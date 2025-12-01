@@ -1,0 +1,124 @@
+"""AWSCredentialManager 유닛 테스트"""
+import pytest
+from datetime import datetime
+from unittest.mock import Mock, patch
+from botocore.exceptions import ClientError
+
+from aws_resource_fetcher.credentials import AWSCredentialManager
+from aws_resource_fetcher.exceptions import AssumeRoleError, PermissionError
+from aws_resource_fetcher.models import AWSCredentials
+
+
+class TestAWSCredentialManager:
+    """AWSCredentialManager 테스트"""
+    
+    def test_assume_role_success(self):
+        """정상적인 AssumeRole 시나리오"""
+        manager = AWSCredentialManager()
+        
+        # Mock STS 응답
+        mock_response = {
+            'Credentials': {
+                'AccessKeyId': 'AKIAIOSFODNN7EXAMPLE',
+                'SecretAccessKey': 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+                'SessionToken': 'FwoGZXIvYXdzEBYaDH...',
+                'Expiration': datetime(2024, 12, 31, 23, 59, 59)
+            }
+        }
+        
+        with patch('boto3.client') as mock_boto_client:
+            mock_sts = Mock()
+            mock_sts.assume_role.return_value = mock_response
+            mock_boto_client.return_value = mock_sts
+            
+            # AssumeRole 실행
+            credentials = manager.assume_role(
+                account_id='123456789012',
+                role_name='TestRole'
+            )
+            
+            # 검증
+            assert isinstance(credentials, AWSCredentials)
+            assert credentials.access_key == 'AKIAIOSFODNN7EXAMPLE'
+            assert credentials.secret_key == 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+            assert credentials.session_token == 'FwoGZXIvYXdzEBYaDH...'
+            assert credentials.expiration == datetime(2024, 12, 31, 23, 59, 59)
+            
+            # STS 클라이언트가 올바르게 호출되었는지 확인
+            mock_boto_client.assert_called_once_with('sts', region_name='ap-northeast-2')
+            mock_sts.assume_role.assert_called_once()
+    
+    def test_assume_role_access_denied(self):
+        """권한 부족 에러 처리"""
+        manager = AWSCredentialManager()
+        
+        # AccessDenied 에러 Mock
+        error_response = {
+            'Error': {
+                'Code': 'AccessDenied',
+                'Message': 'User is not authorized to perform: sts:AssumeRole'
+            }
+        }
+        
+        with patch('boto3.client') as mock_boto_client:
+            mock_sts = Mock()
+            mock_sts.assume_role.side_effect = ClientError(error_response, 'AssumeRole')
+            mock_boto_client.return_value = mock_sts
+            
+            # PermissionError가 발생해야 함
+            with pytest.raises(PermissionError) as exc_info:
+                manager.assume_role(
+                    account_id='123456789012',
+                    role_name='TestRole'
+                )
+            
+            # 에러 메시지 검증
+            assert 'sts:AssumeRole' in str(exc_info.value)
+            assert exc_info.value.required_permissions == ['sts:AssumeRole']
+    
+    def test_assume_role_invalid_client_token(self):
+        """잘못된 자격증명 에러 처리"""
+        manager = AWSCredentialManager()
+        
+        # InvalidClientTokenId 에러 Mock
+        error_response = {
+            'Error': {
+                'Code': 'InvalidClientTokenId',
+                'Message': 'The security token included in the request is invalid'
+            }
+        }
+        
+        with patch('boto3.client') as mock_boto_client:
+            mock_sts = Mock()
+            mock_sts.assume_role.side_effect = ClientError(error_response, 'AssumeRole')
+            mock_boto_client.return_value = mock_sts
+            
+            # AssumeRoleError가 발생해야 함
+            with pytest.raises(AssumeRoleError) as exc_info:
+                manager.assume_role(
+                    account_id='123456789012',
+                    role_name='TestRole'
+                )
+            
+            # 에러 정보 검증
+            assert exc_info.value.account_id == '123456789012'
+            assert exc_info.value.role_name == 'TestRole'
+    
+    def test_assume_role_network_error(self):
+        """네트워크 에러 처리"""
+        manager = AWSCredentialManager()
+        
+        with patch('boto3.client') as mock_boto_client:
+            mock_sts = Mock()
+            mock_sts.assume_role.side_effect = Exception('Network timeout')
+            mock_boto_client.return_value = mock_sts
+            
+            # AssumeRoleError가 발생해야 함
+            with pytest.raises(AssumeRoleError) as exc_info:
+                manager.assume_role(
+                    account_id='123456789012',
+                    role_name='TestRole'
+                )
+            
+            # 원본 에러가 포함되어 있는지 확인
+            assert 'Network timeout' in str(exc_info.value.original_error)

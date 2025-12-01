@@ -1,0 +1,4 @@
+# file: /Users/seungdo/work/DaVinci/aws_resource_fetcher/fetchers/security_group.py
+# hypothesis_version: 6.148.3
+
+['-1', 'CidrIp', 'CidrIpv6', 'Description', 'FromPort', 'GroupId', 'GroupName', 'IpPermissions', 'IpPermissionsEgress', 'IpProtocol', 'IpRanges', 'Ipv6Ranges', 'PrefixListId', 'PrefixListIds', 'SecurityGroup', 'SecurityGroups', 'ToPort', 'UserIdGroupPairs', 'VpcId', 'ap-northeast-2', 'ec2']

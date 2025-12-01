@@ -1,0 +1,4 @@
+# file: /Users/seungdo/work/DaVinci/aws_resource_fetcher/fetchers/base.py
+# hypothesis_version: 6.148.3
+
+['AccessDenied', 'Code', 'EC2', 'Error', 'Message', 'SecurityGroup', 'VPC', 'ap-northeast-2', 'ec2:DescribeSubnets', 'ec2:DescribeVpcs']

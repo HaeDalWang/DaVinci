@@ -1,0 +1,165 @@
+"""통합 리소스 조회 인터페이스"""
+from datetime import datetime
+import logging
+from typing import Any
+
+from .credentials import AWSCredentialManager
+from .fetchers.ec2 import EC2Fetcher
+from .fetchers.vpc import VPCFetcher
+from .fetchers.security_group import SecurityGroupFetcher
+from .models import AWSCredentials
+from .exceptions import ResourceFetchError
+
+
+# 로거 설정
+logger = logging.getLogger(__name__)
+
+
+class ResourceFetcher:
+    """모든 AWS 리소스를 통합 조회하는 고수준 인터페이스"""
+    
+    def __init__(self) -> None:
+        """ResourceFetcher 초기화"""
+        self.credential_manager = AWSCredentialManager()
+        self.ec2_fetcher = EC2Fetcher()
+        self.vpc_fetcher = VPCFetcher()
+        self.security_group_fetcher = SecurityGroupFetcher()
+    
+    def fetch_all_resources(
+        self, 
+        account_id: str, 
+        role_name: str, 
+        region: str = 'ap-northeast-2'
+    ) -> dict[str, Any]:
+        """
+        모든 리소스를 조회
+        
+        Args:
+            account_id: 대상 AWS 계정 번호
+            role_name: AssumeRole할 IAM Role 이름
+            region: AWS 리전 (기본값: ap-northeast-2)
+            
+        Returns:
+            dict: {
+                'account_id': str,
+                'region': str,
+                'timestamp': str,
+                'ec2_instances': list[dict],
+                'vpcs': list[dict],
+                'security_groups': list[dict]
+            }
+            
+        Raises:
+            AssumeRoleError: Role assume 실패 시
+            PermissionError: 권한 부족 시
+        """
+        # 자격증명 획득
+        credentials = self.credential_manager.assume_role(
+            account_id=account_id,
+            role_name=role_name,
+            region=region
+        )
+        
+        # 결과 구조 초기화
+        result: dict[str, Any] = {
+            'account_id': account_id,
+            'region': region,
+            'timestamp': datetime.now().isoformat(),
+            'ec2_instances': [],
+            'vpcs': [],
+            'security_groups': []
+        }
+        
+        # EC2 인스턴스 조회
+        result['ec2_instances'] = self._fetch_with_fallback(
+            fetcher=self.ec2_fetcher,
+            credentials=credentials,
+            region=region,
+            resource_name='EC2 instances'
+        )
+        
+        # VPC 조회
+        result['vpcs'] = self._fetch_with_fallback(
+            fetcher=self.vpc_fetcher,
+            credentials=credentials,
+            region=region,
+            resource_name='VPCs'
+        )
+        
+        # 보안그룹 조회
+        result['security_groups'] = self._fetch_with_fallback(
+            fetcher=self.security_group_fetcher,
+            credentials=credentials,
+            region=region,
+            resource_name='Security Groups'
+        )
+        
+        return result
+    
+    def _fetch_with_fallback(
+        self,
+        fetcher: Any,
+        credentials: AWSCredentials,
+        region: str,
+        resource_name: str
+    ) -> list[dict[str, Any]]:
+        """
+        Fetcher를 호출하고 실패 시 빈 리스트를 반환
+        
+        Args:
+            fetcher: 리소스 Fetcher 객체
+            credentials: AWS 임시 자격증명
+            region: AWS 리전
+            resource_name: 리소스 이름 (로깅용)
+            
+        Returns:
+            리소스 객체를 dict로 변환한 리스트, 실패 시 빈 리스트
+        """
+        try:
+            # Fetcher 호출
+            resources = fetcher.fetch(credentials, region)
+            
+            # dataclass를 dict로 변환
+            return [self._to_dict(resource) for resource in resources]
+            
+        except ResourceFetchError as e:
+            # 리소스 조회 실패 시 에러 로깅 후 빈 리스트 반환
+            logger.error(
+                f"Failed to fetch {resource_name}: {e}",
+                exc_info=True
+            )
+            return []
+        except Exception as e:
+            # 예상치 못한 에러도 로깅 후 빈 리스트 반환
+            logger.error(
+                f"Unexpected error while fetching {resource_name}: {e}",
+                exc_info=True
+            )
+            return []
+    
+    def _to_dict(self, obj: Any) -> Any:
+        """
+        dataclass 객체를 dict로 변환 (재귀적으로)
+        
+        Args:
+            obj: 변환할 객체
+            
+        Returns:
+            dict, list, str 등으로 변환된 객체
+        """
+        if hasattr(obj, '__dataclass_fields__'):
+            # dataclass인 경우
+            result: dict[str, Any] = {}
+            for field_name in obj.__dataclass_fields__:
+                value = getattr(obj, field_name)
+                result[field_name] = self._to_dict(value)
+            return result
+        elif isinstance(obj, list):
+            # 리스트인 경우
+            return [self._to_dict(item) for item in obj]
+        elif isinstance(obj, datetime):
+            # datetime인 경우 ISO 형식 문자열로 변환
+            return obj.isoformat()
+        else:
+            # 기본 타입인 경우 그대로 반환
+            return obj

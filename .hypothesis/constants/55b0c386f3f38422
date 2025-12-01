@@ -1,0 +1,4 @@
+# file: /Users/seungdo/work/DaVinci/aws_resource_fetcher/credentials.py
+# hypothesis_version: 6.148.3
+
+['AccessDenied', 'AccessKeyId', 'Code', 'Credentials', 'Error', 'Expiration', 'InvalidClientTokenId', 'SecretAccessKey', 'SessionToken', 'ap-northeast-2', 'sts', 'sts:AssumeRole']

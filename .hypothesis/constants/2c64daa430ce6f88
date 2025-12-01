@@ -1,0 +1,4 @@
+# file: /Users/seungdo/work/DaVinci/aws_resource_fetcher/resource_fetcher.py
+# hypothesis_version: 6.148.3
+
+['EC2 instances', 'Security Groups', 'VPCs', '__dataclass_fields__', 'account_id', 'ap-northeast-2', 'ec2_instances', 'region', 'security_groups', 'timestamp', 'vpcs']
