@@ -1,6 +1,8 @@
 """API 라우트"""
 from fastapi import APIRouter, HTTPException, Query
 from typing import Dict, Any
+import logging
+import traceback
 
 from aws_resource_fetcher.resource_fetcher import ResourceFetcher
 from aws_resource_fetcher.credentials import AWSCredentialManager
@@ -16,6 +18,7 @@ from aws_resource_fetcher.exceptions import (
 from api.schemas import FetchRequest, HealthResponse
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -41,24 +44,31 @@ async def fetch_all_resources(
         EC2 인스턴스, VPC, 보안그룹 정보를 포함한 구조화된 데이터
     """
     try:
+        logger.info(f"전체 리소스 조회 시작: account_id={account_id}, role_name={role_name}, region={region}")
         fetcher = ResourceFetcher()
         result = fetcher.fetch_all_resources(
             account_id=account_id,
             role_name=role_name,
             region=region
         )
+        logger.info(f"전체 리소스 조회 완료: EC2={len(result.get('ec2_instances', []))}, VPC={len(result.get('vpcs', []))}, SG={len(result.get('security_groups', []))}")
         return result
     except AssumeRoleError as e:
+        logger.error(f"AssumeRole 실패: {str(e)}")
+        logger.debug(f"상세 에러:\n{traceback.format_exc()}")
         raise HTTPException(
             status_code=403,
             detail={
                 "error": "AssumeRoleError",
                 "message": str(e),
                 "account_id": e.account_id,
-                "role_name": e.role_name
+                "role_name": e.role_name,
+                "original_error": str(e.original_error) if hasattr(e, 'original_error') else None
             }
         )
     except AWSPermissionError as e:
+        logger.error(f"권한 부족: {str(e)}")
+        logger.debug(f"상세 에러:\n{traceback.format_exc()}")
         raise HTTPException(
             status_code=403,
             detail={
@@ -68,6 +78,8 @@ async def fetch_all_resources(
             }
         )
     except ResourceFetchError as e:
+        logger.error(f"리소스 조회 실패: {str(e)}")
+        logger.debug(f"상세 에러:\n{traceback.format_exc()}")
         raise HTTPException(
             status_code=500,
             detail={
@@ -77,11 +89,14 @@ async def fetch_all_resources(
             }
         )
     except Exception as e:
+        logger.error(f"예상치 못한 에러: {str(e)}")
+        logger.error(f"상세 에러:\n{traceback.format_exc()}")
         raise HTTPException(
             status_code=500,
             detail={
                 "error": "InternalServerError",
-                "message": str(e)
+                "message": str(e),
+                "traceback": traceback.format_exc() if logger.level == logging.DEBUG else None
             }
         )
 
@@ -99,6 +114,7 @@ async def fetch_ec2_instances(
         EC2 인스턴스 목록
     """
     try:
+        logger.info(f"EC2 조회 시작: account_id={account_id}, role_name={role_name}, region={region}")
         credential_manager = AWSCredentialManager()
         credentials = credential_manager.assume_role(
             account_id=account_id,
@@ -108,6 +124,7 @@ async def fetch_ec2_instances(
         
         ec2_fetcher = EC2Fetcher()
         instances = ec2_fetcher.fetch(credentials, region)
+        logger.info(f"EC2 조회 완료: {len(instances)}개")
         
         return {
             "account_id": account_id,
@@ -115,8 +132,12 @@ async def fetch_ec2_instances(
             "ec2_instances": [instance.__dict__ for instance in instances]
         }
     except AssumeRoleError as e:
+        logger.error(f"AssumeRole 실패: {str(e)}")
+        logger.debug(f"상세 에러:\n{traceback.format_exc()}")
         raise HTTPException(status_code=403, detail=str(e))
     except Exception as e:
+        logger.error(f"EC2 조회 실패: {str(e)}")
+        logger.error(f"상세 에러:\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

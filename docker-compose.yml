@@ -9,15 +9,18 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # AWS 자격증명 (환경 변수에서 가져옴)
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN:-}
+      # AWS 설정
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-ap-northeast-2}
+      - AWS_SHARED_CREDENTIALS_FILE=/root/.aws/credentials
+      - AWS_CONFIG_FILE=/root/.aws/config
+      # 로그 레벨 (INFO, DEBUG, WARNING, ERROR)
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
     volumes:
-      # 로컬 개발 시 코드 변경 반영 (선택사항)
+      # 로컬 개발 시 코드 변경 반영
       - ./api:/app/api
       - ./aws_resource_fetcher:/app/aws_resource_fetcher
+      # AWS 자격증명 마운트 (읽기 전용)
+      - ~/.aws:/root/.aws:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
