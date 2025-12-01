@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+aws_resource_fetcher/__init__.py
+aws_resource_fetcher.egg-info/PKG-INFO
+aws_resource_fetcher.egg-info/SOURCES.txt
+aws_resource_fetcher.egg-info/dependency_links.txt
+aws_resource_fetcher.egg-info/requires.txt
+aws_resource_fetcher.egg-info/top_level.txt
+aws_resource_fetcher/fetchers/__init__.py

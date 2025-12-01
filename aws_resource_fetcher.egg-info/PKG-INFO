@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: aws-resource-fetcher
+Version: 0.1.0
+Summary: AWS 리소스 조회 시스템 - EC2, VPC, 보안그룹 정보 수집
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: boto3>=1.34.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.4.0; extra == "dev"
+Requires-Dist: hypothesis>=6.92.0; extra == "dev"
+Requires-Dist: moto>=4.2.0; extra == "dev"
+Requires-Dist: mypy>=1.7.0; extra == "dev"
+Requires-Dist: boto3-stubs[ec2,sts]>=1.34.0; extra == "dev"
+
+# DaVinci
+
+다빈치 (Da Vinci)
+Saltware의 Cloud 사업부의 모든 엔지니어들이 AWS 인프라 다이어그램 아키텍처를 쉽고 빠르게 생성/수정/저장/공유 할 수 있는 플랫폼을 목표로 합니다
