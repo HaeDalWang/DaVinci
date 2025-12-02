@@ -1,5 +1,9 @@
 README.md
 pyproject.toml
+api/__init__.py
+api/main.py
+api/routes.py
+api/schemas.py
 aws_resource_fetcher/__init__.py
 aws_resource_fetcher/credentials.py
 aws_resource_fetcher/exceptions.py

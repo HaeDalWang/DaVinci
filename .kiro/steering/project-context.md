@@ -22,17 +22,18 @@ Agent (MCP)
 - **출력**: JSON 형태의 리소스 정보
 - **상태**: 구현 완료, 테스트 통과
 
-### 🚧 Phase 2: 리소스 관계 그래프 생성 (Spec 작성 완료)
-- **Spec**: `.kiro/specs/resource-relationship-analyzer/`
-- **기능**: 리소스 간 연관성 분석 및 그래프 구조 생성
+### 🚧 Phase 2: 리소스 그래프 빌더 (Spec 작성 완료)
+- **Spec**: `.kiro/specs/resource-graph-builder/`
+- **기능**: 리소스 간 관계를 분석하여 그래프 JSON 생성
 - **입력**: Phase 1의 JSON 출력
 - **출력**: 그래프 JSON (노드, 엣지, 그룹)
 - **핵심 로직**:
-  - EC2-VPC, EC2-Subnet, EC2-SecurityGroup 관계 분석
-  - SecurityGroup 규칙 기반 통신 가능 여부 판단
+  - 리소스를 노드로 변환
+  - EC2-VPC, EC2-Subnet, EC2-SecurityGroup 엣지 생성
+  - SecurityGroup 규칙 기반 트래픽 허용 엣지 생성
   - VPC별 리소스 그룹핑
-  - 리소스 간 연결성 정보 생성
-- **상태**: Spec 작성 완료, 구현 대기
+  - JSON 직렬화/역직렬화
+- **상태**: Spec 작성 완료, 구현 준비 완료
 
 ### 📋 Phase 3: draw.io XML 생성 (예정)
 - **Spec**: `.kiro/specs/drawio-generator/` (작성 예정)
@@ -57,7 +58,7 @@ Agent (MCP)
 - draw.io 편집 연동
 
 ## 현재 작업
-**Phase 2 spec 작성 완료 - 구현 준비 완료**
+**Phase 2 (resource-graph-builder) spec 작성 완료 - 구현 준비 완료**
 
 ## 기술 스택
 - Python 3.11+

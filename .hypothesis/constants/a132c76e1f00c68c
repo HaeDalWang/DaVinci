@@ -1,0 +1,4 @@
+# file: /Users/seungdo/work/DaVinci/resource_graph_builder/builder.py
+# hypothesis_version: 6.148.3
+
+['availability_zone', 'cidr_block', 'contains', 'description', 'ec2', 'group_id', 'hosts', 'instance_id', 'name', 'private_ip', 'public_ip', 'security_group', 'security_groups', 'state', 'subnet', 'subnet_id', 'uses', 'vpc', 'vpc_id']

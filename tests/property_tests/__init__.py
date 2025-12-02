@@ -1,1 +1,3 @@
-"""Property-based 테스트 모듈"""
+"""
+Property-Based Tests for Resource Graph Builder
+"""

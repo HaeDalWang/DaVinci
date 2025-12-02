@@ -1,0 +1,4 @@
+# file: /Users/seungdo/work/DaVinci/resource_graph_builder/builder.py
+# hypothesis_version: 6.148.3
+
+['allows_traffic', 'availability_zone', 'cidr_block', 'contains', 'description', 'direction', 'ec2', 'from_port', 'group_id', 'hosts', 'inbound', 'inbound_rules', 'instance_id', 'name', 'outbound', 'outbound_rules', 'private_ip', 'protocol', 'public_ip', 'security_group', 'security_groups', 'sg-', 'state', 'subnet', 'subnet_id', 'target', 'to_port', 'uses', 'vpc', 'vpc_id']

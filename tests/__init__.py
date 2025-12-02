@@ -1,1 +1,3 @@
-"""테스트 패키지"""
+"""
+Tests for Resource Graph Builder
+"""

@@ -1,0 +1,4 @@
+# file: /Users/seungdo/work/DaVinci/resource_graph_builder/graph.py
+# hypothesis_version: 6.148.3
+
+['ResourceGraph', 'attributes', 'created_at', 'edge_count', 'edge_type', 'edges', 'group_count', 'groups', 'id', 'members', 'metadata', 'name', 'node_count', 'nodes', 'source', 'target', 'type']

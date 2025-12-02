@@ -10,9 +10,13 @@ Saltware Cloud 사업부 엔지니어들이 AWS 인프라 아키텍처를 쉽고
 Agent → AWS 리소스 조회 → 리소스 그래프 → draw.io XML → S3 저장
 ```
 
-## 현재 단계: Phase 1 완료
+## 현재 단계: Phase 1-2 완료
 
+### Phase 1: AWS 리소스 조회
 CrossAccount AssumeRole을 통해 고객사 AWS 계정의 리소스 정보를 수집하는 REST API 서버
+
+### Phase 2: 리소스 그래프 빌더
+Phase 1에서 수집한 리소스 데이터를 분석하여 리소스 간 관계를 그래프로 표현
 
 ### Features
 
@@ -20,7 +24,10 @@ CrossAccount AssumeRole을 통해 고객사 AWS 계정의 리소스 정보를 �
 - 🚀 FastAPI 기반 REST API
 - 🐳 Docker 지원
 - 📊 EC2, VPC, SecurityGroup 조회
-- 📈 리소스 관계 그래프 생성 (Phase 2 진행 중)
+- 📈 리소스 관계 그래프 생성 (완료)
+- 🔗 VPC-EC2, Subnet-EC2, EC2-SG 엣지 생성
+- 🛡️ SecurityGroup 규칙 기반 트래픽 허용 엣지
+- 📦 VPC별 리소스 그룹핑
 
 ## Quick Start
 
@@ -43,7 +50,9 @@ uv sync
 
 API 문서: http://localhost:8000/docs
 
-## API Usage
+## Usage
+
+### Phase 1: AWS 리소스 조회 (API)
 
 ```bash
 # 헬스체크
@@ -54,6 +63,115 @@ curl "http://localhost:8000/api/v1/resources?account_id=123456789012&role_name=R
 
 # EC2만 조회
 curl "http://localhost:8000/api/v1/ec2?account_id=123456789012&role_name=ReadRole"
+```
+
+### Phase 1 → Phase 2: 전체 플로우 (Python)
+
+```python
+from aws_resource_fetcher.models import AWSCredentials
+from aws_resource_fetcher.fetchers.ec2 import EC2Fetcher
+from aws_resource_fetcher.fetchers.vpc import VPCFetcher
+from aws_resource_fetcher.fetchers.security_group import SecurityGroupFetcher
+from resource_graph_builder.builder import GraphBuilder
+import json
+
+# 1. Phase 1: AWS 리소스 조회
+credentials = AWSCredentials(
+    access_key='YOUR_ACCESS_KEY',
+    secret_key='YOUR_SECRET_KEY',
+    session_token='YOUR_SESSION_TOKEN',
+    expiration=datetime.now()
+)
+
+ec2_fetcher = EC2Fetcher()
+vpc_fetcher = VPCFetcher()
+sg_fetcher = SecurityGroupFetcher()
+
+ec2_instances = ec2_fetcher.fetch(credentials, 'ap-northeast-2')
+vpcs = vpc_fetcher.fetch(credentials, 'ap-northeast-2')
+security_groups = sg_fetcher.fetch(credentials, 'ap-northeast-2')
+
+# Phase 1 결과를 JSON으로 변환
+phase1_json = {
+    'ec2_instances': [
+        {
+            'instance_id': ec2.instance_id,
+            'name': ec2.name,
+            'state': ec2.state,
+            'vpc_id': ec2.vpc_id,
+            'subnet_id': ec2.subnet_id,
+            'security_groups': ec2.security_groups,
+            'private_ip': ec2.private_ip,
+            'public_ip': ec2.public_ip
+        }
+        for ec2 in ec2_instances
+    ],
+    'vpcs': [
+        {
+            'vpc_id': vpc.vpc_id,
+            'name': vpc.name,
+            'cidr_block': vpc.cidr_block,
+            'subnets': [
+                {
+                    'subnet_id': subnet.subnet_id,
+                    'name': subnet.name,
+                    'cidr_block': subnet.cidr_block,
+                    'availability_zone': subnet.availability_zone
+                }
+                for subnet in vpc.subnets
+            ]
+        }
+        for vpc in vpcs
+    ],
+    'security_groups': [
+        {
+            'group_id': sg.group_id,
+            'name': sg.name,
+            'vpc_id': sg.vpc_id,
+            'description': sg.description,
+            'inbound_rules': [
+                {
+                    'protocol': rule.protocol,
+                    'from_port': rule.from_port,
+                    'to_port': rule.to_port,
+                    'target': rule.target
+                }
+                for rule in sg.inbound_rules
+            ],
+            'outbound_rules': [
+                {
+                    'protocol': rule.protocol,
+                    'from_port': rule.from_port,
+                    'to_port': rule.to_port,
+                    'target': rule.target
+                }
+                for rule in sg.outbound_rules
+            ]
+        }
+        for sg in security_groups
+    ]
+}
+
+# 2. Phase 2: 리소스 그래프 생성
+builder = GraphBuilder()
+graph = builder.build(phase1_json)
+
+# 3. 그래프 JSON 출력
+graph_json = graph.to_dict()
+print(json.dumps(graph_json, indent=2))
+
+# 출력 예시:
+# {
+#   "metadata": {
+#     "created_at": "2024-12-02T10:00:00Z",
+#     "node_count": 10,
+#     "edge_count": 15,
+#     "group_count": 2
+#   },
+#   "nodes": [...],
+#   "edges": [...],
+#   "groups": [...]
+# }
 ```
 
 ## Development
@@ -87,10 +205,21 @@ uv run mypy aws_resource_fetcher/
 ## Project Structure
 
 ```
-aws_resource_fetcher/    # Core library
-api/                     # FastAPI server
-tests/                   # Tests
-Dockerfile              # Container image
+aws_resource_fetcher/       # Phase 1: AWS 리소스 조회
+├── fetchers/              # EC2, VPC, SecurityGroup fetcher
+├── models.py              # 데이터 모델
+└── credentials.py         # AWS 자격증명 관리
+
+resource_graph_builder/     # Phase 2: 리소스 그래프 빌더
+├── builder.py             # GraphBuilder (통합 인터페이스)
+├── parser.py              # Phase 1 JSON 파싱
+├── graph.py               # ResourceGraph (그래프 자료구조)
+├── models.py              # Node, Edge, Group 모델
+└── exceptions.py          # 커스텀 예외
+
+api/                       # FastAPI REST API 서버
+tests/                     # 테스트 (Unit, Property-Based, E2E)
+Dockerfile                 # Container image
 ```
 
 ## Tech Stack
@@ -103,19 +232,20 @@ Python 3.11+ • FastAPI • boto3 • Docker • pytest
   - EC2, VPC, SecurityGroup 조회
   - CrossAccount AssumeRole
   - REST API 서버
-- [ ] Phase 2: 리소스 관계 그래프 생성 (진행 중)
+- [x] Phase 2: 리소스 관계 그래프 생성 (완료)
   - 리소스 간 연관성 분석
   - SecurityGroup 규칙 기반 연결성 판단
   - VPC별 그룹핑
-- [ ] Phase 3: draw.io XML 생성
+  - JSON 직렬화/역직렬화
+- [ ] Phase 3: draw.io XML 생성 (예정)
   - 그래프를 draw.io 형식으로 변환
   - AWS 아이콘 적용
   - 자동 레이아웃
-- [ ] Phase 4: 저장 및 공유
+- [ ] Phase 4: 저장 및 공유 (예정)
   - S3 저장
   - Redis 캐시
   - 메타데이터 관리
-- [ ] Phase 5: 웹 UI
+- [ ] Phase 5: 웹 UI (예정)
   - 자연어 질의
   - 다이어그램 편집
   - 협업 및 공유
