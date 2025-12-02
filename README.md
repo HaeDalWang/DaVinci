@@ -10,7 +10,7 @@ Saltware Cloud 사업부 엔지니어들이 AWS 인프라 아키텍처를 쉽고
 Agent → AWS 리소스 조회 → 리소스 그래프 → draw.io XML → S3 저장
 ```
 
-## 현재 단계: Phase 1-2 완료
+## 현재 단계: Phase 1-3 완료
 
 ### Phase 1: AWS 리소스 조회
 CrossAccount AssumeRole을 통해 고객사 AWS 계정의 리소스 정보를 수집하는 REST API 서버
@@ -18,16 +18,22 @@ CrossAccount AssumeRole을 통해 고객사 AWS 계정의 리소스 정보를 �
 ### Phase 2: 리소스 그래프 빌더
 Phase 1에서 수집한 리소스 데이터를 분석하여 리소스 간 관계를 그래프로 표현
 
+### Phase 3: draw.io XML 생성기
+Phase 2 그래프를 draw.io 애플리케이션에서 열 수 있는 XML 다이어그램으로 변환
+
 ### Features
 
 - 🔐 CrossAccount AssumeRole 지원
 - 🚀 FastAPI 기반 REST API
 - 🐳 Docker 지원
 - 📊 EC2, VPC, SecurityGroup 조회
-- 📈 리소스 관계 그래프 생성 (완료)
+- 📈 리소스 관계 그래프 생성
 - 🔗 VPC-EC2, Subnet-EC2, EC2-SG 엣지 생성
 - 🛡️ SecurityGroup 규칙 기반 트래픽 허용 엣지
 - 📦 VPC별 리소스 그룹핑
+- 🎨 draw.io XML 다이어그램 생성
+- 🏗️ AWS Architecture Icons 2025 적용
+- 📐 자동 레이아웃 (VPC, Subnet, EC2)
 
 ## Quick Start
 
@@ -65,7 +71,7 @@ curl "http://localhost:8000/api/v1/resources?account_id=123456789012&role_name=R
 curl "http://localhost:8000/api/v1/ec2?account_id=123456789012&role_name=ReadRole"
 ```
 
-### Phase 1 → Phase 2: 전체 플로우 (Python)
+### Phase 1 → Phase 2 → Phase 3: 전체 플로우 (Python)
 
 ```python
 from aws_resource_fetcher.models import AWSCredentials
@@ -73,6 +79,8 @@ from aws_resource_fetcher.fetchers.ec2 import EC2Fetcher
 from aws_resource_fetcher.fetchers.vpc import VPCFetcher
 from aws_resource_fetcher.fetchers.security_group import SecurityGroupFetcher
 from resource_graph_builder.builder import GraphBuilder
+from drawio_generator.generator import DrawioGenerator
+from datetime import datetime
 import json
 
 # 1. Phase 1: AWS 리소스 조회
@@ -116,7 +124,8 @@ phase1_json = {
                     'subnet_id': subnet.subnet_id,
                     'name': subnet.name,
                     'cidr_block': subnet.cidr_block,
-                    'availability_zone': subnet.availability_zone
+                    'availability_zone': subnet.availability_zone,
+                    'vpc_id': vpc.vpc_id
                 }
                 for subnet in vpc.subnets
             ]
@@ -155,23 +164,79 @@ phase1_json = {
 # 2. Phase 2: 리소스 그래프 생성
 builder = GraphBuilder()
 graph = builder.build(phase1_json)
-
-# 3. 그래프 JSON 출력
 graph_json = graph.to_dict()
-print(json.dumps(graph_json, indent=2))
 
-# 출력 예시:
-# {
-#   "metadata": {
-#     "created_at": "2024-12-02T10:00:00Z",
-#     "node_count": 10,
-#     "edge_count": 15,
-#     "group_count": 2
-#   },
-#   "nodes": [...],
-#   "edges": [...],
-#   "groups": [...]
-# }
+# 3. Phase 3: draw.io XML 생성
+generator = DrawioGenerator()
+xml_output = generator.generate(graph_json)
+
+# 4. XML 파일로 저장
+with open('aws-infrastructure.drawio', 'w', encoding='utf-8') as f:
+    f.write(xml_output)
+
+print("✅ draw.io 다이어그램 생성 완료: aws-infrastructure.drawio")
+print("   draw.io 웹/데스크톱 앱에서 열어서 확인하세요!")
+```
+
+### 간단한 예제
+
+```python
+from resource_graph_builder.builder import GraphBuilder
+from drawio_generator.generator import DrawioGenerator
+
+# Phase 1 JSON (간단한 예제)
+phase1_json = {
+    "ec2_instances": [
+        {
+            "instance_id": "i-123",
+            "name": "web-server",
+            "state": "running",
+            "private_ip": "10.0.1.10",
+            "public_ip": "54.180.1.1",
+            "vpc_id": "vpc-123",
+            "subnet_id": "subnet-456",
+            "security_groups": ["sg-web"]
+        }
+    ],
+    "vpcs": [
+        {
+            "vpc_id": "vpc-123",
+            "name": "production-vpc",
+            "cidr_block": "10.0.0.0/16",
+            "subnets": [
+                {
+                    "subnet_id": "subnet-456",
+                    "name": "public-subnet",
+                    "cidr_block": "10.0.1.0/24",
+                    "availability_zone": "ap-northeast-2a",
+                    "vpc_id": "vpc-123"
+                }
+            ]
+        }
+    ],
+    "security_groups": [
+        {
+            "group_id": "sg-web",
+            "name": "web-sg",
+            "description": "Web server security group",
+            "vpc_id": "vpc-123",
+            "inbound_rules": [],
+            "outbound_rules": []
+        }
+    ]
+}
+
+# Phase 2: 그래프 생성
+builder = GraphBuilder()
+graph = builder.build(phase1_json)
+
+# Phase 3: draw.io XML 생성
+generator = DrawioGenerator()
+xml_output = generator.generate(graph.to_dict())
+
+# 파일 저장
+with open('diagram.drawio', 'w', encoding='utf-8') as f:
+    f.write(xml_output)
 ```
 
 ## Development
@@ -217,6 +282,14 @@ resource_graph_builder/     # Phase 2: 리소스 그래프 빌더
 ├── models.py              # Node, Edge, Group 모델
 └── exceptions.py          # 커스텀 예외
 
+drawio_generator/          # Phase 3: draw.io XML 생성기
+├── generator.py           # DrawioGenerator (통합 인터페이스)
+├── converters/            # Shape, Container, Connector 변환기
+├── layout.py              # LayoutEngine (자동 레이아웃)
+├── xml_builder.py         # XMLBuilder (XML 생성)
+├── models.py              # Shape, Container, Connector 모델
+└── exceptions.py          # 커스텀 예외
+
 api/                       # FastAPI REST API 서버
 tests/                     # 테스트 (Unit, Property-Based, E2E)
 Dockerfile                 # Container image
@@ -237,10 +310,11 @@ Python 3.11+ • FastAPI • boto3 • Docker • pytest
   - SecurityGroup 규칙 기반 연결성 판단
   - VPC별 그룹핑
   - JSON 직렬화/역직렬화
-- [ ] Phase 3: draw.io XML 생성 (예정)
+- [x] Phase 3: draw.io XML 생성 (완료)
   - 그래프를 draw.io 형식으로 변환
-  - AWS 아이콘 적용
-  - 자동 레이아웃
+  - AWS Architecture Icons 2025 적용
+  - 자동 레이아웃 (VPC, Subnet, EC2)
+  - UTF-8 인코딩 지원
 - [ ] Phase 4: 저장 및 공유 (예정)
   - S3 저장
   - Redis 캐시

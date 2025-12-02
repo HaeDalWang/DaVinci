@@ -197,26 +197,20 @@ def phase1_json_strategy() -> st.SearchStrategy[dict]:
         vpc_ids = []
         used_vpc_ids = set()
         
-        for _ in range(num_vpcs):
-            # 중복되지 않는 VPC ID 생성
-            while True:
-                vpc_id = f"vpc-{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=8, max_size=17))}"
-                if vpc_id not in used_vpc_ids:
-                    used_vpc_ids.add(vpc_id)
-                    break
+        for i in range(num_vpcs):
+            # 중복되지 않는 VPC ID 생성 (인덱스를 포함하여 고유성 보장)
+            vpc_id = f"vpc-{i:08d}{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=1, max_size=9))}"
+            used_vpc_ids.add(vpc_id)
             vpc_ids.append(vpc_id)
             
             # Subnet 생성
             num_subnets = draw(st.integers(min_value=0, max_value=3))
             subnets = []
             used_subnet_ids = set()
-            for _ in range(num_subnets):
-                # 중복되지 않는 Subnet ID 생성
-                while True:
-                    subnet_id = f"subnet-{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=8, max_size=17))}"
-                    if subnet_id not in used_subnet_ids:
-                        used_subnet_ids.add(subnet_id)
-                        break
+            for j in range(num_subnets):
+                # 중복되지 않는 Subnet ID 생성 (VPC 인덱스와 Subnet 인덱스를 포함하여 고유성 보장)
+                subnet_id = f"subnet-{i:04d}{j:04d}{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=1, max_size=9))}"
+                used_subnet_ids.add(subnet_id)
                 
                 subnet = {
                     'subnet_id': subnet_id,
@@ -240,13 +234,10 @@ def phase1_json_strategy() -> st.SearchStrategy[dict]:
         sg_ids = []
         used_sg_ids = set()
         
-        for _ in range(num_sgs):
-            # 중복되지 않는 SecurityGroup ID 생성
-            while True:
-                sg_id = f"sg-{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=8, max_size=17))}"
-                if sg_id not in used_sg_ids:
-                    used_sg_ids.add(sg_id)
-                    break
+        for k in range(num_sgs):
+            # 중복되지 않는 SecurityGroup ID 생성 (인덱스를 포함하여 고유성 보장)
+            sg_id = f"sg-{k:08d}{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=1, max_size=9))}"
+            used_sg_ids.add(sg_id)
             sg_ids.append(sg_id)
             
             # 규칙 생성
@@ -357,7 +348,7 @@ def phase1_json_strategy() -> st.SearchStrategy[dict]:
         # VPC와 Subnet이 있는 경우에만 EC2 생성
         vpcs_with_subnets = [vpc for vpc in vpcs if vpc['subnets']]
         
-        for _ in range(num_ec2):
+        for m in range(num_ec2):
             # VPC와 Subnet 선택
             if vpcs_with_subnets:
                 # Subnet이 있는 VPC 중에서 선택
@@ -370,8 +361,9 @@ def phase1_json_strategy() -> st.SearchStrategy[dict]:
                 vpc_id = selected_vpc['vpc_id']
                 
                 # 새 Subnet 생성 및 VPC에 추가
+                new_subnet_idx = len(selected_vpc['subnets'])
                 new_subnet = {
-                    'subnet_id': f"subnet-{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=8, max_size=17))}",
+                    'subnet_id': f"subnet-new{new_subnet_idx:08d}{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=1, max_size=9))}",
                     'name': draw(st.text(min_size=1, max_size=50)),
                     'cidr_block': draw(_cidr_block_generator(is_vpc=False)),
                     'availability_zone': draw(st.sampled_from(['ap-northeast-2a', 'ap-northeast-2b', 'ap-northeast-2c']))
@@ -380,8 +372,9 @@ def phase1_json_strategy() -> st.SearchStrategy[dict]:
                 subnet_id = new_subnet['subnet_id']
             else:
                 # VPC가 없는 경우, 새로운 VPC와 Subnet 생성
-                vpc_id = f"vpc-{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=8, max_size=17))}"
-                subnet_id = f"subnet-{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=8, max_size=17))}"
+                new_vpc_idx = len(vpcs)
+                vpc_id = f"vpc-new{new_vpc_idx:08d}{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=1, max_size=9))}"
+                subnet_id = f"subnet-new{new_vpc_idx:08d}0000{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=1, max_size=9))}"
                 
                 new_subnet = {
                     'subnet_id': subnet_id,
@@ -405,12 +398,9 @@ def phase1_json_strategy() -> st.SearchStrategy[dict]:
             else:
                 selected_sgs = []
             
-            # 중복되지 않는 EC2 인스턴스 ID 생성
-            while True:
-                instance_id = f"i-{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=10, max_size=20))}"
-                if instance_id not in used_ec2_ids:
-                    used_ec2_ids.add(instance_id)
-                    break
+            # 중복되지 않는 EC2 인스턴스 ID 생성 (인덱스를 포함하여 고유성 보장)
+            instance_id = f"i-{m:010d}{draw(st.text(alphabet=st.characters(whitelist_categories=('Ll', 'Nd')), min_size=1, max_size=10))}"
+            used_ec2_ids.add(instance_id)
             
             ec2 = {
                 'instance_id': instance_id,
