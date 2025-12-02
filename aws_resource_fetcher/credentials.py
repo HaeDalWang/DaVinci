@@ -1,14 +1,51 @@
 """AWS 자격증명 관리"""
 from datetime import datetime
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, NoCredentialsError as BotoNoCredentialsError
 
-from .exceptions import AssumeRoleError, PermissionError
+from .exceptions import AssumeRoleError, PermissionError, NoCredentialsError
 from .models import AWSCredentials
 
 
 class AWSCredentialManager:
-    """CrossAccount AssumeRole을 처리하는 자격증명 관리자"""
+    """AWS 자격증명을 관리하는 클래스. 기본 자격증명과 CrossAccount AssumeRole을 지원합니다."""
+    
+    def get_default_credentials(self, region: str = 'ap-northeast-2') -> AWSCredentials:
+        """
+        기본 자격증명을 반환 (환경변수, ~/.aws/credentials, IAM Role 등)
+        
+        Args:
+            region: AWS 리전 (기본값: ap-northeast-2)
+            
+        Returns:
+            AWSCredentials: 자격증명 객체
+            
+        Raises:
+            NoCredentialsError: 자격증명을 찾을 수 없을 때
+        """
+        try:
+            # boto3 세션 생성 (기본 자격증명 체인 사용)
+            session = boto3.Session(region_name=region)
+            credentials = session.get_credentials()
+            
+            if credentials is None:
+                raise NoCredentialsError()
+            
+            # frozen credentials 가져오기
+            frozen_creds = credentials.get_frozen_credentials()
+            
+            return AWSCredentials(
+                access_key=frozen_creds.access_key,
+                secret_key=frozen_creds.secret_key,
+                session_token=frozen_creds.token,
+                expiration=None  # 기본 자격증명은 만료 시간이 없을 수 있음
+            )
+            
+        except BotoNoCredentialsError as e:
+            raise NoCredentialsError() from e
+        except Exception as e:
+            # 예상치 못한 에러
+            raise NoCredentialsError() from e
     
     def assume_role(
         self, 

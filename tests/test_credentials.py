@@ -1,16 +1,100 @@
 """AWSCredentialManager 유닛 테스트"""
 import pytest
 from datetime import datetime
-from unittest.mock import Mock, patch
-from botocore.exceptions import ClientError
+from unittest.mock import Mock, patch, MagicMock
+from botocore.exceptions import ClientError, NoCredentialsError as BotoNoCredentialsError
 
 from aws_resource_fetcher.credentials import AWSCredentialManager
-from aws_resource_fetcher.exceptions import AssumeRoleError, PermissionError
+from aws_resource_fetcher.exceptions import AssumeRoleError, PermissionError, NoCredentialsError
 from aws_resource_fetcher.models import AWSCredentials
 
 
 class TestAWSCredentialManager:
     """AWSCredentialManager 테스트"""
+    
+    def test_get_default_credentials_success(self):
+        """기본 자격증명 조회 성공 시나리오"""
+        manager = AWSCredentialManager()
+        
+        # Mock credentials
+        mock_frozen_creds = Mock()
+        mock_frozen_creds.access_key = 'AKIAIOSFODNN7EXAMPLE'
+        mock_frozen_creds.secret_key = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+        mock_frozen_creds.token = None
+        
+        mock_credentials = Mock()
+        mock_credentials.get_frozen_credentials.return_value = mock_frozen_creds
+        
+        with patch('boto3.Session') as mock_session_class:
+            mock_session = Mock()
+            mock_session.get_credentials.return_value = mock_credentials
+            mock_session_class.return_value = mock_session
+            
+            # 기본 자격증명 조회
+            credentials = manager.get_default_credentials()
+            
+            # 검증
+            assert isinstance(credentials, AWSCredentials)
+            assert credentials.access_key == 'AKIAIOSFODNN7EXAMPLE'
+            assert credentials.secret_key == 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+            assert credentials.session_token is None
+            assert credentials.expiration is None
+            
+            # Session이 올바르게 생성되었는지 확인
+            mock_session_class.assert_called_once_with(region_name='ap-northeast-2')
+    
+    def test_get_default_credentials_with_session_token(self):
+        """세션 토큰이 있는 기본 자격증명 조회"""
+        manager = AWSCredentialManager()
+        
+        # Mock credentials with session token
+        mock_frozen_creds = Mock()
+        mock_frozen_creds.access_key = 'AKIAIOSFODNN7EXAMPLE'
+        mock_frozen_creds.secret_key = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+        mock_frozen_creds.token = 'FwoGZXIvYXdzEBYaDH...'
+        
+        mock_credentials = Mock()
+        mock_credentials.get_frozen_credentials.return_value = mock_frozen_creds
+        
+        with patch('boto3.Session') as mock_session_class:
+            mock_session = Mock()
+            mock_session.get_credentials.return_value = mock_credentials
+            mock_session_class.return_value = mock_session
+            
+            # 기본 자격증명 조회
+            credentials = manager.get_default_credentials()
+            
+            # 검증
+            assert credentials.session_token == 'FwoGZXIvYXdzEBYaDH...'
+    
+    def test_get_default_credentials_no_credentials(self):
+        """자격증명이 없을 때 에러 처리"""
+        manager = AWSCredentialManager()
+        
+        with patch('boto3.Session') as mock_session_class:
+            mock_session = Mock()
+            mock_session.get_credentials.return_value = None
+            mock_session_class.return_value = mock_session
+            
+            # NoCredentialsError가 발생해야 함
+            with pytest.raises(NoCredentialsError) as exc_info:
+                manager.get_default_credentials()
+            
+            # 에러 메시지 검증
+            assert 'AWS 자격증명을 찾을 수 없습니다' in str(exc_info.value)
+    
+    def test_get_default_credentials_boto_no_credentials_error(self):
+        """boto3 NoCredentialsError 처리"""
+        manager = AWSCredentialManager()
+        
+        with patch('boto3.Session') as mock_session_class:
+            mock_session = Mock()
+            mock_session.get_credentials.side_effect = BotoNoCredentialsError()
+            mock_session_class.return_value = mock_session
+            
+            # NoCredentialsError가 발생해야 함
+            with pytest.raises(NoCredentialsError):
+                manager.get_default_credentials()
     
     def test_assume_role_success(self):
         """정상적인 AssumeRole 시나리오"""

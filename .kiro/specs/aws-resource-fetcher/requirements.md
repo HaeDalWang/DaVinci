@@ -16,6 +16,18 @@
 
 ### Requirement 1
 
+**User Story:** 사용자로서, AWS 자격증명을 다양한 방법으로 제공하고 싶습니다. 그래야 개발 환경과 프로덕션 환경 모두에서 유연하게 사용할 수 있습니다.
+
+#### Acceptance Criteria
+
+1. WHEN 사용자가 환경변수로 자격증명을 제공하면, THE System SHALL 해당 자격증명을 사용하여 AWS에 접근한다
+2. WHEN 사용자가 ~/.aws/credentials 파일을 사용하면, THE System SHALL 해당 프로파일의 자격증명을 사용한다
+3. WHEN 사용자가 명시적으로 자격증명을 제공하지 않으면, THE System SHALL boto3의 기본 자격증명 체인을 사용한다
+4. WHEN 기본 자격증명 조회가 성공하면, THE System SHALL 자격증명 객체를 반환한다
+5. IF 자격증명을 찾을 수 없으면, THEN THE System SHALL 명확한 에러 메시지를 반환한다
+
+### Requirement 2
+
 **User Story:** 사용자로서, 특정 AWS 계정의 리소스를 조회하고 싶습니다. 그래야 다이어그램 생성을 위한 기본 데이터를 확보할 수 있습니다.
 
 #### Acceptance Criteria
@@ -24,7 +36,7 @@
 2. WHEN AssumeRole이 성공하면, THE System SHALL 임시 자격증명을 반환한다
 3. IF AssumeRole이 실패하면, THEN THE System SHALL 명확한 에러 메시지를 반환한다
 
-### Requirement 2
+### Requirement 3
 
 **User Story:** 사용자로서, EC2 인스턴스 정보를 조회하고 싶습니다. 그래야 인프라 다이어그램에 컴퓨팅 리소스를 표시할 수 있습니다.
 
@@ -35,7 +47,7 @@
 3. WHEN EC2 정보를 조회하면, THE System SHALL 결과를 JSON 형태로 반환한다
 4. IF EC2가 존재하지 않으면, THEN THE System SHALL 빈 리스트를 반환한다
 
-### Requirement 3
+### Requirement 4
 
 **User Story:** 사용자로서, VPC 정보를 조회하고 싶습니다. 그래야 네트워크 구조를 파악할 수 있습니다.
 
@@ -46,7 +58,7 @@
 3. WHEN VPC 정보를 조회하면, THE System SHALL 결과를 JSON 형태로 반환한다
 4. IF VPC가 존재하지 않으면, THEN THE System SHALL 빈 리스트를 반환한다
 
-### Requirement 4
+### Requirement 5
 
 **User Story:** 사용자로서, 보안그룹 정보를 조회하고 싶습니다. 그래야 리소스 간 연결성을 분석할 수 있습니다.
 
@@ -58,7 +70,7 @@
 4. WHEN 보안그룹 정보를 조회하면, THE System SHALL 결과를 JSON 형태로 반환한다
 5. IF 보안그룹이 존재하지 않으면, THEN THE System SHALL 빈 리스트를 반환한다
 
-### Requirement 5
+### Requirement 6
 
 **User Story:** 사용자로서, 여러 리소스를 한 번에 조회하고 싶습니다. 그래야 효율적으로 전체 인프라 정보를 수집할 수 있습니다.
 
@@ -68,7 +80,7 @@
 2. WHEN 전체 리소스를 조회하면, THE System SHALL 각 리소스 타입별로 구조화된 JSON을 반환한다
 3. IF 특정 리소스 조회가 실패하면, THEN THE System SHALL 해당 리소스는 빈 리스트로 처리하고 나머지 조회를 계속한다
 
-### Requirement 6
+### Requirement 7
 
 **User Story:** 사용자로서, API 호출 실패 시 명확한 에러를 받고 싶습니다. 그래야 문제를 빠르게 파악하고 해결할 수 있습니다.
 

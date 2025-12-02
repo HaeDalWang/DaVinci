@@ -38,11 +38,25 @@ AWS 리소스 조회 시스템은 boto3를 사용하여 CrossAccount AssumeRole�
 
 ### 1. AWSCredentialManager
 
-CrossAccount AssumeRole을 처리하는 컴포넌트입니다.
+AWS 자격증명을 관리하는 컴포넌트입니다. 기본 자격증명과 CrossAccount AssumeRole을 모두 지원합니다.
 
 ```python
 class AWSCredentialManager:
-    def assume_role(self, account_id: str, role_name: str, region: str = 'ap-northeast-2') -> dict:
+    def get_default_credentials(self, region: str = 'ap-northeast-2') -> AWSCredentials:
+        """
+        기본 자격증명을 반환 (환경변수, ~/.aws/credentials, IAM Role 등)
+        
+        Args:
+            region: AWS 리전 (기본값: ap-northeast-2)
+            
+        Returns:
+            AWSCredentials: 자격증명 객체
+            
+        Raises:
+            NoCredentialsError: 자격증명을 찾을 수 없을 때
+        """
+    
+    def assume_role(self, account_id: str, role_name: str, region: str = 'ap-northeast-2') -> AWSCredentials:
         """
         CrossAccount Role을 assume하여 임시 자격증명을 반환
         
@@ -52,15 +66,11 @@ class AWSCredentialManager:
             region: AWS 리전 (기본값: ap-northeast-2)
             
         Returns:
-            dict: {
-                'access_key': str,
-                'secret_key': str,
-                'session_token': str,
-                'expiration': datetime
-            }
+            AWSCredentials: 임시 자격증명 객체
             
         Raises:
             AssumeRoleError: Role assume 실패 시
+            PermissionError: 권한 부족 시
         """
 ```
 
@@ -266,83 +276,95 @@ class SecurityGroupRule:
 
 *A property is a characteristic or behavior that should hold true across all valid executions of a system-essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
-### Property 1: AssumeRole returns complete credentials
+### Property 1: Default credentials returns valid credentials
+
+*For any* 환경에서 기본 자격증명을 조회할 때, 자격증명이 존재하면 access_key와 secret_key를 포함한 유효한 AWSCredentials 객체를 반환해야 한다.
+
+**Validates: Requirements 1.4**
+
+### Property 2: Default credentials failure raises exception
+
+*For any* 자격증명이 없는 환경에서 기본 자격증명을 조회하면, 명확한 에러 메시지를 포함한 NoCredentialsError 예외가 발생해야 한다.
+
+**Validates: Requirements 1.5**
+
+### Property 3: AssumeRole returns complete credentials
 
 *For any* valid AWS 계정 번호와 role 이름, AssumeRole이 성공하면 반환되는 자격증명은 access_key, secret_key, session_token, expiration 필드를 모두 포함해야 한다.
 
-**Validates: Requirements 1.2**
+**Validates: Requirements 2.2**
 
-### Property 2: AssumeRole failure raises appropriate exception
+### Property 4: AssumeRole failure raises appropriate exception
 
 *For any* 잘못된 계정 번호나 권한 부족 상황, AssumeRole 실패 시 명확한 에러 타입과 메시지를 포함한 예외가 발생해야 한다.
 
-**Validates: Requirements 1.3**
+**Validates: Requirements 2.3**
 
-### Property 3: EC2 fetch returns complete instance data
+### Property 5: EC2 fetch returns complete instance data
 
 *For any* 유효한 자격증명으로 EC2를 조회할 때, 반환되는 모든 인스턴스 데이터는 instance_id, name, state, vpc_id, subnet_id, security_groups 필드를 포함해야 한다.
 
-**Validates: Requirements 2.2**
+**Validates: Requirements 3.2**
 
-### Property 4: EC2 data is JSON serializable
+### Property 6: EC2 data is JSON serializable
 
 *For any* EC2 조회 결과, JSON으로 직렬화한 후 역직렬화하면 동일한 데이터 구조를 유지해야 한다.
 
-**Validates: Requirements 2.3**
+**Validates: Requirements 3.3**
 
-### Property 5: VPC fetch returns complete VPC data
+### Property 7: VPC fetch returns complete VPC data
 
 *For any* 유효한 자격증명으로 VPC를 조회할 때, 반환되는 모든 VPC 데이터는 vpc_id, name, cidr_block, subnets 필드를 포함해야 한다.
 
-**Validates: Requirements 3.2**
+**Validates: Requirements 4.2**
 
-### Property 6: VPC data is JSON serializable
+### Property 8: VPC data is JSON serializable
 
 *For any* VPC 조회 결과, JSON으로 직렬화한 후 역직렬화하면 동일한 데이터 구조를 유지해야 한다.
 
-**Validates: Requirements 3.3**
+**Validates: Requirements 4.3**
 
-### Property 7: SecurityGroup fetch returns complete data
+### Property 9: SecurityGroup fetch returns complete data
 
 *For any* 유효한 자격증명으로 보안그룹을 조회할 때, 반환되는 모든 보안그룹 데이터는 group_id, name, vpc_id, inbound_rules, outbound_rules 필드를 포함해야 한다.
 
-**Validates: Requirements 4.2**
+**Validates: Requirements 5.2**
 
-### Property 8: SecurityGroup rules contain required fields
+### Property 10: SecurityGroup rules contain required fields
 
 *For any* 보안그룹 규칙, protocol, from_port, to_port, target 정보를 포함해야 한다.
 
-**Validates: Requirements 4.3**
+**Validates: Requirements 5.3**
 
-### Property 9: SecurityGroup data is JSON serializable
+### Property 11: SecurityGroup data is JSON serializable
 
 *For any* 보안그룹 조회 결과, JSON으로 직렬화한 후 역직렬화하면 동일한 데이터 구조를 유지해야 한다.
 
-**Validates: Requirements 4.4**
+**Validates: Requirements 5.4**
 
-### Property 10: Integrated fetch calls all fetchers
+### Property 12: Integrated fetch calls all fetchers
 
 *For any* 유효한 계정 정보로 전체 리소스를 조회할 때, EC2, VPC, 보안그룹 fetcher가 모두 호출되어야 한다.
 
-**Validates: Requirements 5.1**
+**Validates: Requirements 6.1**
 
-### Property 11: Integrated fetch returns structured data
+### Property 13: Integrated fetch returns structured data
 
 *For any* 전체 리소스 조회 결과, account_id, region, timestamp, ec2_instances, vpcs, security_groups 필드를 포함한 구조화된 데이터를 반환해야 한다.
 
-**Validates: Requirements 5.2**
+**Validates: Requirements 6.2**
 
-### Property 12: Partial failure continues execution
+### Property 14: Partial failure continues execution
 
 *For any* 리소스 조회 중 특정 fetcher가 실패하더라도, 해당 리소스는 빈 리스트로 처리되고 나머지 리소스 조회는 계속되어야 한다.
 
-**Validates: Requirements 5.3**
+**Validates: Requirements 6.3**
 
-### Property 13: API failure raises exception with details
+### Property 15: API failure raises exception with details
 
 *For any* AWS API 호출 실패, 에러 타입과 메시지를 포함한 예외가 발생해야 한다.
 
-**Validates: Requirements 6.1**
+**Validates: Requirements 7.1**
 
 ## Error Handling
 
@@ -355,6 +377,15 @@ class SecurityGroupRule:
 class AWSResourceFetcherError(Exception):
     """Base exception for all fetcher errors"""
     pass
+
+class NoCredentialsError(AWSResourceFetcherError):
+    """자격증명을 찾을 수 없을 때 발생"""
+    def __init__(self):
+        super().__init__(
+            "AWS 자격증명을 찾을 수 없습니다. "
+            "환경변수(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) 또는 "
+            "~/.aws/credentials 파일을 확인하세요."
+        )
 
 class AssumeRoleError(AWSResourceFetcherError):
     """AssumeRole 실패 시 발생"""

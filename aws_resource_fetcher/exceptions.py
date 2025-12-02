@@ -37,3 +37,14 @@ class PermissionError(AWSResourceFetcherError):
             f"Permission denied for {action}. "
             f"Required permissions: {', '.join(required_permissions)}"
         )
+
+
+class NoCredentialsError(AWSResourceFetcherError):
+    """자격증명을 찾을 수 없을 때 발생"""
+    
+    def __init__(self):
+        super().__init__(
+            "AWS 자격증명을 찾을 수 없습니다. "
+            "환경변수(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) 또는 "
+            "~/.aws/credentials 파일을 확인하세요."
+        )
