@@ -78,6 +78,7 @@ class DrawioGenerator:
         for vpc_node in vpc_nodes:
             vpc_id = vpc_node["id"]
             subnets = vpc_to_subnets_map.get(vpc_id, [])
+            logger.debug(f"Creating VPC container: id={vpc_id}, subnets={len(subnets)}")
             vpc_container = self.container_converter.convert_vpc(vpc_node, subnets)
             containers.append(vpc_container)
         
@@ -87,20 +88,24 @@ class DrawioGenerator:
             ec2_instances = subnet_to_ec2_map.get(subnet_id, [])
             
             # 부모 VPC ID 찾기
-            parent_vpc_id = self._find_parent_vpc(subnet_id, edges)
+            parent_vpc_id = self._find_parent_vpc(subnet_node, edges)
+            logger.debug(f"Subnet {subnet_id}: parent_vpc_id={parent_vpc_id}")
             
             subnet_container = self.container_converter.convert_subnet(
                 subnet_node,
                 ec2_instances,
                 parent_vpc_id=parent_vpc_id
             )
+            logger.debug(f"Created subnet container: id={subnet_container.id}, parent_id={subnet_container.parent_id}")
             containers.append(subnet_container)
         
         # 8. EC2 Shape 생성 (Subnet 내부)
         shapes: list[Shape] = []
         for ec2_node in ec2_nodes:
+            ec2_id = ec2_node["id"]
             # 부모 Subnet ID 찾기
-            parent_subnet_id = self._find_parent_subnet(ec2_node["id"], edges)
+            parent_subnet_id = self._find_parent_subnet(ec2_id, edges)
+            logger.debug(f"EC2 {ec2_id}: parent_subnet_id={parent_subnet_id}")
             
             # parent_id를 노드에 추가
             ec2_node_with_parent = {**ec2_node, "parent_id": f"container-{parent_subnet_id}" if parent_subnet_id else None}
@@ -114,8 +119,10 @@ class DrawioGenerator:
         
         # 10. 트래픽 Connector 생성 (allows_traffic 엣지만)
         connectors = self._create_traffic_connectors(edges, sg_to_ec2_map)
+        logger.debug(f"Created {len(connectors)} traffic connectors")
         
         # 11. XML 생성
+        logger.debug(f"Building XML: {len(shapes)} shapes, {len(containers)} containers, {len(connectors)} connectors")
         xml_output = self.xml_builder.build(shapes, containers, connectors)
         
         logger.info("draw.io XML generation completed")
@@ -212,7 +219,7 @@ class DrawioGenerator:
         
         # uses 엣지를 통해 EC2 → SecurityGroup 관계 파악
         for edge in edges:
-            if edge.get("type") == "uses":
+            if edge.get("edge_type") == "uses":
                 source_id = edge.get("source")
                 target_id = edge.get("target")
                 
@@ -243,7 +250,7 @@ class DrawioGenerator:
         
         # contains 엣지를 통해 VPC → Subnet 관계 파악
         for edge in edges:
-            if edge.get("type") == "contains":
+            if edge.get("edge_type") == "contains":
                 source_id = edge.get("source")
                 target_id = edge.get("target")
                 
@@ -275,7 +282,7 @@ class DrawioGenerator:
         
         # hosts 엣지를 통해 Subnet → EC2 관계 파악
         for edge in edges:
-            if edge.get("type") == "hosts":
+            if edge.get("edge_type") == "hosts":
                 source_id = edge.get("source")
                 target_id = edge.get("target")
                 
@@ -292,21 +299,27 @@ class DrawioGenerator:
         
         return subnet_to_ec2_map
     
-    def _find_parent_vpc(self, subnet_id: str, edges: list[dict[str, Any]]) -> str | None:
+    def _find_parent_vpc(self, subnet_node: dict[str, Any], edges: list[dict[str, Any]]) -> str | None:
         """
         Subnet의 부모 VPC ID 찾기
         
         Args:
-            subnet_id: Subnet ID
+            subnet_node: Subnet 노드 (attributes.vpc_id 포함)
             edges: 엣지 목록
             
         Returns:
             str | None: VPC ID 또는 None
         """
+        subnet_id = subnet_node["id"]
+        
+        # 먼저 엣지에서 찾기
         for edge in edges:
-            if edge.get("type") == "contains" and edge.get("target") == subnet_id:
+            if edge.get("edge_type") == "contains" and edge.get("target") == subnet_id:
                 return edge.get("source")
-        return None
+        
+        # 엣지에 없으면 attributes.vpc_id 사용 (Phase 2 버그 우회)
+        vpc_id = subnet_node.get("attributes", {}).get("vpc_id")
+        return vpc_id
     
     def _find_parent_subnet(self, ec2_id: str, edges: list[dict[str, Any]]) -> str | None:
         """
@@ -320,7 +333,7 @@ class DrawioGenerator:
             str | None: Subnet ID 또는 None
         """
         for edge in edges:
-            if edge.get("type") == "hosts" and edge.get("target") == ec2_id:
+            if edge.get("edge_type") == "hosts" and edge.get("target") == ec2_id:
                 return edge.get("source")
         return None
     
@@ -336,22 +349,29 @@ class DrawioGenerator:
         vpcs = [c for c in containers if c.container_type == "vpc"]
         subnets = [c for c in containers if c.container_type == "subnet"]
         
-        # 1. VPC 배치
-        self.layout_engine.layout_vpcs(vpcs)
+        logger.debug(f"Applying layout: {len(vpcs)} VPCs, {len(subnets)} Subnets, {len(shapes)} Shapes")
+        
+        # 1. VPC 배치 (Subnet 정보 전달하여 크기 재계산)
+        self.layout_engine.layout_vpcs(vpcs, subnets)
+        logger.debug(f"VPC layout applied: {[(v.id, v.x, v.y, v.width, v.height) for v in vpcs]}")
         
         # 2. 각 VPC 내부에 Subnet 배치
         for vpc in vpcs:
             vpc_subnets = [s for s in subnets if s.parent_id == vpc.id]
+            logger.debug(f"VPC {vpc.id}: found {len(vpc_subnets)} subnets")
             if vpc_subnets:
                 vpc_bounds = (vpc.x, vpc.y, vpc.width, vpc.height)
                 self.layout_engine.layout_subnets(vpc_subnets, vpc_bounds)
+                logger.debug(f"Subnet layout for VPC {vpc.id}: {[(s.id, s.x, s.y) for s in vpc_subnets[:3]]}")
         
         # 3. 각 Subnet 내부에 EC2 배치
         for subnet in subnets:
             subnet_ec2s = [s for s in shapes if s.parent_id == subnet.id]
             if subnet_ec2s:
+                logger.debug(f"Subnet {subnet.id}: found {len(subnet_ec2s)} EC2 instances")
                 subnet_bounds = (subnet.x, subnet.y, subnet.width, subnet.height)
                 self.layout_engine.layout_ec2_instances(subnet_ec2s, subnet_bounds)
+                logger.debug(f"EC2 layout for Subnet {subnet.id}: {[(s.id, s.x, s.y) for s in subnet_ec2s]}")
     
     def _create_traffic_connectors(
         self,
@@ -372,7 +392,7 @@ class DrawioGenerator:
         
         for edge in edges:
             # allows_traffic 엣지만 처리
-            if edge.get("type") == "allows_traffic":
+            if edge.get("edge_type") == "allows_traffic":
                 source_sg_id = edge.get("source")
                 target_sg_id = edge.get("target")
                 

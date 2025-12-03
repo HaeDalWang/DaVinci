@@ -44,6 +44,7 @@ docker build -t aws-fetcher-api .
 docker run -p 8000:8000 \
   -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
   -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+  -e LOG_LEVEL=INFO \
   aws-fetcher-api
 ```
 
@@ -51,10 +52,17 @@ docker run -p 8000:8000 \
 
 ```bash
 uv sync
+export LOG_LEVEL=DEBUG  # DEBUG, INFO, WARNING, ERROR
 ./run_local.sh
 ```
 
 API 문서: http://localhost:8000/docs
+
+## 환경 변수
+
+- `LOG_LEVEL`: 로그 레벨 (DEBUG, INFO, WARNING, ERROR) - 기본값: INFO
+- `AWS_ACCESS_KEY_ID`: AWS Access Key
+- `AWS_SECRET_ACCESS_KEY`: AWS Secret Key
 
 ## Usage
 

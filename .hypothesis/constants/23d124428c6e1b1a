@@ -1,4 +1,0 @@
-# file: /Users/seungdo/work/DaVinci/drawio_generator/converters/container.py
-# hypothesis_version: 6.148.3
-
-[300, 360, 600, 800, '#147EBA', '#248814', 'cidr', 'id', 'name', 'none', 'subnet', 'vpc']

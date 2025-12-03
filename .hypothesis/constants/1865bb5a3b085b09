@@ -1,4 +1,0 @@
-# file: /Users/seungdo/work/DaVinci/aws_resource_fetcher/fetchers/vpc.py
-# hypothesis_version: 6.148.3
-
-['AvailabilityZone', 'CidrBlock', 'Key', 'Name', 'SubnetId', 'Subnets', 'Tags', 'VPC', 'Value', 'Values', 'VpcId', 'Vpcs', 'ap-northeast-2', 'describe_subnets', 'describe_vpcs', 'ec2', 'vpc-id']

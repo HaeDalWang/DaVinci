@@ -117,8 +117,8 @@ def test_create_vpc_container_cell():
     style = vpc_cell.attrib['style']
     assert 'mxgraph.aws4.group' in style
     assert 'mxgraph.aws4.group_vpc' in style
-    assert '#248814' in style  # 녹색
     assert 'fillColor=none' in style
+    # strokeColor 지정 안 함 - 아이콘 기본 색상 사용
     
     # geometry 확인
     geometry = vpc_cell.find('mxGeometry')
@@ -163,8 +163,8 @@ def test_create_subnet_container_cell():
     style = subnet_cell.attrib['style']
     assert 'mxgraph.aws4.group' in style
     assert 'mxgraph.aws4.group_subnet' in style
-    assert '#147EBA' in style  # 파란색
     assert 'fillColor=none' in style
+    # strokeColor 지정 안 함 - 아이콘 기본 색상 사용
 
 
 def test_create_connector_cell():

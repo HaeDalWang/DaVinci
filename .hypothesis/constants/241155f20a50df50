@@ -1,4 +1,0 @@
-# file: /Users/seungdo/work/DaVinci/drawio_generator/generator.py
-# hypothesis_version: 6.148.3
-
-['EC2', 'Must be a list', 'SecurityGroup', 'Subnet', 'VPC', 'allows_traffic', 'contains', 'edges', 'groups', 'hosts', 'id', 'nodes', 'parent_id', 'source', 'subnet', 'target', 'type', 'unknown', 'uses', 'vpc']

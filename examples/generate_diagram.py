@@ -25,9 +25,11 @@ from aws_resource_fetcher.fetchers.security_group import SecurityGroupFetcher
 from resource_graph_builder.builder import GraphBuilder
 from drawio_generator.generator import DrawioGenerator
 
-# 로깅 설정
+# 로깅 설정 (환경변수 LOG_LEVEL로 조정 가능)
+import os
+log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, log_level, logging.INFO),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)

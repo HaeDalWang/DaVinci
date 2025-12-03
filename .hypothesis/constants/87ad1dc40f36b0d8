@@ -1,4 +1,0 @@
-# file: /Users/seungdo/work/DaVinci/aws_resource_fetcher/fetchers/__init__.py
-# hypothesis_version: 6.148.3
-
-['BaseFetcher', 'EC2Fetcher', 'VPCFetcher']

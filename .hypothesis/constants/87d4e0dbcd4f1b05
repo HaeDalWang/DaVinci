@@ -1,4 +1,0 @@
-# file: /Users/seungdo/work/DaVinci/drawio_generator/converters/shape.py
-# hypothesis_version: 6.148.3
-
-['ec2', 'id', 'name', 'parent_id', 'private_ip', 'public_ip']

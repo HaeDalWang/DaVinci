@@ -1,4 +1,0 @@
-# file: /Users/seungdo/work/DaVinci/aws_resource_fetcher/__init__.py
-# hypothesis_version: 6.148.3
-
-['0.1.0', 'AWSCredentialManager', 'AWSCredentials', 'AssumeRoleError', 'EC2Instance', 'PermissionError', 'ResourceFetchError', 'ResourceFetcher', 'SecurityGroup', 'SecurityGroupRule', 'Subnet', 'VPC']

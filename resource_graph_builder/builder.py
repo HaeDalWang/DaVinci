@@ -6,12 +6,15 @@ Phase 1 JSON 데이터로부터 리소스 그래프를 생성합니다.
 Requirements: 2.1, 2.2, 2.3, 2.4
 """
 
+import logging
 from typing import Any
 
 from .exceptions import InvalidReferenceError
 from .graph import ResourceGraph
 from .models import Node, Edge
 from .parser import ResourceParser, ParsedResources
+
+logger = logging.getLogger(__name__)
 
 
 class GraphBuilder:
@@ -44,8 +47,13 @@ class GraphBuilder:
             6. VPC별 그룹 생성 (추후 구현)
             7. 그래프 반환
         """
+        logger.info("Starting graph build from Phase 1 JSON")
+        
         # 1. JSON 데이터 파싱
+        logger.debug("Parsing Phase 1 JSON...")
         parsed = self.parser.parse(phase1_json)
+        logger.debug(f"Parsed: {len(parsed.ec2_instances)} EC2, {len(parsed.vpcs)} VPCs, "
+                    f"{len(parsed.subnets)} Subnets, {len(parsed.security_groups)} SGs")
         
         # 2. 그래프 생성 및 노드 추가
         graph = ResourceGraph()

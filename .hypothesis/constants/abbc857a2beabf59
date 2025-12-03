@@ -1,4 +1,0 @@
-# file: /Users/seungdo/work/DaVinci/aws_resource_fetcher/fetchers/ec2.py
-# hypothesis_version: 6.148.3
-
-['EC2', 'GroupId', 'InstanceId', 'Instances', 'Key', 'Name', 'PrivateIpAddress', 'PublicIpAddress', 'Reservations', 'SecurityGroups', 'State', 'SubnetId', 'Tags', 'Value', 'VpcId', 'ap-northeast-2', 'describe_instances', 'ec2']

@@ -1,4 +1,0 @@
-# file: /Users/seungdo/work/DaVinci/resource_graph_builder/parser.py
-# hypothesis_version: 6.148.3
-
-['availability_zone', 'cidr_block', 'description', 'dict', 'ec2_instances', 'from_port', 'group_id', 'inbound_rules', 'instance_id', 'int or None', 'json_data', 'list', 'name', 'outbound_rules', 'private_ip', 'protocol', 'public_ip', 'required field', 'security_groups', 'state', 'str or None', 'subnet_id', 'subnets', 'target', 'to_port', 'vpc_id', 'vpcs']

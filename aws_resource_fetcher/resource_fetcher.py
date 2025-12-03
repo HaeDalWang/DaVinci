@@ -1,6 +1,7 @@
 """통합 리소스 조회 인터페이스"""
 from datetime import datetime
 import logging
+import os
 from typing import Any
 
 from .credentials import AWSCredentialManager
@@ -12,6 +13,11 @@ from .exceptions import ResourceFetchError
 
 
 # 로거 설정
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(
+    level=getattr(logging, LOG_LEVEL),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 
@@ -53,12 +59,16 @@ class ResourceFetcher:
             AssumeRoleError: Role assume 실패 시
             PermissionError: 권한 부족 시
         """
+        logger.info(f"Starting resource fetch for account={account_id}, role={role_name}, region={region}")
+        
         # 자격증명 획득
+        logger.debug(f"Assuming role: {role_name} in account {account_id}")
         credentials = self.credential_manager.assume_role(
             account_id=account_id,
             role_name=role_name,
             region=region
         )
+        logger.debug("Role assumed successfully")
         
         # 결과 구조 초기화
         result: dict[str, Any] = {
@@ -71,29 +81,36 @@ class ResourceFetcher:
         }
         
         # EC2 인스턴스 조회
+        logger.debug("Fetching EC2 instances...")
         result['ec2_instances'] = self._fetch_with_fallback(
             fetcher=self.ec2_fetcher,
             credentials=credentials,
             region=region,
             resource_name='EC2 instances'
         )
+        logger.info(f"Fetched {len(result['ec2_instances'])} EC2 instances")
         
         # VPC 조회
+        logger.debug("Fetching VPCs...")
         result['vpcs'] = self._fetch_with_fallback(
             fetcher=self.vpc_fetcher,
             credentials=credentials,
             region=region,
             resource_name='VPCs'
         )
+        logger.info(f"Fetched {len(result['vpcs'])} VPCs")
         
         # 보안그룹 조회
+        logger.debug("Fetching Security Groups...")
         result['security_groups'] = self._fetch_with_fallback(
             fetcher=self.security_group_fetcher,
             credentials=credentials,
             region=region,
             resource_name='Security Groups'
         )
+        logger.info(f"Fetched {len(result['security_groups'])} Security Groups")
         
+        logger.info("Resource fetch completed successfully")
         return result
     
     def _fetch_with_fallback(

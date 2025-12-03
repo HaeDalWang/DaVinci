@@ -1,10 +1,13 @@
 """AWS 자격증명 관리"""
 from datetime import datetime
+import logging
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError as BotoNoCredentialsError
 
 from .exceptions import AssumeRoleError, PermissionError, NoCredentialsError
 from .models import AWSCredentials
+
+logger = logging.getLogger(__name__)
 
 
 class AWSCredentialManager:
@@ -23,16 +26,19 @@ class AWSCredentialManager:
         Raises:
             NoCredentialsError: 자격증명을 찾을 수 없을 때
         """
+        logger.debug(f"Getting default credentials for region={region}")
         try:
             # boto3 세션 생성 (기본 자격증명 체인 사용)
             session = boto3.Session(region_name=region)
             credentials = session.get_credentials()
             
             if credentials is None:
+                logger.error("No credentials found")
                 raise NoCredentialsError()
             
             # frozen credentials 가져오기
             frozen_creds = credentials.get_frozen_credentials()
+            logger.debug("Default credentials retrieved successfully")
             
             return AWSCredentials(
                 access_key=frozen_creds.access_key,
@@ -42,9 +48,11 @@ class AWSCredentialManager:
             )
             
         except BotoNoCredentialsError as e:
+            logger.error("boto3 NoCredentialsError", exc_info=True)
             raise NoCredentialsError() from e
         except Exception as e:
             # 예상치 못한 에러
+            logger.error(f"Unexpected error getting credentials: {e}", exc_info=True)
             raise NoCredentialsError() from e
     
     def assume_role(
@@ -68,12 +76,14 @@ class AWSCredentialManager:
             AssumeRoleError: Role assume 실패 시
             PermissionError: 권한 부족 시
         """
+        logger.debug(f"Assuming role: account_id={account_id}, role_name={role_name}, region={region}")
         try:
             # STS 클라이언트 생성
             sts_client = boto3.client('sts', region_name=region)
             
             # Role ARN 구성
             role_arn = f"arn:aws:iam::{account_id}:role/{role_name}"
+            logger.debug(f"Role ARN: {role_arn}")
             
             # AssumeRole 호출
             response = sts_client.assume_role(
@@ -83,6 +93,7 @@ class AWSCredentialManager:
             
             # 자격증명 추출
             credentials = response['Credentials']
+            logger.debug(f"Role assumed successfully, expires at: {credentials['Expiration']}")
             
             return AWSCredentials(
                 access_key=credentials['AccessKeyId'],
@@ -93,6 +104,7 @@ class AWSCredentialManager:
             
         except ClientError as e:
             error_code = e.response.get('Error', {}).get('Code', '')
+            logger.error(f"ClientError during AssumeRole: {error_code}", exc_info=True)
             
             # 권한 부족 에러 처리
             if error_code == 'AccessDenied':
@@ -118,6 +130,7 @@ class AWSCredentialManager:
             
         except Exception as e:
             # 예상치 못한 에러 (네트워크 에러 등)
+            logger.error(f"Unexpected error during AssumeRole: {e}", exc_info=True)
             raise AssumeRoleError(
                 account_id=account_id,
                 role_name=role_name,

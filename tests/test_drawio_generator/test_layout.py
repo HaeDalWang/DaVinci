@@ -55,16 +55,17 @@ class TestLayoutEngine:
         vpc_bounds = (40, 40, 800, 600)
         engine.layout_subnets(subnets, vpc_bounds)
         
-        # 첫 번째 행 (0, 1)
-        assert subnets[0].x == engine.CONTAINER_PADDING
-        assert subnets[0].y == engine.LABEL_HEIGHT + engine.CONTAINER_PADDING
+        # 첫 번째 행 (0, 1) - 절대 좌표
+        vpc_x, vpc_y = 40, 40
+        assert subnets[0].x == vpc_x + engine.CONTAINER_PADDING
+        assert subnets[0].y == vpc_y + engine.LABEL_HEIGHT + engine.CONTAINER_PADDING
         
-        assert subnets[1].x == engine.CONTAINER_PADDING + 360 + engine.SUBNET_SPACING
-        assert subnets[1].y == engine.LABEL_HEIGHT + engine.CONTAINER_PADDING
+        assert subnets[1].x == vpc_x + engine.CONTAINER_PADDING + 360 + engine.SUBNET_SPACING
+        assert subnets[1].y == vpc_y + engine.LABEL_HEIGHT + engine.CONTAINER_PADDING
         
         # 두 번째 행 (2, 3)
-        assert subnets[2].x == engine.CONTAINER_PADDING
-        assert subnets[2].y == engine.LABEL_HEIGHT + engine.CONTAINER_PADDING + 300 + engine.SUBNET_SPACING
+        assert subnets[2].x == vpc_x + engine.CONTAINER_PADDING
+        assert subnets[2].y == vpc_y + engine.LABEL_HEIGHT + engine.CONTAINER_PADDING + 300 + engine.SUBNET_SPACING
     
     def test_layout_ec2_instances_grid(self):
         """EC2를 3열 그리드로 배치하는지 테스트"""
@@ -82,19 +83,20 @@ class TestLayoutEngine:
         subnet_bounds = (40, 40, 360, 300)
         engine.layout_ec2_instances(ec2_list, subnet_bounds)
         
-        # 첫 번째 행 (0, 1, 2)
-        assert ec2_list[0].x == engine.CONTAINER_PADDING
-        assert ec2_list[0].y == engine.LABEL_HEIGHT + engine.CONTAINER_PADDING
+        # 첫 번째 행 (0, 1, 2) - 절대 좌표
+        subnet_x, subnet_y = 40, 40
+        assert ec2_list[0].x == subnet_x + engine.CONTAINER_PADDING
+        assert ec2_list[0].y == subnet_y + engine.LABEL_HEIGHT + engine.CONTAINER_PADDING
         
-        assert ec2_list[1].x == engine.CONTAINER_PADDING + 78 + engine.EC2_SPACING
-        assert ec2_list[1].y == engine.LABEL_HEIGHT + engine.CONTAINER_PADDING
+        assert ec2_list[1].x == subnet_x + engine.CONTAINER_PADDING + 78 + engine.EC2_SPACING
+        assert ec2_list[1].y == subnet_y + engine.LABEL_HEIGHT + engine.CONTAINER_PADDING
         
-        assert ec2_list[2].x == engine.CONTAINER_PADDING + 2 * (78 + engine.EC2_SPACING)
-        assert ec2_list[2].y == engine.LABEL_HEIGHT + engine.CONTAINER_PADDING
+        assert ec2_list[2].x == subnet_x + engine.CONTAINER_PADDING + 2 * (78 + engine.EC2_SPACING)
+        assert ec2_list[2].y == subnet_y + engine.LABEL_HEIGHT + engine.CONTAINER_PADDING
         
         # 두 번째 행 (3, 4, 5)
-        assert ec2_list[3].x == engine.CONTAINER_PADDING
-        assert ec2_list[3].y == engine.LABEL_HEIGHT + engine.CONTAINER_PADDING + 78 + engine.EC2_SPACING
+        assert ec2_list[3].x == subnet_x + engine.CONTAINER_PADDING
+        assert ec2_list[3].y == subnet_y + engine.LABEL_HEIGHT + engine.CONTAINER_PADDING + 78 + engine.EC2_SPACING
     
     def test_layout_empty_lists(self):
         """빈 리스트 처리 테스트"""

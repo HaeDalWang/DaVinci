@@ -183,12 +183,12 @@ class XMLBuilder:
         VPC 그룹 아이콘 스타일 문자열 생성
         
         Returns:
-            str: AWS Architecture Icons 2025 VPC Group 스타일
+            str: AWS Architecture Icons VPC Group 스타일 (보라색)
         """
         return (
             "shape=mxgraph.aws4.group;"
             "grIcon=mxgraph.aws4.group_vpc;"
-            "strokeColor=#248814;"
+            "strokeColor=#8C4FFF;"  # 보라색
             "fillColor=none;"
             "verticalAlign=top;"
         )
@@ -198,12 +198,12 @@ class XMLBuilder:
         Subnet 그룹 아이콘 스타일 문자열 생성
         
         Returns:
-            str: AWS Architecture Icons 2025 Subnet Group 스타일
+            str: AWS Architecture Icons Subnet Group 스타일 (녹색)
         """
         return (
             "shape=mxgraph.aws4.group;"
             "grIcon=mxgraph.aws4.group_subnet;"
-            "strokeColor=#147EBA;"
+            "strokeColor=#248814;"  # 녹색
             "fillColor=none;"
             "verticalAlign=top;"
         )
