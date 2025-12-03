@@ -22,6 +22,12 @@ from aws_resource_fetcher.credentials import AWSCredentialManager
 from aws_resource_fetcher.fetchers.ec2 import EC2Fetcher
 from aws_resource_fetcher.fetchers.vpc import VPCFetcher
 from aws_resource_fetcher.fetchers.security_group import SecurityGroupFetcher
+from aws_resource_fetcher.fetchers.internet_gateway import InternetGatewayFetcher
+from aws_resource_fetcher.fetchers.nat_gateway import NATGatewayFetcher
+from aws_resource_fetcher.fetchers.route_table import RouteTableFetcher
+from aws_resource_fetcher.fetchers.load_balancer import LoadBalancerFetcher
+from aws_resource_fetcher.fetchers.rds import RDSFetcher
+from aws_resource_fetcher.fetchers.vpc_peering import VPCPeeringFetcher
 from resource_graph_builder.builder import GraphBuilder
 from drawio_generator.generator import DrawioGenerator
 
@@ -70,6 +76,12 @@ def main():
         ec2_fetcher = EC2Fetcher()
         vpc_fetcher = VPCFetcher()
         sg_fetcher = SecurityGroupFetcher()
+        igw_fetcher = InternetGatewayFetcher()
+        nat_fetcher = NATGatewayFetcher()
+        rt_fetcher = RouteTableFetcher()
+        lb_fetcher = LoadBalancerFetcher()
+        rds_fetcher = RDSFetcher()
+        pcx_fetcher = VPCPeeringFetcher()
         
         logger.info("EC2 인스턴스 조회 중...")
         ec2_instances = ec2_fetcher.fetch(credentials, args.region)
@@ -82,6 +94,30 @@ def main():
         logger.info("SecurityGroup 조회 중...")
         security_groups = sg_fetcher.fetch(credentials, args.region)
         logger.info(f"  ✓ SecurityGroup {len(security_groups)}개 발견")
+        
+        logger.info("Internet Gateway 조회 중...")
+        internet_gateways = igw_fetcher.fetch(credentials, args.region)
+        logger.info(f"  ✓ Internet Gateway {len(internet_gateways)}개 발견")
+        
+        logger.info("NAT Gateway 조회 중...")
+        nat_gateways = nat_fetcher.fetch(credentials, args.region)
+        logger.info(f"  ✓ NAT Gateway {len(nat_gateways)}개 발견")
+        
+        logger.info("Route Table 조회 중...")
+        route_tables = rt_fetcher.fetch(credentials, args.region)
+        logger.info(f"  ✓ Route Table {len(route_tables)}개 발견")
+        
+        logger.info("Load Balancer 조회 중...")
+        load_balancers = lb_fetcher.fetch(credentials, args.region)
+        logger.info(f"  ✓ Load Balancer {len(load_balancers)}개 발견")
+        
+        logger.info("RDS 인스턴스 조회 중...")
+        rds_instances = rds_fetcher.fetch(credentials, args.region)
+        logger.info(f"  ✓ RDS 인스턴스 {len(rds_instances)}개 발견")
+        
+        logger.info("VPC Peering Connection 조회 중...")
+        vpc_peering_connections = pcx_fetcher.fetch(credentials, args.region)
+        logger.info(f"  ✓ VPC Peering Connection {len(vpc_peering_connections)}개 발견")
         
         # 3. Phase 1 JSON 생성
         phase1_json = {
@@ -142,6 +178,95 @@ def main():
                     ]
                 }
                 for sg in security_groups
+            ],
+            'internet_gateways': [
+                {
+                    'gateway_id': igw.gateway_id,
+                    'name': igw.name,
+                    'vpc_id': igw.vpc_id,
+                    'state': igw.state
+                }
+                for igw in internet_gateways
+            ],
+            'nat_gateways': [
+                {
+                    'gateway_id': nat.gateway_id,
+                    'name': nat.name,
+                    'vpc_id': nat.vpc_id,
+                    'subnet_id': nat.subnet_id,
+                    'state': nat.state,
+                    'public_ip': nat.public_ip
+                }
+                for nat in nat_gateways
+            ],
+            'route_tables': [
+                {
+                    'route_table_id': rt.route_table_id,
+                    'name': rt.name,
+                    'vpc_id': rt.vpc_id,
+                    'routes': [
+                        {
+                            'destination': route.destination,
+                            'target_type': route.target_type,
+                            'target_id': route.target_id
+                        }
+                        for route in rt.routes
+                    ],
+                    'subnet_associations': rt.subnet_associations,
+                    'is_main': rt.is_main
+                }
+                for rt in route_tables
+            ],
+            'load_balancers': [
+                {
+                    'load_balancer_arn': lb.load_balancer_arn,
+                    'name': lb.name,
+                    'load_balancer_type': lb.load_balancer_type,
+                    'scheme': lb.scheme,
+                    'vpc_id': lb.vpc_id,
+                    'subnet_ids': lb.subnet_ids,
+                    'security_groups': lb.security_groups,
+                    'state': lb.state,
+                    'dns_name': lb.dns_name
+                }
+                for lb in load_balancers
+            ],
+            'rds_instances': [
+                {
+                    'db_instance_identifier': rds.db_instance_identifier,
+                    'db_instance_arn': rds.db_instance_arn,
+                    'name': rds.name,
+                    'engine': rds.engine,
+                    'engine_version': rds.engine_version,
+                    'db_instance_class': rds.db_instance_class,
+                    'vpc_id': rds.vpc_id,
+                    'subnet_group_name': rds.subnet_group_name,
+                    'subnet_ids': rds.subnet_ids,
+                    'security_groups': rds.security_groups,
+                    'availability_zone': rds.availability_zone,
+                    'multi_az': rds.multi_az,
+                    'publicly_accessible': rds.publicly_accessible,
+                    'endpoint': rds.endpoint,
+                    'port': rds.port,
+                    'status': rds.status
+                }
+                for rds in rds_instances
+            ],
+            'vpc_peering_connections': [
+                {
+                    'peering_connection_id': pcx.peering_connection_id,
+                    'name': pcx.name,
+                    'requester_vpc_id': pcx.requester_vpc_id,
+                    'accepter_vpc_id': pcx.accepter_vpc_id,
+                    'requester_cidr': pcx.requester_cidr,
+                    'accepter_cidr': pcx.accepter_cidr,
+                    'requester_owner_id': pcx.requester_owner_id,
+                    'accepter_owner_id': pcx.accepter_owner_id,
+                    'requester_region': pcx.requester_region,
+                    'accepter_region': pcx.accepter_region,
+                    'status': pcx.status
+                }
+                for pcx in vpc_peering_connections
             ]
         }
         
@@ -203,6 +328,12 @@ def main():
         logger.info(f"  - Subnet: {total_subnets}개")
         logger.info(f"  - EC2: {len(ec2_instances)}개")
         logger.info(f"  - SecurityGroup: {len(security_groups)}개")
+        logger.info(f"  - Internet Gateway: {len(internet_gateways)}개")
+        logger.info(f"  - NAT Gateway: {len(nat_gateways)}개")
+        logger.info(f"  - Route Table: {len(route_tables)}개")
+        logger.info(f"  - Load Balancer: {len(load_balancers)}개")
+        logger.info(f"  - RDS: {len(rds_instances)}개")
+        logger.info(f"  - VPC Peering: {len(vpc_peering_connections)}개")
         
     except Exception as e:
         logger.error(f"❌ 에러 발생: {e}", exc_info=True)

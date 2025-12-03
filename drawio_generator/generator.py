@@ -62,7 +62,7 @@ class DrawioGenerator:
         nodes, edges, groups = self._parse_graph_json(graph_json)
         
         # 2. 노드를 타입별로 분류
-        ec2_nodes, vpc_nodes, subnet_nodes, sg_nodes = self._classify_nodes(nodes)
+        ec2_nodes, vpc_nodes, subnet_nodes, sg_nodes, igw_nodes, nat_nodes, lb_nodes, rds_nodes = self._classify_nodes(nodes)
         
         # 3. SecurityGroup → EC2 매핑 생성
         sg_to_ec2_map = self._build_sg_to_ec2_map(ec2_nodes, edges)
@@ -114,12 +114,78 @@ class DrawioGenerator:
             shape = self.shape_converter.convert_ec2(ec2_node_with_parent, (0, 0))
             shapes.append(shape)
         
+        # 8-1. Internet Gateway Shape 생성 (VPC 내부)
+        for igw_node in igw_nodes:
+            igw_id = igw_node["id"]
+            # VPC에 연결된 경우 VPC 내부에 배치
+            vpc_id = igw_node.get("attributes", {}).get("vpc_id")
+            parent_id = f"container-{vpc_id}" if vpc_id else None
+            
+            igw_node_with_parent = {**igw_node, "parent_id": parent_id}
+            shape = self.shape_converter.convert_internet_gateway(igw_node_with_parent, (0, 0))
+            shapes.append(shape)
+            logger.debug(f"Created IGW shape: {igw_id}, parent={parent_id}")
+        
+        # 8-2. NAT Gateway Shape 생성 (Subnet 내부)
+        for nat_node in nat_nodes:
+            nat_id = nat_node["id"]
+            # Subnet 내부에 배치
+            subnet_id = nat_node.get("attributes", {}).get("subnet_id")
+            parent_id = f"container-{subnet_id}" if subnet_id else None
+            
+            nat_node_with_parent = {**nat_node, "parent_id": parent_id}
+            shape = self.shape_converter.convert_nat_gateway(nat_node_with_parent, (0, 0))
+            shapes.append(shape)
+            logger.debug(f"Created NAT Gateway shape: {nat_id}, parent={parent_id}")
+        
+        # 8-3. Load Balancer Shape 생성 (첫 번째 Subnet 내부)
+        for lb_node in lb_nodes:
+            lb_id = lb_node["id"]
+            # LoadBalancer는 여러 Subnet에 배포되므로 첫 번째 Subnet에 배치
+            subnet_ids = lb_node.get("attributes", {}).get("subnet_ids", [])
+            first_subnet_id = subnet_ids[0] if subnet_ids else None
+            parent_id = f"container-{first_subnet_id}" if first_subnet_id else None
+            
+            # attributes에서 load_balancer_type, scheme 추출
+            lb_type = lb_node.get("attributes", {}).get("load_balancer_type", "application")
+            scheme = lb_node.get("attributes", {}).get("scheme", "internet-facing")
+            lb_node_with_parent = {**lb_node, "parent_id": parent_id, "load_balancer_type": lb_type, "scheme": scheme}
+            
+            shape = self.shape_converter.convert_load_balancer(lb_node_with_parent, (0, 0))
+            shapes.append(shape)
+            logger.debug(f"Created Load Balancer shape: {lb_id}, parent={parent_id} (subnet={first_subnet_id}), type={lb_type}")
+        
+        # 8-4. RDS Shape 생성 (첫 번째 Subnet 내부)
+        for rds_node in rds_nodes:
+            rds_id = rds_node["id"]
+            # RDS는 여러 Subnet에 걸쳐 있지만 첫 번째 Subnet에 배치
+            subnet_ids = rds_node.get("attributes", {}).get("subnet_ids", [])
+            first_subnet_id = subnet_ids[0] if subnet_ids else None
+            parent_id = f"container-{first_subnet_id}" if first_subnet_id else None
+            
+            # attributes에서 engine, db_instance_class, multi_az 추출
+            engine = rds_node.get("attributes", {}).get("engine", "")
+            db_class = rds_node.get("attributes", {}).get("db_instance_class", "")
+            multi_az = rds_node.get("attributes", {}).get("multi_az", False)
+            rds_node_with_parent = {**rds_node, "parent_id": parent_id, "engine": engine, "db_instance_class": db_class, "multi_az": multi_az}
+            
+            shape = self.shape_converter.convert_rds(rds_node_with_parent, (0, 0))
+            shapes.append(shape)
+            logger.debug(f"Created RDS shape: {rds_id}, parent={parent_id} (subnet={first_subnet_id}), engine={engine}")
+        
+        # Note: RouteTable은 다이어그램에 표시하지 않음 (메타데이터로만 사용)
+        
         # 9. 레이아웃 적용
         self._apply_layout(containers, shapes)
         
         # 10. 트래픽 Connector 생성 (allows_traffic 엣지만)
         connectors = self._create_traffic_connectors(edges, sg_to_ec2_map)
         logger.debug(f"Created {len(connectors)} traffic connectors")
+        
+        # 11. VPC Peering Connector 생성 (peers_with 엣지)
+        peering_connectors = self._create_vpc_peering_connectors(edges)
+        connectors.extend(peering_connectors)
+        logger.debug(f"Created {len(peering_connectors)} VPC peering connectors")
         
         # 11. XML 생성
         logger.debug(f"Building XML: {len(shapes)} shapes, {len(containers)} containers, {len(connectors)} connectors")
@@ -166,7 +232,7 @@ class DrawioGenerator:
         
         return nodes, edges, groups
     
-    def _classify_nodes(self, nodes: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    def _classify_nodes(self, nodes: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
         """
         노드를 타입별로 분류
         
@@ -174,7 +240,7 @@ class DrawioGenerator:
             nodes: 노드 목록
             
         Returns:
-            tuple: (ec2_nodes, vpc_nodes, subnet_nodes, sg_nodes)
+            tuple: (ec2_nodes, vpc_nodes, subnet_nodes, sg_nodes, igw_nodes, nat_nodes, lb_nodes, rds_nodes)
             
         Raises:
             UnknownNodeTypeError: 알 수 없는 노드 타입을 만난 경우
@@ -183,6 +249,10 @@ class DrawioGenerator:
         vpc_nodes = []
         subnet_nodes = []
         sg_nodes = []
+        igw_nodes = []
+        nat_nodes = []
+        lb_nodes = []
+        rds_nodes = []
         
         for node in nodes:
             node_type = node.get("type", "").lower()  # 대소문자 구분 없이 처리
@@ -196,13 +266,25 @@ class DrawioGenerator:
                 subnet_nodes.append(node)
             elif node_type in ("securitygroup", "security_group"):
                 sg_nodes.append(node)
+            elif node_type == "internet_gateway":
+                igw_nodes.append(node)
+            elif node_type == "nat_gateway":
+                nat_nodes.append(node)
+            elif node_type == "load_balancer":
+                lb_nodes.append(node)
+            elif node_type == "rds":
+                rds_nodes.append(node)
+            elif node_type == "route_table":
+                # RouteTable은 메타데이터로만 사용, 다이어그램에 표시하지 않음
+                logger.debug(f"Skipping RouteTable node for diagram: {node_id}")
             else:
                 raise UnknownNodeTypeError(node_id, node_type)
         
         logger.debug(f"Classified nodes: {len(ec2_nodes)} EC2, {len(vpc_nodes)} VPC, "
-                    f"{len(subnet_nodes)} Subnet, {len(sg_nodes)} SecurityGroup")
+                    f"{len(subnet_nodes)} Subnet, {len(sg_nodes)} SecurityGroup, "
+                    f"{len(igw_nodes)} IGW, {len(nat_nodes)} NAT, {len(lb_nodes)} LB, {len(rds_nodes)} RDS")
         
-        return ec2_nodes, vpc_nodes, subnet_nodes, sg_nodes
+        return ec2_nodes, vpc_nodes, subnet_nodes, sg_nodes, igw_nodes, nat_nodes, lb_nodes, rds_nodes
     
     def _build_sg_to_ec2_map(self, ec2_nodes: list[dict[str, Any]], edges: list[dict[str, Any]]) -> dict[str, list[str]]:
         """
@@ -414,5 +496,46 @@ class DrawioGenerator:
                     connectors.extend(edge_connectors)
         
         logger.debug(f"Created {len(connectors)} traffic connectors")
+        
+        return connectors
+
+    
+    def _create_vpc_peering_connectors(
+        self,
+        edges: list[dict[str, Any]]
+    ) -> list[Connector]:
+        """
+        VPC Peering Connector 생성 (peers_with 엣지)
+        
+        Args:
+            edges: 엣지 목록
+            
+        Returns:
+            list[Connector]: VPC Peering Connector 목록
+        """
+        connectors: list[Connector] = []
+        
+        for edge in edges:
+            # peers_with 엣지만 처리
+            if edge.get("edge_type") == "peers_with":
+                source_vpc_id = edge.get("source")
+                target_vpc_id = edge.get("target")
+                
+                # None 체크
+                if source_vpc_id is None or target_vpc_id is None:
+                    continue
+                
+                # VPC Peering Connector 생성
+                peering_name = edge.get("attributes", {}).get("name", "")
+                label = f"Peering\n{peering_name}" if peering_name else "VPC Peering"
+                
+                connector = Connector(
+                    id=f"connector-peering-{source_vpc_id}-{target_vpc_id}",
+                    source_id=f"container-{source_vpc_id}",
+                    target_id=f"container-{target_vpc_id}",
+                    label=label,
+                    style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#8C4FFF;strokeWidth=2;dashed=1;"
+                )
+                connectors.append(connector)
         
         return connectors

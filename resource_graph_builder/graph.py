@@ -114,6 +114,15 @@ class ResourceGraph:
             ]
         }
     
+    def to_json(self) -> dict[str, Any]:
+        """
+        그래프를 JSON 형식으로 변환 (to_dict의 별칭)
+        
+        Returns:
+            dict: JSON 직렬화 가능한 dict
+        """
+        return self.to_dict()
+    
     @staticmethod
     def from_dict(data: dict[str, Any]) -> 'ResourceGraph':
         """

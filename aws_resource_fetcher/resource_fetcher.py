@@ -8,6 +8,12 @@ from .credentials import AWSCredentialManager
 from .fetchers.ec2 import EC2Fetcher
 from .fetchers.vpc import VPCFetcher
 from .fetchers.security_group import SecurityGroupFetcher
+from .fetchers.internet_gateway import InternetGatewayFetcher
+from .fetchers.nat_gateway import NATGatewayFetcher
+from .fetchers.route_table import RouteTableFetcher
+from .fetchers.load_balancer import LoadBalancerFetcher
+from .fetchers.rds import RDSFetcher
+from .fetchers.vpc_peering import VPCPeeringFetcher
 from .models import AWSCredentials
 from .exceptions import ResourceFetchError
 
@@ -30,6 +36,12 @@ class ResourceFetcher:
         self.ec2_fetcher = EC2Fetcher()
         self.vpc_fetcher = VPCFetcher()
         self.security_group_fetcher = SecurityGroupFetcher()
+        self.internet_gateway_fetcher = InternetGatewayFetcher()
+        self.nat_gateway_fetcher = NATGatewayFetcher()
+        self.route_table_fetcher = RouteTableFetcher()
+        self.load_balancer_fetcher = LoadBalancerFetcher()
+        self.rds_fetcher = RDSFetcher()
+        self.vpc_peering_fetcher = VPCPeeringFetcher()
     
     def fetch_all_resources(
         self, 
@@ -77,7 +89,13 @@ class ResourceFetcher:
             'timestamp': datetime.now().isoformat(),
             'ec2_instances': [],
             'vpcs': [],
-            'security_groups': []
+            'security_groups': [],
+            'internet_gateways': [],
+            'nat_gateways': [],
+            'route_tables': [],
+            'load_balancers': [],
+            'rds_instances': [],
+            'vpc_peering_connections': []
         }
         
         # EC2 인스턴스 조회
@@ -109,6 +127,66 @@ class ResourceFetcher:
             resource_name='Security Groups'
         )
         logger.info(f"Fetched {len(result['security_groups'])} Security Groups")
+        
+        # Internet Gateway 조회
+        logger.debug("Fetching Internet Gateways...")
+        result['internet_gateways'] = self._fetch_with_fallback(
+            fetcher=self.internet_gateway_fetcher,
+            credentials=credentials,
+            region=region,
+            resource_name='Internet Gateways'
+        )
+        logger.info(f"Fetched {len(result['internet_gateways'])} Internet Gateways")
+        
+        # NAT Gateway 조회
+        logger.debug("Fetching NAT Gateways...")
+        result['nat_gateways'] = self._fetch_with_fallback(
+            fetcher=self.nat_gateway_fetcher,
+            credentials=credentials,
+            region=region,
+            resource_name='NAT Gateways'
+        )
+        logger.info(f"Fetched {len(result['nat_gateways'])} NAT Gateways")
+        
+        # Route Table 조회
+        logger.debug("Fetching Route Tables...")
+        result['route_tables'] = self._fetch_with_fallback(
+            fetcher=self.route_table_fetcher,
+            credentials=credentials,
+            region=region,
+            resource_name='Route Tables'
+        )
+        logger.info(f"Fetched {len(result['route_tables'])} Route Tables")
+        
+        # Load Balancer 조회
+        logger.debug("Fetching Load Balancers...")
+        result['load_balancers'] = self._fetch_with_fallback(
+            fetcher=self.load_balancer_fetcher,
+            credentials=credentials,
+            region=region,
+            resource_name='Load Balancers'
+        )
+        logger.info(f"Fetched {len(result['load_balancers'])} Load Balancers")
+        
+        # RDS 인스턴스 조회
+        logger.debug("Fetching RDS instances...")
+        result['rds_instances'] = self._fetch_with_fallback(
+            fetcher=self.rds_fetcher,
+            credentials=credentials,
+            region=region,
+            resource_name='RDS instances'
+        )
+        logger.info(f"Fetched {len(result['rds_instances'])} RDS instances")
+        
+        # VPC Peering Connection 조회
+        logger.debug("Fetching VPC Peering Connections...")
+        result['vpc_peering_connections'] = self._fetch_with_fallback(
+            fetcher=self.vpc_peering_fetcher,
+            credentials=credentials,
+            region=region,
+            resource_name='VPC Peering Connections'
+        )
+        logger.info(f"Fetched {len(result['vpc_peering_connections'])} VPC Peering Connections")
         
         logger.info("Resource fetch completed successfully")
         return result

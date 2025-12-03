@@ -117,8 +117,20 @@ class XMLBuilder:
             root: XML 루트 요소
             shape: Shape 객체
         """
-        # EC2 아이콘 스타일
-        style = self._get_ec2_style()
+        # 아이콘 타입에 따른 스타일 결정
+        if shape.icon_type == "ec2":
+            style = self._get_ec2_style()
+        elif shape.icon_type == "internet_gateway":
+            style = self._get_igw_style()
+        elif shape.icon_type == "nat_gateway":
+            style = self._get_nat_gateway_style()
+        elif shape.icon_type.startswith("load_balancer_"):
+            lb_type = shape.icon_type.replace("load_balancer_", "")
+            style = self._get_load_balancer_style(lb_type)
+        elif shape.icon_type == "rds":
+            style = self._get_rds_style()
+        else:
+            style = self._get_ec2_style()  # 기본값
         
         # parent 결정
         parent_id = shape.parent_id if shape.parent_id else "1"
@@ -227,3 +239,75 @@ class XMLBuilder:
         
         # UTF-8 문자열로 디코딩
         return pretty_xml.decode('utf-8')
+
+    def _get_igw_style(self) -> str:
+        """
+        Internet Gateway 아이콘 스타일 문자열 생성
+        
+        Returns:
+            str: AWS Architecture Icons Internet Gateway 스타일
+        """
+        return (
+            "shape=mxgraph.aws4.resourceIcon;"
+            "resIcon=mxgraph.aws4.internet_gateway;"
+            "strokeColor=#ffffff;"
+            "fillColor=#8C4FFF;"  # 보라색 (네트워킹)
+            "verticalLabelPosition=bottom;"
+            "verticalAlign=top;"
+        )
+    
+    def _get_nat_gateway_style(self) -> str:
+        """
+        NAT Gateway 아이콘 스타일 문자열 생성
+        
+        Returns:
+            str: AWS Architecture Icons NAT Gateway 스타일
+        """
+        return (
+            "shape=mxgraph.aws4.resourceIcon;"
+            "resIcon=mxgraph.aws4.nat_gateway;"
+            "strokeColor=#ffffff;"
+            "fillColor=#8C4FFF;"  # 보라색 (네트워킹)
+            "verticalLabelPosition=bottom;"
+            "verticalAlign=top;"
+        )
+
+
+
+    def _get_load_balancer_style(self, lb_type: str) -> str:
+        """
+        Load Balancer 아이콘 스타일 문자열 생성
+        
+        Args:
+            lb_type: application, network, classic
+            
+        Returns:
+            str: AWS Architecture Icons Load Balancer 스타일
+        """
+        # ALB, NLB, CLB 모두 동일한 ELB 아이콘 사용
+        # 색상은 오렌지 (컴퓨팅 서비스)
+        return (
+            "shape=mxgraph.aws4.resourceIcon;"
+            "resIcon=mxgraph.aws4.elastic_load_balancing;"
+            "strokeColor=#ffffff;"
+            "fillColor=#ED7100;"  # 오렌지 (컴퓨팅)
+            "verticalLabelPosition=bottom;"
+            "verticalAlign=top;"
+        )
+
+
+    def _get_rds_style(self) -> str:
+        """
+        RDS 아이콘 스타일 문자열 생성
+        
+        Returns:
+            str: AWS Architecture Icons RDS 스타일
+        """
+        return (
+            "shape=mxgraph.aws4.resourceIcon;"
+            "resIcon=mxgraph.aws4.rds;"
+            "strokeColor=#ffffff;"
+            "fillColor=#3334B9;"  # 파란색 (데이터베이스)
+            "verticalLabelPosition=bottom;"
+            "verticalAlign=top;"
+        )

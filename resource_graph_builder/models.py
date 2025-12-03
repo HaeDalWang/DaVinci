@@ -36,10 +36,11 @@ class Edge:
     그래프의 엣지를 나타내는 데이터 모델
     
     엣지 타입:
-    - contains: VPC가 EC2를 포함
-    - hosts: Subnet이 EC2를 호스팅
+    - contains: VPC가 Subnet/EC2를 포함
+    - hosts: Subnet이 EC2/NAT Gateway를 호스팅
     - uses: EC2가 SecurityGroup을 사용
     - allows_traffic: SecurityGroup 간 트래픽 허용
+    - attaches: VPC가 Internet Gateway에 연결
     """
     source: str                       # 소스 노드 ID
     target: str                       # 타겟 노드 ID
@@ -55,7 +56,7 @@ class Edge:
         if not self.edge_type:
             raise ValueError("Edge edge_type cannot be empty")
         
-        valid_edge_types = {"contains", "hosts", "uses", "allows_traffic"}
+        valid_edge_types = {"contains", "hosts", "uses", "allows_traffic", "attaches", "routes_to", "associates", "distributes_to", "resides_in", "peers_with"}
         if self.edge_type not in valid_edge_types:
             raise ValueError(
                 f"Invalid edge_type '{self.edge_type}'. "
