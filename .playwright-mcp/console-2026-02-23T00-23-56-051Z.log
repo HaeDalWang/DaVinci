@@ -1,0 +1,9 @@
+[    1307ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5173/favicon.ico:0
+[  339991ms] [ERROR] INFO Error undefined undefined undefined Error: 유효하지 않은 호출입니다. mxOrganicLayout을 찾을 수 없습니다.
+    at Graph.createLayouts (https://embed.diagrams.net/js/app.min.js:2693:418)
+    at App.<anonymous> (https://embed.diagrams.net/js/app.min.js:13490:267)
+    at https://embed.diagrams.net/js/app.min.js:107:418 @ https://embed.diagrams.net/js/app.min.js:13038
+[  497138ms] [ERROR] INFO Error undefined undefined undefined Error: 유효하지 않은 호출입니다. mxOrganicLayout을 찾을 수 없습니다.
+    at Graph.createLayouts (https://embed.diagrams.net/js/app.min.js:2693:418)
+    at App.<anonymous> (https://embed.diagrams.net/js/app.min.js:13490:267)
+    at https://embed.diagrams.net/js/app.min.js:107:418 @ https://embed.diagrams.net/js/app.min.js:13038
