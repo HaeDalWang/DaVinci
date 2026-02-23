@@ -1,6 +1,7 @@
 // src/components/sidebar.js — 좌측 접이식 사이드바 (AI Agent 연동 준비)
 
 import { showToast } from './toast.js';
+import { analyzeXmlServices } from '../core/aws-architecture-builder.js';
 
 /**
  * 사이드바 컴포넌트 초기화
@@ -29,7 +30,7 @@ export function initSidebar(bridge) {
 
     // 전송 버튼
     chatSend.addEventListener('click', () => {
-        sendMessage(chatInput, chatMessages);
+        sendMessage(chatInput, chatMessages, bridge);
     });
 
     // Enter 키 전송 (Shift+Enter는 줄바꿈)
@@ -37,7 +38,7 @@ export function initSidebar(bridge) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             if (chatInput.value.trim()) {
-                sendMessage(chatInput, chatMessages);
+                sendMessage(chatInput, chatMessages, bridge);
             }
         }
     });
@@ -56,7 +57,7 @@ export function initSidebar(bridge) {
 /**
  * 메시지 전송 처리
  */
-function sendMessage(inputEl, messagesEl) {
+async function sendMessage(inputEl, messagesEl, bridge) {
     const text = inputEl.value.trim();
     if (!text) return;
 
@@ -75,11 +76,48 @@ function sendMessage(inputEl, messagesEl) {
     const sendBtn = document.getElementById('chat-send');
     sendBtn.disabled = true;
 
-    // AI 응답 시뮬레이션 (향후 실제 AI 연동 포인트)
-    setTimeout(() => {
-        const response = generateSimulatedResponse(text);
-        appendMessage(messagesEl, response, 'ai');
-    }, 800);
+    // 로딩 인디케이터 추가
+    const loadingId = 'loading-' + Date.now();
+    const loadingHtml = `<div id="${loadingId}" class="chat-message chat-message--ai"><div class="chat-message__bubble">생각 중...</div></div>`;
+    messagesEl.insertAdjacentHTML('beforeend', loadingHtml);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    try {
+        // 현재 에디터 내용 (XML)
+        const xml = await bridge.getCurrentXml();
+
+        // XML 텍스트 전체 대신 분석된 서비스 논리 구조만 추출
+        const services = analyzeXmlServices(xml);
+        // 원본 XML에서 아이디, 스타일 데이터 등을 떼어내어 필요한 정보만 요약 (토큰 최적화용)
+        const architectureSummary = Object.entries(services).map(([tier, items]) => {
+            return {
+                tier,
+                items: items.map(i => ({ type: i.type, label: i.label }))
+            };
+        });
+
+        // 벡엔드 API 호출 (클라우드 배포 시 상대 주소 사용 등 동적 처리 필요)
+        const response = await fetch('http://localhost:3000/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text, architecture: architectureSummary })
+        });
+
+        const data = await response.json();
+
+        // 로딩 제거
+        document.getElementById(loadingId)?.remove();
+
+        if (response.ok && data.reply) {
+            appendMessage(messagesEl, data.reply, 'ai');
+        } else {
+            appendMessage(messagesEl, data.error || '백엔드에서 응답을 받지 못했습니다.', 'error');
+        }
+    } catch (err) {
+        document.getElementById(loadingId)?.remove();
+        console.error('AI 연결 에러:', err);
+        appendMessage(messagesEl, 'AI Agent 서버(localhost:3000)에 연결할 수 없습니다.', 'error');
+    }
 }
 
 /**
@@ -91,31 +129,9 @@ function appendMessage(container, text, type) {
 
     const bubble = document.createElement('div');
     bubble.className = 'chat-message__bubble';
-    bubble.textContent = text;
+    bubble.innerText = text;
 
     msgDiv.appendChild(bubble);
     container.appendChild(msgDiv);
     container.scrollTop = container.scrollHeight;
-}
-
-/**
- * AI 응답 시뮬레이션
- * 향후 이 함수를 실제 AI API 호출로 교체
- */
-function generateSimulatedResponse(userMessage) {
-    const lower = userMessage.toLowerCase();
-
-    if (lower.includes('3-tier') || lower.includes('3tier') || lower.includes('웹 앱') || lower.includes('웹앱')) {
-        return '3-Tier 웹 앱 아키텍처를 생성하겠습니다.\n\nAI Agent 기능은 현재 개발 중입니다. 이 기능이 완성되면 자연어 명령으로 CloudFront → ALB → EC2/ECS → RDS 구성의 다이어그램을 자동 생성할 수 있습니다.';
-    }
-
-    if (lower.includes('서버리스') || lower.includes('serverless') || lower.includes('lambda')) {
-        return '서버리스 이벤트 드리븐 아키텍처를 그리겠습니다.\n\nAI Agent 기능은 현재 개발 중입니다. 이 기능이 완성되면 API Gateway → Lambda → DynamoDB + EventBridge 구성을 자동 생성할 수 있습니다.';
-    }
-
-    if (lower.includes('eks') || lower.includes('kubernetes') || lower.includes('마이크로서비스')) {
-        return 'EKS 기반 마이크로서비스 아키텍처를 구성하겠습니다.\n\nAI Agent 기능은 현재 개발 중입니다. 이 기능이 완성되면 VPC → EKS Cluster → Node Groups + ECR + ALB Ingress 패턴을 자동 생성할 수 있습니다.';
-    }
-
-    return 'AI Agent 기능은 현재 Preview 단계입니다. 추후 업데이트를 통해 자연어 기반 아키텍처 생성/수정 기능이 지원될 예정입니다.\n\n현재는 draw.io 패널에서 AWS 서비스를 직접 드래그 앤 드롭하여 아키텍처를 설계할 수 있습니다.';
 }

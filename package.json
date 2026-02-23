@@ -5,11 +5,21 @@
   "type": "module",
   "description": "AWS Architecture Diagram Editor powered by draw.io embed mode",
   "scripts": {
-    "dev": "vite",
+    "dev:frontend": "vite",
+    "dev:server": "nodemon server/index.js",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:frontend\"",
     "build": "vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.14",
     "vite": "^6.2.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.995.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1"
   }
 }

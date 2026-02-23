@@ -40,7 +40,7 @@
   --shadow-glow: 0 0 20px rgba(255, 153, 0, 0.15);
 
   /* 레이아웃 */
-  --toolbar-height: 56px;
+  --toolbar-height: 40px;
   --sidebar-width: 360px;
   --sidebar-collapsed-width: 0px;
 
@@ -120,7 +120,7 @@ textarea {
   justify-content: space-between;
   padding: 0 16px;
   background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: none;
   z-index: 100;
   gap: 12px;
 }

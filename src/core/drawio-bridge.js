@@ -23,8 +23,6 @@ const DRAWIO_CONFIG = {
     defaultLibraries: 'aws4',
     enabledLibraries: ['aws4'],
     css: `
-    .geMenubar { display: none !important; }
-    .geToolbar { display: none !important; }
     .geFooter { display: none !important; }
   `,
     defaultEdgeStyle: {
