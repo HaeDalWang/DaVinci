@@ -1,20 +1,6 @@
 // src/core/aws-analyzer.js — AWS 아키텍처 XML 분석 엔진
 
-/**
- * AWS 서비스 카테고리 매핑
- * draw.io aws4 라이브러리의 shape 이름을 기준으로 분류
- */
-const AWS_CATEGORIES = {
-    Compute: ['ec2', 'lambda', 'ecs', 'eks', 'fargate', 'batch', 'lightsail', 'elastic_beanstalk', 'outposts', 'app_runner'],
-    Networking: ['vpc', 'cloudfront', 'route53', 'api_gateway', 'elb', 'alb', 'nlb', 'direct_connect', 'transit_gateway', 'nat_gateway', 'internet_gateway', 'endpoint', 'global_accelerator'],
-    Storage: ['s3', 'ebs', 'efs', 'fsx', 'glacier', 'storage_gateway', 'backup'],
-    Database: ['rds', 'dynamodb', 'aurora', 'elasticache', 'redshift', 'neptune', 'documentdb', 'keyspaces', 'timestream', 'memorydb'],
-    Security: ['iam', 'cognito', 'waf', 'shield', 'kms', 'secrets_manager', 'certificate_manager', 'guardduty', 'inspector', 'macie', 'security_hub', 'firewall_manager'],
-    Integration: ['sqs', 'sns', 'eventbridge', 'step_functions', 'mq', 'appsync', 'kinesis', 'msk'],
-    Management: ['cloudwatch', 'cloudformation', 'cloudtrail', 'config', 'systems_manager', 'organizations', 'control_tower', 'service_catalog', 'trusted_advisor'],
-    AI_ML: ['sagemaker', 'comprehend', 'rekognition', 'lex', 'polly', 'textract', 'translate', 'bedrock'],
-    Container: ['ecr', 'ecs', 'eks', 'fargate'],
-};
+import { AWS_CATEGORIES } from './aws-service-catalog.js';
 
 /**
  * 최적화 규칙 정의

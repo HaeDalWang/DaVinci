@@ -324,6 +324,30 @@ textarea {
   border-radius: var(--border-radius-xl);
 }
 
+.sidebar__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding-left: 8px;
+}
+
+.sidebar__header-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-sm);
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.sidebar__header-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
 .sidebar__content {
   flex: 1;
   overflow-y: auto;
@@ -414,6 +438,24 @@ textarea {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-md) var(--border-radius-md) var(--border-radius-md) 4px;
   max-width: 85%;
+}
+
+.chat-message--system .chat-message__bubble {
+  background: rgba(52, 168, 83, 0.1);
+  border: 1px solid rgba(52, 168, 83, 0.25);
+  border-radius: var(--border-radius-md);
+  max-width: 85%;
+  color: var(--color-success);
+  font-size: var(--font-size-xs);
+}
+
+.chat-message--error .chat-message__bubble {
+  background: rgba(234, 67, 53, 0.1);
+  border: 1px solid rgba(234, 67, 53, 0.25);
+  border-radius: var(--border-radius-md);
+  max-width: 85%;
+  color: var(--color-error);
+  font-size: var(--font-size-xs);
 }
 
 .chat-message__bubble {
@@ -941,4 +983,186 @@ textarea {
   .align-preset-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ============================================================
+   Well-Architected 평가 모달
+   ============================================================ */
+.modal--wa {
+  max-width: 720px;
+}
+
+/* 개요 섹션 */
+.wa-overview {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.wa-overview__avg {
+  text-align: center;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.wa-overview__avg-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-aws-orange);
+}
+
+.wa-overview__avg-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.wa-overview__bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 점수 바 */
+.wa-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wa-bar__label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  width: 80px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.wa-bar__track {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.wa-bar__fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width var(--transition-smooth);
+}
+
+.wa-bar__score {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-primary);
+  width: 28px;
+  flex-shrink: 0;
+}
+
+/* Pillar 상세 카드 */
+.wa-pillar {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.wa-pillar__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.wa-pillar__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.wa-pillar__name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.wa-pillar__score {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-aws-orange);
+}
+
+.wa-pillar__rationale {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.wa-pillar__recs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 권장사항 카드 */
+.wa-rec {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+}
+
+.wa-rec--empty {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  justify-content: center;
+}
+
+.wa-rec__text {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.wa-rec__apply-btn {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: #000;
+  background: var(--color-aws-orange);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.wa-rec__apply-btn:hover {
+  background: var(--color-aws-orange-hover);
+  box-shadow: var(--shadow-glow);
+}
+
+.wa-rec__apply-btn--applied {
+  background: var(--color-success);
+  cursor: default;
+  opacity: 0.7;
+}
+
+.wa-rec__apply-btn--applied:hover {
+  background: var(--color-success);
+  box-shadow: none;
 }

@@ -1,6 +1,8 @@
 // src/components/align-modal.js — 아키텍처 정렬 옵션 모달
 
-import { analyzeXmlServices, buildAwsStandardLayout, buildAwsLeftRightLayout } from '../core/aws-architecture-builder.js';
+import { reorganizeForAlignment } from '../core/aws-architecture-builder.js';
+import { summarizeXml } from '../core/xml-summarizer.js';
+import { buildXml } from '../core/json-to-xml-builder.js';
 
 /**
  * 정렬 프리셋 2종:
@@ -121,7 +123,7 @@ function closeAlignModal() {
 
 /**
  * 계층 정렬 실행:
- * 현재 XML에서 AWS 서비스를 분류 → AWS 모범사례 계층 구조 XML 재생성 → draw.io 로드
+ * currentXml → summarizeXml → reorganizeForAlignment('hierarchy') → buildXml → bridge.loadXml
  */
 async function runAwsStandardLayout(bridge) {
   const loadingEl = document.createElement('div');
@@ -142,19 +144,19 @@ async function runAwsStandardLayout(bridge) {
       throw new Error('다이어그램 데이터가 비어 있습니다.');
     }
 
-    const services = analyzeXmlServices(currentXml);
-    const totalSvcs = Object.values(services).flat().length;
+    const json = summarizeXml(currentXml);
+    const reorganized = reorganizeForAlignment(json, 'hierarchy');
 
-    if (totalSvcs === 0) {
+    if (reorganized.services.length === 0) {
       throw new Error('분류 가능한 AWS 서비스가 없습니다. AWS4 아이콘을 배치하고 다시 시도해주세요.');
     }
 
-    const newXml = buildAwsStandardLayout(services);
+    const newXml = buildXml(reorganized);
     bridge.loadXml(newXml);
 
     loadingEl.remove();
     const { showToast } = await import('./toast.js');
-    showToast(`계층 정렬 완료 (${totalSvcs}개 서비스)`, 'success');
+    showToast(`계층 정렬 완료 (${reorganized.services.length}개 서비스)`, 'success');
   } catch (err) {
     loadingEl.remove();
     console.error('[DaVinci] 계층 정렬 오류:', err);
@@ -164,7 +166,8 @@ async function runAwsStandardLayout(bridge) {
 }
 
 /**
- * 좌→우 흐름 정렬 실행 (buildAwsLeftRightLayout 커스텀 엔진)
+ * 좌→우 흐름 정렬 실행:
+ * currentXml → summarizeXml → reorganizeForAlignment('left-right') → buildXml({ direction: 'horizontal' }) → bridge.loadXml
  */
 async function runLeftRightLayout(bridge) {
   const loadingEl = document.createElement('div');
@@ -182,16 +185,19 @@ async function runLeftRightLayout(bridge) {
     const currentXml = await bridge.getCurrentXml();
     if (!currentXml || currentXml.trim() === '') throw new Error('다이어그램 데이터가 비어 있습니다.');
 
-    const services = analyzeXmlServices(currentXml);
-    const totalSvcs = Object.values(services).flat().length;
-    if (totalSvcs === 0) throw new Error('분류 가능한 AWS 서비스가 없습니다. AWS4 아이콘을 배치하고 다시 시도해주세요.');
+    const json = summarizeXml(currentXml);
+    const reorganized = reorganizeForAlignment(json, 'left-right');
 
-    const newXml = buildAwsLeftRightLayout(services);
+    if (reorganized.services.length === 0) {
+      throw new Error('분류 가능한 AWS 서비스가 없습니다. AWS4 아이콘을 배치하고 다시 시도해주세요.');
+    }
+
+    const newXml = buildXml(reorganized, { direction: 'horizontal' });
     bridge.loadXml(newXml);
 
     loadingEl.remove();
     const { showToast } = await import('./toast.js');
-    showToast(`좌→우 흐름 정렬 완료 (${totalSvcs}개 서비스)`, 'success');
+    showToast(`좌→우 흐름 정렬 완료 (${reorganized.services.length}개 서비스)`, 'success');
   } catch (err) {
     loadingEl.remove();
     console.error('[DaVinci] 좌→우 정렬 오류:', err);

@@ -1,7 +1,23 @@
-// src/components/sidebar.js — 좌측 접이식 사이드바 (AI Agent 연동 준비)
+// src/components/sidebar.js — 좌측 접이식 사이드바 (AI Agent 연동)
 
 import { showToast } from './toast.js';
-import { analyzeXmlServices } from '../core/aws-architecture-builder.js';
+import { showWellArchitectedModal } from './well-architected-modal.js';
+import { ChannelRouter } from '../core/channel-router.js';
+import { ConversationContext } from '../core/conversation-context.js';
+import { DiagramController } from '../core/diagram-controller.js';
+import { SnapshotManager } from '../core/snapshot-manager.js';
+
+/** 모델 컨텍스트 윈도우 토큰 한도 (Claude 3.5 Sonnet 기준 근사치) */
+const MAX_MODEL_TOKENS = 200000;
+
+/** @type {ChannelRouter|null} */
+let channelRouter = null;
+/** @type {ConversationContext|null} */
+let conversationContext = null;
+/** @type {DiagramController|null} */
+let diagramController = null;
+/** @type {SnapshotManager|null} */
+let snapshotManager = null;
 
 /**
  * 사이드바 컴포넌트 초기화
@@ -14,6 +30,12 @@ export function initSidebar(bridge) {
     const chatSend = document.getElementById('chat-send');
     const chatMessages = document.getElementById('chat-messages');
     const exampleBtns = document.querySelectorAll('.sidebar__example-btn');
+
+    // 핵심 모듈 초기화
+    snapshotManager = new SnapshotManager();
+    channelRouter = new ChannelRouter(bridge);
+    conversationContext = new ConversationContext();
+    diagramController = new DiagramController(bridge, snapshotManager);
 
     // 사이드바 토글
     toggleBtn.addEventListener('click', () => {
@@ -52,6 +74,80 @@ export function initSidebar(bridge) {
             chatInput.focus();
         });
     });
+
+    // "새 대화" 버튼
+    const newChatBtn = document.getElementById('btn-new-chat');
+    if (newChatBtn) {
+        newChatBtn.addEventListener('click', () => {
+            conversationContext.reset();
+            resetChatUI(chatMessages);
+            showToast('새 대화를 시작합니다.', 'info');
+        });
+    }
+
+    // "되돌리기" 버튼
+    const undoBtn = document.getElementById('btn-undo');
+    if (undoBtn) {
+        undoBtn.addEventListener('click', () => {
+            const snapshot = snapshotManager.restore();
+            if (snapshot) {
+                bridge.loadXml(snapshot.xml);
+                const time = new Date(snapshot.timestamp).toLocaleTimeString('ko-KR');
+                showToast(`다이어그램을 복원했습니다 (${time}: ${snapshot.description})`, 'success');
+            } else {
+                showToast('되돌릴 수 있는 변경 사항이 없습니다.', 'info');
+            }
+        });
+    }
+}
+
+/**
+ * 채팅 UI를 웰컴 화면으로 복원한다.
+ */
+function resetChatUI(messagesEl) {
+    messagesEl.innerHTML = `
+    <div class="sidebar__welcome">
+        <div class="sidebar__welcome-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-aws-orange)"
+                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+                <path d="M8 7h.01M12 7h.01M16 7h.01" />
+            </svg>
+        </div>
+        <h3>AWS 아키텍처 AI</h3>
+        <p>자연어로 아키텍처를 생성하거나 수정할 수 있습니다.</p>
+        <div class="sidebar__examples">
+            <button class="sidebar__example-btn" data-prompt="3-tier 웹 애플리케이션 아키텍처를 그려줘">3-tier 웹 앱 아키텍처</button>
+            <button class="sidebar__example-btn" data-prompt="서버리스 이벤트 드리븐 아키텍처를 그려줘">서버리스 아키텍처</button>
+            <button class="sidebar__example-btn" data-prompt="EKS 기반 마이크로서비스 아키텍처를 그려줘">EKS 마이크로서비스</button>
+        </div>
+    </div>`;
+
+    // 새로 생성된 예시 버튼에 이벤트 재바인딩
+    const chatInput = document.getElementById('chat-input');
+    messagesEl.querySelectorAll('.sidebar__example-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            chatInput.value = btn.dataset.prompt;
+            chatInput.dispatchEvent(new Event('input'));
+            chatInput.focus();
+        });
+    });
+}
+
+/**
+ * Command_Response JSON을 파싱한다.
+ * 유효하지 않은 경우 텍스트 메시지로 폴백한다.
+ */
+function parseCommandResponse(data) {
+    if (data && typeof data.message === 'string' && Array.isArray(data.commands)) {
+        return data;
+    }
+    if (data && typeof data.message === 'string') {
+        return { message: data.message, commands: [], wellArchitected: data.wellArchitected || undefined };
+    }
+    // 폴백: 전체를 텍스트로 처리
+    return { message: typeof data === 'string' ? data : JSON.stringify(data), commands: [] };
 }
 
 /**
@@ -63,55 +159,91 @@ async function sendMessage(inputEl, messagesEl, bridge) {
 
     // 웰컴 메시지 제거 (첫 전송 시)
     const welcome = messagesEl.querySelector('.sidebar__welcome');
-    if (welcome) {
-        welcome.remove();
-    }
+    if (welcome) welcome.remove();
 
     // 사용자 메시지 추가
     appendMessage(messagesEl, text, 'user');
+    conversationContext.addMessage('user', text);
 
     // 입력 초기화
     inputEl.value = '';
     inputEl.style.height = 'auto';
-    const sendBtn = document.getElementById('chat-send');
-    sendBtn.disabled = true;
+    document.getElementById('chat-send').disabled = true;
 
-    // 로딩 인디케이터 추가
+    // 로딩 인디케이터
     const loadingId = 'loading-' + Date.now();
     const loadingHtml = `<div id="${loadingId}" class="chat-message chat-message--ai"><div class="chat-message__bubble">생각 중...</div></div>`;
     messagesEl.insertAdjacentHTML('beforeend', loadingHtml);
     messagesEl.scrollTop = messagesEl.scrollHeight;
 
     try {
-        // 현재 에디터 내용 (XML)
-        const xml = await bridge.getCurrentXml();
+        // 채널 라우팅으로 데이터 준비
+        const payload = await channelRouter.preparePayload(text);
 
-        // XML 텍스트 전체 대신 분석된 서비스 논리 구조만 추출
-        const services = analyzeXmlServices(xml);
-        // 원본 XML에서 아이디, 스타일 데이터 등을 떼어내어 필요한 정보만 요약 (토큰 최적화용)
-        const architectureSummary = Object.entries(services).map(([tier, items]) => {
-            return {
-                tier,
-                items: items.map(i => ({ type: i.type, label: i.label }))
-            };
-        });
+        // 토큰 한도 초과 시 트리밍
+        conversationContext.trimToFit(Math.floor(MAX_MODEL_TOKENS * 0.8));
 
-        // 벡엔드 API 호출 (클라우드 배포 시 상대 주소 사용 등 동적 처리 필요)
+        // API 호출
+        // Channel Router는 xml 채널에서 { architecture: lightweightJson }을,
+        // summary 채널에서 { services, connections, categories, summary }를 반환한다.
+        // 서버는 architecture 필드에 채널별 데이터를 직접 기대하므로,
+        // xml 채널일 때는 data.architecture(Lightweight_JSON)를 추출하여 전달한다.
+        const architectureData = payload.channel === 'xml'
+            ? payload.data.architecture
+            : payload.data;
+
         const response = await fetch('http://localhost:3000/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text, architecture: architectureSummary })
+            body: JSON.stringify({
+                message: text,
+                architecture: architectureData,
+                channel: payload.channel,
+                conversationHistory: conversationContext.getMessages().slice(0, -1), // 현재 메시지 제외 (서버에서 추가)
+            }),
         });
-
-        const data = await response.json();
 
         // 로딩 제거
         document.getElementById(loadingId)?.remove();
 
-        if (response.ok && data.reply) {
-            appendMessage(messagesEl, data.reply, 'ai');
-        } else {
-            appendMessage(messagesEl, data.error || '백엔드에서 응답을 받지 못했습니다.', 'error');
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            appendMessage(messagesEl, errData.error || '백엔드에서 응답을 받지 못했습니다.', 'error');
+            return;
+        }
+
+        const data = await response.json();
+        const commandResponse = parseCommandResponse(data);
+
+        // AI 텍스트 메시지 표시
+        if (commandResponse.message) {
+            appendMessage(messagesEl, commandResponse.message, 'ai');
+            conversationContext.addMessage('assistant', commandResponse.message);
+        }
+
+        // Well-Architected 평가 응답 처리
+        if (commandResponse.wellArchitected && commandResponse.wellArchitected.pillars) {
+            showWellArchitectedModal(
+                commandResponse.wellArchitected.pillars,
+                async (commands) => {
+                    const result = await diagramController.executeCommands(commands);
+                    if (result.success) {
+                        appendMessage(messagesEl, `✅ ${result.message}`, 'system');
+                    } else {
+                        showToast(`권장사항 적용 실패: ${result.message}`, 'error');
+                    }
+                },
+            );
+        }
+
+        // 커맨드 실행
+        if (commandResponse.commands && commandResponse.commands.length > 0) {
+            const result = await diagramController.executeCommands(commandResponse.commands);
+            if (result.success) {
+                appendMessage(messagesEl, `✅ ${result.message}`, 'system');
+            } else {
+                showToast(`커맨드 실행 실패: ${result.message}`, 'error');
+            }
         }
     } catch (err) {
         document.getElementById(loadingId)?.remove();

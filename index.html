@@ -79,6 +79,22 @@
     <div class="sidebar__header">
       <h2 class="sidebar__title">AI Assistant</h2>
       <span class="sidebar__badge">Preview</span>
+      <div class="sidebar__header-actions">
+        <button id="btn-undo" class="sidebar__header-btn" title="되돌리기" aria-label="다이어그램 되돌리기">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1,4 1,10 7,10" />
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+          </svg>
+        </button>
+        <button id="btn-new-chat" class="sidebar__header-btn" title="새 대화" aria-label="새 대화 시작">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="sidebar__content" id="chat-messages">
       <div class="sidebar__welcome">
