@@ -1,68 +1,103 @@
-/* src/styles/index.css — DaVinci 디자인 시스템 */
+/* src/styles/index.css — DaVinci 디자인 시스템 (The Architect's Canvas) */
 
 /* ============================================================
-   CSS Variables (Dark Theme — AWS Color Palette)
+   CSS Variables — Surface Hierarchy & Tonal Depth
    ============================================================ */
 :root {
-  /* AWS 기본 색상 */
-  --color-aws-dark: #1B2838;
-  --color-aws-navy: #232F3E;
-  --color-aws-orange: #FF9900;
-  --color-aws-orange-hover: #EC7211;
-  --color-aws-light-orange: #FFAB40;
+  /* Surface Hierarchy (Deep Sea palette) */
+  --surface: #0f141b;
+  --surface-container-lowest: #090f15;
+  --surface-container-low: #171c23;
+  --surface-container: #1b2027;
+  --surface-container-high: #252a32;
+  --surface-container-highest: #30353d;
+  --surface-bright: #3a3f48;
 
-  /* 배경 */
-  --bg-primary: #0F1923;
-  --bg-secondary: #1A2332;
-  --bg-tertiary: #243044;
-  --bg-surface: #1E2A3A;
-  --bg-surface-hover: #283A4E;
+  /* Primary (Forged Orange) */
+  --primary: #ffb86f;
+  --primary-container: #d88100;
+  --on-primary: #000000;
+  --on-primary-container: #d88100;
+
+  /* Secondary (AI Glow — Cyan) */
+  --secondary: #5ed4fe;
+  --secondary-container: #004d61;
+  --on-secondary: #003544;
+
+  /* Tertiary (Healthy Green) */
+  --tertiary: #aad54a;
+  --tertiary-container: #2a3a10;
+
+  /* Error */
+  --error: #ffb4ab;
+  --error-container: #93000a;
+
+  /* Text / On-Surface */
+  --on-surface: #e2e2e6;
+  --on-surface-variant: #c4c6cf;
+  --on-surface-muted: #8e9196;
+
+  /* Outline */
+  --outline: #8e9196;
+  --outline-variant: #44474c;
+
+  /* Legacy aliases (backward compat for JS-generated modals) */
+  --color-aws-orange: #ffb86f;
+  --color-aws-orange-hover: #d88100;
+  --color-aws-light-orange: #ffd4a3;
+  --bg-primary: var(--surface);
+  --bg-secondary: var(--surface-container-low);
+  --bg-tertiary: var(--surface-container);
+  --bg-surface: var(--surface-container-high);
+  --bg-surface-hover: var(--surface-container-highest);
   --bg-overlay: rgba(0, 0, 0, 0.6);
+  --text-primary: var(--on-surface);
+  --text-secondary: var(--on-surface-variant);
+  --text-muted: var(--on-surface-muted);
+  --text-accent: var(--primary);
+  --border-color: var(--outline-variant);
+  --border-color-light: var(--outline);
 
-  /* 텍스트 */
-  --text-primary: #E8EAED;
-  --text-secondary: #9AA0A6;
-  --text-muted: #6B7785;
-  --text-accent: #FF9900;
+  /* Border Radius */
+  --border-radius-sm: 0.125rem;   /* 2px — precision-tool feel */
+  --border-radius-md: 0.375rem;   /* 6px */
+  --border-radius-lg: 0.625rem;   /* 10px */
+  --border-radius-xl: 1.25rem;    /* 20px — pills */
 
-  /* 보더 */
-  --border-color: #2D3B4E;
-  --border-color-light: #3A4A5E;
-  --border-radius-sm: 6px;
-  --border-radius-md: 10px;
-  --border-radius-lg: 14px;
-  --border-radius-xl: 20px;
+  /* Elevation — Atmospheric Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 24px rgba(255, 184, 111, 0.18);
+  --shadow-ai-glow: 0 0 16px rgba(94, 212, 254, 0.2);
 
-  /* 그림자 */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 20px rgba(255, 153, 0, 0.15);
-
-  /* 레이아웃 */
+  /* Layout */
   --toolbar-height: 40px;
   --sidebar-width: 360px;
   --sidebar-collapsed-width: 0px;
 
-  /* 트랜지션 */
+  /* Transitions */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
   --transition-smooth: 350ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* 타이포그래피 */
+  /* Typography */
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
   --font-size-xs: 11px;
   --font-size-sm: 12px;
   --font-size-base: 13px;
   --font-size-md: 14px;
   --font-size-lg: 16px;
   --font-size-xl: 18px;
+  --font-size-headline: 22px;
 
-  /* 상태 색상 */
-  --color-success: #34A853;
+  /* Status Colors */
+  --color-success: #aad54a;
   --color-warning: #FBBC04;
-  --color-error: #EA4335;
-  --color-info: #4285F4;
+  --color-error: #ffb4ab;
+  --color-info: var(--secondary);
 }
 
 /* ============================================================
@@ -82,8 +117,8 @@ body {
   overflow: hidden;
   font-family: var(--font-family);
   font-size: var(--font-size-base);
-  color: var(--text-primary);
-  background: var(--bg-primary);
+  color: var(--on-surface);
+  background: var(--surface);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -110,8 +145,9 @@ textarea {
   font-family: inherit;
 }
 
+
 /* ============================================================
-   Toolbar
+   Toolbar — Tonal Layering (No-Line Rule)
    ============================================================ */
 .toolbar {
   grid-area: toolbar;
@@ -119,7 +155,7 @@ textarea {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  background: var(--bg-secondary);
+  background: var(--surface-container-low);
   border-bottom: none;
   z-index: 100;
   gap: 12px;
@@ -143,15 +179,16 @@ textarea {
 
 .toolbar__logo {
   font-size: 22px;
-  color: var(--color-aws-orange);
-  filter: drop-shadow(0 0 6px rgba(255, 153, 0, 0.4));
+  color: var(--primary);
+  filter: drop-shadow(0 0 8px rgba(255, 184, 111, 0.35));
 }
 
 .toolbar__title {
+  font-family: var(--font-display);
   font-size: var(--font-size-lg);
   font-weight: 700;
   letter-spacing: -0.3px;
-  background: linear-gradient(135deg, var(--color-aws-orange), var(--color-aws-light-orange));
+  background: linear-gradient(135deg, var(--primary), var(--on-primary-container));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -159,16 +196,17 @@ textarea {
 
 .toolbar__subtitle {
   font-size: var(--font-size-xs);
-  color: var(--text-muted);
+  color: var(--on-surface-muted);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 2px 6px;
-  border: 1px solid var(--border-color);
+  background: var(--surface-container);
+  border: 1px solid rgba(68, 71, 76, 0.15);
   border-radius: var(--border-radius-sm);
 }
 
-/* 버튼 기본 */
+/* Toolbar Buttons */
 .toolbar__btn {
   display: inline-flex;
   align-items: center;
@@ -183,48 +221,48 @@ textarea {
 
 .toolbar__btn--icon {
   padding: 8px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
 }
 
 .toolbar__btn--icon:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--surface-container);
+  color: var(--on-surface);
 }
 
 .toolbar__btn--action {
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   border: 1px solid transparent;
 }
 
 .toolbar__btn--action:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border-color: var(--border-color);
+  background: var(--surface-container);
+  color: var(--on-surface);
+  border-color: rgba(68, 71, 76, 0.15);
 }
 
 .toolbar__btn--secondary {
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
+  color: var(--on-surface-variant);
+  border: 1px solid rgba(68, 71, 76, 0.15);
 }
 
 .toolbar__btn--secondary:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border-color: var(--border-color-light);
+  background: var(--surface-container);
+  color: var(--on-surface);
 }
 
+/* Primary CTA — Forged Metallic Gradient */
 .toolbar__btn--primary {
-  background: var(--color-aws-orange);
+  background: linear-gradient(135deg, var(--primary), var(--on-primary-container));
   color: #000;
   font-weight: 600;
 }
 
 .toolbar__btn--primary:hover {
-  background: var(--color-aws-orange-hover);
   box-shadow: var(--shadow-glow);
+  filter: brightness(1.1);
 }
 
-/* 드롭다운 */
+/* Dropdown */
 .toolbar__dropdown {
   position: relative;
 }
@@ -235,9 +273,10 @@ textarea {
   top: calc(100% + 6px);
   right: 0;
   min-width: 160px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color-light);
-  border-radius: var(--border-radius-md);
+  background: var(--surface-container-high);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(68, 71, 76, 0.15);
+  border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-lg);
   padding: 4px;
   z-index: 200;
@@ -255,13 +294,13 @@ textarea {
   padding: 8px 12px;
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   transition: all var(--transition-fast);
 }
 
 .toolbar__dropdown-item:hover {
-  background: var(--bg-surface-hover);
-  color: var(--text-primary);
+  background: var(--surface-container-highest);
+  color: var(--on-surface);
 }
 
 @keyframes dropdownIn {
@@ -269,26 +308,32 @@ textarea {
     opacity: 0;
     transform: translateY(-4px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
+
 /* ============================================================
-   Sidebar (우측)
+   Sidebar — No-Line Rule, Tonal Separation
    ============================================================ */
 .sidebar {
   grid-area: sidebar;
   width: var(--sidebar-width);
   display: flex;
   flex-direction: column;
-  background: var(--bg-secondary);
-  border-left: 1px solid var(--border-color);
+  background: var(--surface-container-low);
+  border-left: none;
   transition: width var(--transition-smooth), opacity var(--transition-smooth);
   overflow: hidden;
   z-index: 50;
+  position: relative;
+}
+
+/* 드래그 중 트랜지션 비활성화 */
+.sidebar.is-resizing {
+  transition: none;
 }
 
 .sidebar.is-collapsed {
@@ -298,16 +343,37 @@ textarea {
   pointer-events: none;
 }
 
+/* 리사이즈 핸들 */
+.sidebar__resize-handle {
+  position: absolute;
+  top: 0;
+  left: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 60;
+  background: transparent;
+  transition: background var(--transition-fast);
+}
+
+.sidebar__resize-handle:hover,
+.sidebar.is-resizing .sidebar__resize-handle {
+  background: var(--secondary);
+  opacity: 0.5;
+}
+
 .sidebar__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid var(--border-color);
+  background: var(--surface-container);
+  border-bottom: none;
   flex-shrink: 0;
 }
 
 .sidebar__title {
+  font-family: var(--font-display);
   font-size: var(--font-size-md);
   font-weight: 600;
 }
@@ -318,9 +384,9 @@ textarea {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 2px 8px;
-  background: linear-gradient(135deg, rgba(255, 153, 0, 0.15), rgba(255, 153, 0, 0.05));
-  color: var(--color-aws-orange);
-  border: 1px solid rgba(255, 153, 0, 0.2);
+  background: linear-gradient(135deg, rgba(94, 212, 254, 0.12), rgba(94, 212, 254, 0.04));
+  color: var(--secondary);
+  border: 1px solid rgba(94, 212, 254, 0.15);
   border-radius: var(--border-radius-xl);
 }
 
@@ -339,13 +405,13 @@ textarea {
   align-items: center;
   justify-content: center;
   border-radius: var(--border-radius-sm);
-  color: var(--text-muted);
+  color: var(--on-surface-muted);
   transition: all var(--transition-fast);
 }
 
 .sidebar__header-btn:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--surface-container-high);
+  color: var(--on-surface);
 }
 
 .sidebar__content {
@@ -360,11 +426,11 @@ textarea {
 }
 
 .sidebar__content::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: var(--outline-variant);
   border-radius: 4px;
 }
 
-/* 웰컴 섹션 */
+/* Welcome Section */
 .sidebar__welcome {
   text-align: center;
   padding: 32px 12px;
@@ -378,18 +444,17 @@ textarea {
 }
 
 .sidebar__welcome h3 {
+  font-family: var(--font-display);
   font-size: var(--font-size-md);
   margin-bottom: 8px;
 }
 
 .sidebar__welcome p {
   font-size: var(--font-size-sm);
-  color: var(--text-muted);
+  color: var(--on-surface-muted);
   line-height: 1.5;
   margin-bottom: 20px;
 }
-
-
 
 .sidebar__examples {
   display: flex;
@@ -399,23 +464,26 @@ textarea {
 
 .sidebar__example-btn {
   padding: 10px 14px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
+  background: var(--surface-container);
+  border: 1px solid rgba(68, 71, 76, 0.15);
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   text-align: left;
   transition: all var(--transition-fast);
 }
 
 .sidebar__example-btn:hover {
-  background: var(--bg-surface-hover);
-  color: var(--text-primary);
-  border-color: var(--color-aws-orange);
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  border-color: rgba(255, 184, 111, 0.3);
   transform: translateX(4px);
 }
 
-/* 채팅 메시지 */
+
+/* ============================================================
+   Chat Messages — AI Glow Accent
+   ============================================================ */
 .chat-message {
   margin-bottom: 12px;
   animation: messageIn 250ms ease;
@@ -427,41 +495,48 @@ textarea {
 }
 
 .chat-message--user .chat-message__bubble {
-  background: var(--color-aws-orange);
-  color: #000;
-  border-radius: var(--border-radius-md) var(--border-radius-md) 4px var(--border-radius-md);
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  border-radius: var(--border-radius-md) var(--border-radius-md) var(--border-radius-sm) var(--border-radius-md);
   max-width: 85%;
 }
 
+/* AI Responses — No background, left accent glow line */
 .chat-message--ai .chat-message__bubble {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-md) var(--border-radius-md) var(--border-radius-md) 4px;
+  background: transparent;
+  border: none;
+  border-left: 2px solid var(--secondary);
+  border-radius: 0;
   max-width: 85%;
+  padding-left: 14px;
+  color: var(--on-surface);
+  box-shadow: -4px 0 12px rgba(94, 212, 254, 0.06);
 }
 
 .chat-message--system .chat-message__bubble {
-  background: rgba(52, 168, 83, 0.1);
-  border: 1px solid rgba(52, 168, 83, 0.25);
-  border-radius: var(--border-radius-md);
+  background: rgba(170, 213, 74, 0.08);
+  border: none;
+  border-left: 2px solid var(--tertiary);
+  border-radius: 0;
   max-width: 85%;
   color: var(--color-success);
   font-size: var(--font-size-xs);
 }
 
 .chat-message--error .chat-message__bubble {
-  background: rgba(234, 67, 53, 0.1);
-  border: 1px solid rgba(234, 67, 53, 0.25);
-  border-radius: var(--border-radius-md);
+  background: rgba(255, 180, 171, 0.06);
+  border: none;
+  border-left: 2px solid var(--error);
+  border-radius: 0;
   max-width: 85%;
-  color: var(--color-error);
+  color: var(--error);
   font-size: var(--font-size-xs);
 }
 
 .chat-message__bubble {
   padding: 10px 14px;
   font-size: var(--font-size-sm);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 @keyframes messageIn {
@@ -469,17 +544,17 @@ textarea {
     opacity: 0;
     transform: translateY(8px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* 입력 영역 */
+/* Input Area — Tonal Separation */
 .sidebar__input-area {
   padding: 12px 16px;
-  border-top: 1px solid var(--border-color);
+  background: var(--surface-container);
+  border-top: none;
   flex-shrink: 0;
 }
 
@@ -487,16 +562,16 @@ textarea {
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
+  background: var(--surface-container-high);
+  border: 1px solid rgba(68, 71, 76, 0.15);
   border-radius: var(--border-radius-md);
   padding: 8px 10px;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .sidebar__input-wrapper:focus-within {
-  border-color: var(--color-aws-orange);
-  box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.1);
+  border-color: rgba(94, 212, 254, 0.4);
+  box-shadow: 0 0 0 2px rgba(94, 212, 254, 0.08);
 }
 
 .sidebar__input {
@@ -504,7 +579,7 @@ textarea {
   background: transparent;
   border: none;
   outline: none;
-  color: var(--text-primary);
+  color: var(--on-surface);
   font-size: var(--font-size-sm);
   resize: none;
   max-height: 100px;
@@ -512,7 +587,7 @@ textarea {
 }
 
 .sidebar__input::placeholder {
-  color: var(--text-muted);
+  color: var(--on-surface-muted);
 }
 
 .sidebar__send-btn {
@@ -522,13 +597,13 @@ textarea {
   align-items: center;
   justify-content: center;
   border-radius: var(--border-radius-sm);
-  color: var(--text-muted);
+  color: var(--on-surface-muted);
   transition: all var(--transition-fast);
   flex-shrink: 0;
 }
 
 .sidebar__send-btn:not(:disabled):hover {
-  background: var(--color-aws-orange);
+  background: linear-gradient(135deg, var(--primary), var(--on-primary-container));
   color: #000;
 }
 
@@ -539,10 +614,11 @@ textarea {
 
 .sidebar__disclaimer {
   font-size: 10px;
-  color: var(--text-muted);
+  color: var(--on-surface-muted);
   text-align: center;
   margin-top: 6px;
 }
+
 
 /* ============================================================
    Editor (draw.io iframe)
@@ -551,7 +627,7 @@ textarea {
   grid-area: editor;
   position: relative;
   overflow: hidden;
-  background: var(--bg-primary);
+  background: var(--surface);
 }
 
 .editor__iframe {
@@ -568,7 +644,7 @@ textarea {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  background: var(--bg-primary);
+  background: var(--surface);
   z-index: 10;
   transition: opacity var(--transition-normal);
 }
@@ -579,17 +655,18 @@ textarea {
 }
 
 .editor__loading p {
-  color: var(--text-muted);
+  color: var(--on-surface-muted);
   font-size: var(--font-size-sm);
 }
 
 .editor__spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid var(--border-color);
-  border-top-color: var(--color-aws-orange);
+  border: 3px solid var(--surface-container);
+  border-top-color: var(--secondary);
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(94, 212, 254, 0.3));
 }
 
 @keyframes spin {
@@ -599,13 +676,13 @@ textarea {
 }
 
 /* ============================================================
-   Modal
+   Modal — Glass & Atmospheric Depth
    ============================================================ */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: var(--bg-overlay);
-  backdrop-filter: blur(4px);
+  background: rgba(9, 15, 21, 0.7);
+  backdrop-filter: blur(8px);
   z-index: 500;
   display: flex;
   align-items: center;
@@ -614,8 +691,8 @@ textarea {
 }
 
 .modal {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color-light);
+  background: var(--surface-container-high);
+  border: 1px solid rgba(68, 71, 76, 0.15);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-lg);
   width: 90%;
@@ -632,10 +709,12 @@ textarea {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border-color);
+  background: var(--surface-container-highest);
+  border-bottom: none;
 }
 
 .modal__title {
+  font-family: var(--font-display);
   font-size: var(--font-size-lg);
   font-weight: 600;
 }
@@ -647,13 +726,13 @@ textarea {
   align-items: center;
   justify-content: center;
   border-radius: var(--border-radius-sm);
-  color: var(--text-muted);
+  color: var(--on-surface-muted);
   transition: all var(--transition-fast);
 }
 
 .modal__close:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--surface-container);
+  color: var(--on-surface);
 }
 
 .modal__body {
@@ -667,38 +746,36 @@ textarea {
 }
 
 .modal__body::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: var(--outline-variant);
   border-radius: 4px;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes modalIn {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(8px);
+    transform: scale(0.96) translateY(8px);
   }
-
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
 }
 
-/* 분석 결과 스타일 */
+
+/* ============================================================
+   Analysis Results — Tonal Layering
+   ============================================================ */
 .analysis-section {
   margin-bottom: 24px;
 }
 
 .analysis-section__title {
+  font-family: var(--font-display);
   font-size: var(--font-size-md);
   font-weight: 600;
   margin-bottom: 12px;
@@ -711,11 +788,11 @@ textarea {
   content: '';
   width: 3px;
   height: 16px;
-  background: var(--color-aws-orange);
+  background: linear-gradient(180deg, var(--primary), var(--on-primary-container));
   border-radius: 2px;
 }
 
-/* 서비스 카드 */
+/* Service Cards — Sunken Utility Look */
 .service-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -723,8 +800,8 @@ textarea {
 }
 
 .service-card {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
+  background: var(--surface-container-lowest);
+  border: 1px solid rgba(68, 71, 76, 0.15);
   border-radius: var(--border-radius-md);
   padding: 12px;
   text-align: center;
@@ -733,25 +810,27 @@ textarea {
 }
 
 .service-card:hover {
-  border-color: var(--color-aws-orange);
+  background: var(--surface-container-highest);
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
 }
 
 .service-card__count {
+  font-family: var(--font-display);
   font-size: var(--font-size-xl);
   font-weight: 700;
-  color: var(--color-aws-orange);
+  color: var(--primary);
 }
 
 .service-card__name {
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   margin-top: 4px;
 }
 
-/* 최적화 팁 카드 */
+/* Optimization Tip Cards — Left Accent */
 .tip-card {
-  background: var(--bg-tertiary);
+  background: var(--surface-container);
+  border: none;
   border-left: 3px solid var(--color-info);
   border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
   padding: 14px 16px;
@@ -760,7 +839,7 @@ textarea {
 }
 
 .tip-card:hover {
-  background: var(--bg-surface-hover);
+  background: var(--surface-container-high);
 }
 
 .tip-card--warning {
@@ -768,11 +847,11 @@ textarea {
 }
 
 .tip-card--error {
-  border-left-color: var(--color-error);
+  border-left-color: var(--error);
 }
 
 .tip-card--success {
-  border-left-color: var(--color-success);
+  border-left-color: var(--tertiary);
 }
 
 .tip-card__title {
@@ -783,11 +862,11 @@ textarea {
 
 .tip-card__desc {
   font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   line-height: 1.5;
 }
 
-/* 연결 관계 목록 */
+/* Connection List — No Dividers, Spacing Only */
 .connection-list {
   list-style: none;
 }
@@ -798,30 +877,35 @@ textarea {
   gap: 10px;
   padding: 8px 12px;
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border-color);
+  color: var(--on-surface-variant);
+  border-bottom: none;
+  margin-bottom: 2px;
 }
 
-.connection-item:last-child {
-  border-bottom: none;
+.connection-item:nth-child(odd) {
+  background: rgba(68, 71, 76, 0.06);
+  border-radius: var(--border-radius-sm);
 }
 
 .connection-arrow {
-  color: var(--color-aws-orange);
+  color: var(--primary);
   font-weight: 600;
 }
 
+
 /* ============================================================
-   Toast
+   Toast — Atmospheric Elevation
    ============================================================ */
 .toast-container {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  top: calc(var(--toolbar-height) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1000;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   gap: 8px;
+  pointer-events: none;
 }
 
 .toast {
@@ -829,26 +913,28 @@ textarea {
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color-light);
+  background: var(--surface-container-high);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(68, 71, 76, 0.15);
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-lg);
   font-size: var(--font-size-sm);
-  color: var(--text-primary);
+  color: var(--on-surface);
   animation: toastIn 300ms ease;
-  max-width: 360px;
+  max-width: 420px;
+  pointer-events: auto;
 }
 
 .toast--success {
-  border-left: 3px solid var(--color-success);
+  border-left: 3px solid var(--tertiary);
 }
 
 .toast--error {
-  border-left: 3px solid var(--color-error);
+  border-left: 3px solid var(--error);
 }
 
 .toast--info {
-  border-left: 3px solid var(--color-info);
+  border-left: 3px solid var(--secondary);
 }
 
 .toast.is-exiting {
@@ -858,29 +944,27 @@ textarea {
 @keyframes toastIn {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateY(-12px);
   }
-
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 
 @keyframes toastOut {
   from {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
-
   to {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateY(-12px);
   }
 }
 
 /* ============================================================
-   정렬 모달 스타일
+   Align Modal
    ============================================================ */
 .modal--align .modal__body {
   padding: 0 24px 24px;
@@ -888,7 +972,7 @@ textarea {
 
 .align-modal__subtitle {
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   line-height: 1.6;
   margin-bottom: 20px;
   padding-top: 20px;
@@ -898,9 +982,9 @@ textarea {
   display: block;
   margin-top: 6px;
   font-size: var(--font-size-xs);
-  color: var(--text-muted);
+  color: var(--on-surface-muted);
   padding: 6px 10px;
-  border-left: 2px solid var(--border-color-light);
+  border-left: 2px solid var(--outline-variant);
 }
 
 .align-preset-grid {
@@ -914,8 +998,8 @@ textarea {
   align-items: flex-start;
   gap: 14px;
   padding: 14px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
+  background: var(--surface-container);
+  border: 1px solid rgba(68, 71, 76, 0.15);
   border-radius: var(--border-radius-md);
   text-align: left;
   cursor: pointer;
@@ -924,8 +1008,8 @@ textarea {
 }
 
 .align-preset:hover {
-  background: var(--bg-surface-hover);
-  border-color: var(--color-aws-orange);
+  background: var(--surface-container-highest);
+  border-color: rgba(255, 184, 111, 0.3);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
@@ -939,18 +1023,19 @@ textarea {
 .align-preset__name {
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--on-surface);
   margin-bottom: 4px;
 }
 
 .align-preset__desc {
   font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   line-height: 1.4;
 }
 
+
 /* ============================================================
-   반응형
+   Responsive
    ============================================================ */
 @media (max-width: 768px) {
   :root {
@@ -986,20 +1071,24 @@ textarea {
 }
 
 /* ============================================================
-   Well-Architected 평가 모달
+   Well-Architected Modal
    ============================================================ */
 .modal--wa {
   max-width: 720px;
 }
 
-/* 개요 섹션 */
+/* Overview Section */
 .wa-overview {
   display: flex;
   gap: 24px;
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: none;
+  background: var(--surface-container);
+  margin: -24px -24px 24px;
+  padding: 20px 24px;
+  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
 }
 
 .wa-overview__avg {
@@ -1009,14 +1098,18 @@ textarea {
 }
 
 .wa-overview__avg-value {
+  font-family: var(--font-display);
   font-size: 32px;
   font-weight: 700;
-  color: var(--color-aws-orange);
+  background: linear-gradient(135deg, var(--primary), var(--on-primary-container));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .wa-overview__avg-label {
   font-size: var(--font-size-xs);
-  color: var(--text-muted);
+  color: var(--on-surface-muted);
   margin-top: 4px;
 }
 
@@ -1027,7 +1120,7 @@ textarea {
   gap: 8px;
 }
 
-/* 점수 바 */
+/* Score Bars */
 .wa-bar {
   display: flex;
   align-items: center;
@@ -1036,7 +1129,7 @@ textarea {
 
 .wa-bar__label {
   font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   width: 80px;
   flex-shrink: 0;
   text-align: right;
@@ -1045,7 +1138,7 @@ textarea {
 .wa-bar__track {
   flex: 1;
   height: 8px;
-  background: var(--bg-tertiary);
+  background: var(--surface-container-lowest);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -1059,15 +1152,15 @@ textarea {
 .wa-bar__score {
   font-size: var(--font-size-xs);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--on-surface);
   width: 28px;
   flex-shrink: 0;
 }
 
-/* Pillar 상세 카드 */
+/* Pillar Detail Cards */
 .wa-pillar {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
+  background: var(--surface-container);
+  border: 1px solid rgba(68, 71, 76, 0.15);
   border-radius: var(--border-radius-md);
   padding: 16px;
   margin-bottom: 12px;
@@ -1090,19 +1183,20 @@ textarea {
 .wa-pillar__name {
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--on-surface);
   flex: 1;
 }
 
 .wa-pillar__score {
+  font-family: var(--font-display);
   font-size: var(--font-size-sm);
   font-weight: 700;
-  color: var(--color-aws-orange);
+  color: var(--primary);
 }
 
 .wa-pillar__rationale {
   font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   line-height: 1.6;
   margin-bottom: 12px;
 }
@@ -1113,38 +1207,39 @@ textarea {
   gap: 8px;
 }
 
-/* 권장사항 카드 */
+/* Recommendation Cards — Sunken Look */
 .wa-rec {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
+  background: var(--surface-container-lowest);
+  border: 1px solid rgba(68, 71, 76, 0.1);
   border-radius: var(--border-radius-sm);
 }
 
 .wa-rec--empty {
-  color: var(--text-muted);
+  color: var(--on-surface-muted);
   font-size: var(--font-size-xs);
   justify-content: center;
 }
 
 .wa-rec__text {
   font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   line-height: 1.5;
   flex: 1;
 }
 
+/* Apply Button — Forged Gradient */
 .wa-rec__apply-btn {
   flex-shrink: 0;
   padding: 5px 12px;
   font-size: var(--font-size-xs);
   font-weight: 600;
   color: #000;
-  background: var(--color-aws-orange);
+  background: linear-gradient(135deg, var(--primary), var(--on-primary-container));
   border: none;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
@@ -1152,17 +1247,18 @@ textarea {
 }
 
 .wa-rec__apply-btn:hover {
-  background: var(--color-aws-orange-hover);
+  filter: brightness(1.1);
   box-shadow: var(--shadow-glow);
 }
 
 .wa-rec__apply-btn--applied {
-  background: var(--color-success);
+  background: var(--tertiary);
   cursor: default;
   opacity: 0.7;
 }
 
 .wa-rec__apply-btn--applied:hover {
-  background: var(--color-success);
+  background: var(--tertiary);
   box-shadow: none;
+  filter: none;
 }

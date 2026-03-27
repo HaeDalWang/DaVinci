@@ -23,6 +23,7 @@ function identifyGroupType(style) {
   if (style.includes('group_aws_cloud_alt')) return 'aws_cloud';
   if (style.includes('group_vpc')) return 'vpc';
   if (style.includes('group_auto_scaling_group')) return 'asg';
+  if (style.includes('group_eks')) return 'eks_cluster';
 
   // group_security_group → subnet_public 또는 subnet_private (색상으로 구분)
   if (style.includes('group_security_group')) {

@@ -37,6 +37,9 @@ export function initSidebar(bridge) {
     conversationContext = new ConversationContext();
     diagramController = new DiagramController(bridge, snapshotManager);
 
+    // 사이드바 리사이즈 핸들 초기화
+    initSidebarResize(sidebar);
+
     // 사이드바 토글
     toggleBtn.addEventListener('click', () => {
         sidebar.classList.toggle('is-collapsed');
@@ -55,9 +58,9 @@ export function initSidebar(bridge) {
         sendMessage(chatInput, chatMessages, bridge);
     });
 
-    // Enter 키 전송 (Shift+Enter는 줄바꿈)
+    // Enter 키 전송 (Shift+Enter는 줄바꿈, IME 조합 중에는 무시)
     chatInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
             e.preventDefault();
             if (chatInput.value.trim()) {
                 sendMessage(chatInput, chatMessages, bridge);
@@ -250,6 +253,63 @@ async function sendMessage(inputEl, messagesEl, bridge) {
         console.error('AI 연결 에러:', err);
         appendMessage(messagesEl, 'AI Agent 서버(localhost:3000)에 연결할 수 없습니다.', 'error');
     }
+}
+
+/**
+ * 사이드바 드래그 리사이즈 초기화
+ * 사이드바 왼쪽 가장자리에 핸들을 삽입하고 드래그로 너비를 조절한다.
+ * @param {HTMLElement} sidebar
+ */
+function initSidebarResize(sidebar) {
+    const MIN_WIDTH = 260;
+    const MAX_WIDTH = 700;
+
+    // 리사이즈 핸들 DOM 생성
+    const handle = document.createElement('div');
+    handle.className = 'sidebar__resize-handle';
+    handle.setAttribute('aria-label', '사이드바 크기 조절');
+    sidebar.prepend(handle);
+
+    // 드래그 중 iframe이 mousemove를 가로채지 못하도록 투명 오버레이
+    let overlay = null;
+    let startX = 0;
+    let startWidth = 0;
+
+    function onMouseMove(e) {
+        const delta = startX - e.clientX;
+        const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + delta));
+        sidebar.style.width = newWidth + 'px';
+    }
+
+    function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        sidebar.classList.remove('is-resizing');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        if (overlay) {
+            overlay.remove();
+            overlay = null;
+        }
+    }
+
+    handle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        startX = e.clientX;
+        startWidth = sidebar.offsetWidth;
+
+        sidebar.classList.add('is-resizing');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+
+        // iframe 위에 투명 오버레이를 깔아 이벤트 캡처 보장
+        overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;cursor:col-resize;';
+        document.body.appendChild(overlay);
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
 }
 
 /**

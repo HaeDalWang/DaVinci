@@ -97,9 +97,10 @@ ${serviceCatalog}
   ]
 }
 
-GroupType: 'vpc' | 'subnet_public' | 'subnet_private' | 'az' | 'asg' | 'aws_cloud'
+GroupType: 'vpc' | 'subnet_public' | 'subnet_private' | 'az' | 'asg' | 'aws_cloud' | 'eks_cluster'
 
-- groups: VPC, 서브넷, AZ 등 컨테이너 그룹 정의. children에 포함된 서비스/그룹 id를 자식으로 배치합니다.
+- groups: VPC, 서브넷, AZ, EKS 클러스터 등 컨테이너 그룹 정의. children에 포함된 서비스/그룹 id를 자식으로 배치합니다.
+  - **EKS 클러스터**: type을 'eks_cluster'로 설정하면 EKS 클러스터 그룹으로 렌더링됩니다. EKS 워커 노드, Fargate 프로파일, 파드 등을 children으로 포함하세요. EKS는 절대 서비스(services)가 아닌 그룹(groups)으로 표현해야 합니다.
 - services: AWS 서비스 노드 정의. type은 반드시 아래 서비스 카탈로그의 type 값을 사용하세요.
 - connections: 서비스/그룹 간 연결선 정의. from/to는 services 또는 groups의 id를 참조합니다.
 
