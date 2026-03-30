@@ -15,10 +15,18 @@
 
 ## Backend
 
-- Express v5 with CORS
+- Express v5 with CORS (origin 제한: `ALLOWED_ORIGINS` 환경변수)
+- `express-rate-limit` — API rate limiting (분당 30회)
 - Amazon Bedrock (`@aws-sdk/client-bedrock-runtime`) using the Converse API
 - Two endpoints: `POST /api/chat`, `POST /api/well-architected`
 - Runs on port 3000
+
+## Security
+
+- CORS origin을 `ALLOWED_ORIGINS` 환경변수로 제한 (기본: `http://localhost:5173`)
+- API rate limiting 적용 (`express-rate-limit`)
+- 서버 에러 응답에 내부 상세 정보 미노출
+- draw.io iframe postMessage targetOrigin을 `https://embed.diagrams.net`으로 제한
 
 ## Testing
 
@@ -49,4 +57,5 @@ Configured via `.env` in project root:
 
 - `AWS_REGION` — AWS region (default: us-east-1)
 - `BEDROCK_MODEL_ID` — Bedrock model identifier
+- `ALLOWED_ORIGINS` — 쉼표 구분 허용 origin 목록 (default: `http://localhost:5173`)
 - AWS credentials via environment or `~/.aws/credentials`

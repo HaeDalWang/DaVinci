@@ -1,5 +1,7 @@
 // src/components/analysis-modal.js — 분석 결과 및 최적화 팁 모달
 
+import { escapeHtml } from '../core/utils.js';
+
 /**
  * 분석 결과 모달 표시
  * @param {import('../core/aws-analyzer.js').AnalysisResult} analysis
@@ -212,10 +214,4 @@ function severityIcon(severity) {
 
 function formatCategory(cat) {
   return cat.replace(/_/g, ' / ');
-}
-
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
 }

@@ -1,5 +1,7 @@
 // src/components/well-architected-modal.js — Well-Architected 평가 결과 모달
 
+import { escapeHtml } from '../core/utils.js';
+
 /**
  * @typedef {Object} Recommendation
  * @property {string} text - 개선 권장사항 설명
@@ -149,10 +151,4 @@ function buildPillarDetails(scores) {
       </div>`;
     });
     return html;
-}
-
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
 }

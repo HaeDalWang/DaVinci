@@ -55,12 +55,12 @@ export class ConversationContext {
 
     /**
      * 토큰 한도 이내로 대화 히스토리를 트리밍한다.
-     * 가장 오래된 메시지부터 순차적으로 제거한다.
+     * 첫 번째 메시지(초기 컨텍스트)는 보존하고, 그 다음 오래된 메시지부터 제거한다.
      * @param {number} maxTokens - 최대 허용 토큰 수
      */
     trimToFit(maxTokens) {
-        while (this._messages.length > 0 && this.estimateTokens() > maxTokens) {
-            this._messages.shift();
+        while (this._messages.length > 1 && this.estimateTokens() > maxTokens) {
+            this._messages.splice(1, 1);
         }
     }
 }

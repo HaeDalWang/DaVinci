@@ -183,10 +183,11 @@ function computeGroupSize(groupId, nodes, sizeCache) {
 
 /**
  * 상대 위치를 오프셋만큼 이동시킨 새 객체를 반환한다.
- * (자식 그룹 내부 요소의 위치를 부모 좌표계로 변환할 때 사용하지 않음 — 최종 단계에서 처리)
+ * 자식 그룹 내부 요소의 위치를 부모 좌표계로 변환할 때 사용한다.
+ * (실제 절대 좌표 변환은 resolveAbsolutePositions에서 재귀적으로 처리하므로
+ *  여기서는 빈 객체를 반환 — 중복 오프셋 적용 방지)
  */
-function prefixPositions(innerPositions, _offsetX, _offsetY) {
-  // innerPositions는 나중에 절대 좌표 변환 시 사용하므로 여기서는 빈 객체 반환
+function prefixPositions(_innerPositions, _offsetX, _offsetY) {
   return {};
 }
 

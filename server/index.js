@@ -1,14 +1,29 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { getAllServicesAsJSON } from '../src/core/aws-service-catalog.js';
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// CORS: 허용 origin 제한
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',');
+app.use(cors({ origin: ALLOWED_ORIGINS }));
+
 app.use(express.json({ limit: '5mb' }));
+
+// Rate limiting: 분당 30회 제한
+const apiLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+});
+app.use('/api/', apiLimiter);
 
 const client = new BedrockRuntimeClient({
     region: process.env.AWS_REGION || 'us-east-1',
@@ -382,7 +397,6 @@ app.post('/api/chat', async (req, res) => {
         console.error('Bedrock API 에러:', error);
         res.status(500).json({
             error: 'AWS Bedrock 통신 중 서버 오류가 발생했습니다.',
-            details: error.message,
         });
     }
 });
@@ -421,7 +435,6 @@ app.post('/api/well-architected', async (req, res) => {
         console.error('Well-Architected 평가 에러:', error);
         res.status(500).json({
             error: 'Well-Architected 평가 중 서버 오류가 발생했습니다.',
-            details: error.message,
         });
     }
 });

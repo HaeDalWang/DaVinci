@@ -121,16 +121,18 @@ export class DrawIOBridge {
         if (this._currentXml && this._currentXml.includes('<mxCell')) {
             return Promise.resolve(this._currentXml);
         }
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             const timer = setTimeout(() => {
-                console.warn('[Bridge] getCurrentXml 타임아웃 (5s)');
-                resolve(this._currentXml || '');
+                this._exportCallback = null;
+                if (this._currentXml) {
+                    resolve(this._currentXml);
+                } else {
+                    reject(new Error('[Bridge] getCurrentXml 타임아웃 (5s): draw.io 응답 없음'));
+                }
             }, 5000);
             this._exportCallback = (data) => {
                 clearTimeout(timer);
-                // draw.io는 format:xml 시 data.xml 또는 data.data에 XML을 담아 보냄
                 const xml = data.xml || data.data || '';
-                console.log('[Bridge] getCurrentXml 응답:', xml.substring(0, 120));
                 resolve(xml);
             };
             this._postMessage({ action: 'export', format: 'xml' });
@@ -143,8 +145,13 @@ export class DrawIOBridge {
      * @returns {Promise<{data: string, xml: string}>}
      */
     exportDiagram(format) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => {
+                this._exportCallback = null;
+                reject(new Error(`[Bridge] exportDiagram(${format}) 타임아웃 (15s)`));
+            }, 15000);
             this._exportCallback = (data) => {
+                clearTimeout(timer);
                 resolve({ data: data.data, xml: data.xml });
             };
             const params = { action: 'export', format };
@@ -164,8 +171,13 @@ export class DrawIOBridge {
      * @returns {Promise<{error: string|null}>}
      */
     merge(xml) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => {
+                this._pendingCallbacks.delete('merge');
+                reject(new Error('[Bridge] merge 타임아웃 (10s)'));
+            }, 10000);
             this._pendingCallbacks.set('merge', (msg) => {
+                clearTimeout(timer);
                 resolve({ error: msg.error || null });
             });
             this._postMessage({ action: 'merge', xml });
@@ -254,7 +266,7 @@ export class DrawIOBridge {
      */
     _postMessage(msg) {
         if (this._iframe && this._iframe.contentWindow) {
-            this._iframe.contentWindow.postMessage(JSON.stringify(msg), '*');
+            this._iframe.contentWindow.postMessage(JSON.stringify(msg), DRAWIO_BASE_URL);
         }
     }
 }

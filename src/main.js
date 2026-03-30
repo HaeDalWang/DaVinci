@@ -38,11 +38,21 @@ function init() {
 
     // 자동 저장 (30초 간격 debounce)
     let autoSaveTimer = null;
+    let pendingXml = null;
     bridge.onAutoSave((xml) => {
+        pendingXml = xml;
         clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(() => {
             localStorage.setItem('davinci_diagram', xml);
+            pendingXml = null;
         }, 5000);
+    });
+
+    // 페이지 언로드 시 미저장 변경사항 즉시 저장
+    window.addEventListener('beforeunload', () => {
+        if (pendingXml) {
+            localStorage.setItem('davinci_diagram', pendingXml);
+        }
     });
 
     // 명시적 저장

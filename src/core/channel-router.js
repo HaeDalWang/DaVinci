@@ -4,14 +4,19 @@ import { analyzeArchitecture } from './aws-analyzer.js';
 import { summarizeXml } from './xml-summarizer.js';
 
 /**
- * 수정/생성 의도를 나타내는 한국어 키워드 목록
- * 이 키워드가 포함되면 XML 채널로 라우팅한다.
+ * 수정/생성 의도를 나타내는 키워드 목록
+ * 한국어 키워드는 동사 어미 형태로 오탐을 줄인다.
+ * 영어 키워드는 단어 경계(\b)로 매칭한다.
  */
-const MODIFICATION_KEYWORDS = [
+const MODIFICATION_KEYWORDS_KO = [
     '그려줘', '추가해', '수정해', '삭제해', '만들어',
-    '변경해', '제거해', '연결해', '그려', '추가',
-    '수정', '삭제', '만들', '변경', '제거', '연결',
-    '넣어', '빼', '바꿔', '교체', '생성',
+    '변경해', '제거해', '연결해', '그려', '넣어',
+    '빼줘', '바꿔', '교체해', '생성해',
+    '추가해줘', '삭제해줘', '수정해줘', '변경해줘',
+    '만들어줘', '연결해줘', '제거해줘',
+];
+
+const MODIFICATION_KEYWORDS_EN = [
     'add', 'remove', 'create', 'delete', 'connect',
     'modify', 'change', 'replace', 'draw', 'build',
 ];
@@ -60,6 +65,7 @@ export class ChannelRouter {
 
     /**
      * 메시지에 수정/생성 키워드가 포함되어 있는지 판별한다.
+     * 한국어는 접미사 매칭, 영어는 단어 경계 매칭으로 오탐을 줄인다.
      * @param {string} message
      * @returns {ChannelType}
      * @private
@@ -67,11 +73,22 @@ export class ChannelRouter {
     _detectChannel(message) {
         if (!message) return 'summary';
         const lower = message.toLowerCase();
-        for (const keyword of MODIFICATION_KEYWORDS) {
+
+        // 한국어 키워드: 동사 어미 형태로 매칭
+        for (const keyword of MODIFICATION_KEYWORDS_KO) {
             if (lower.includes(keyword)) {
                 return 'xml';
             }
         }
+
+        // 영어 키워드: 단어 경계로 매칭
+        for (const keyword of MODIFICATION_KEYWORDS_EN) {
+            const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+            if (regex.test(lower)) {
+                return 'xml';
+            }
+        }
+
         return 'summary';
     }
 }

@@ -1,7 +1,6 @@
 // src/core/diagram-controller.js — AI Agent 커맨드를 해석하여 DrawIO Bridge로 다이어그램을 조작
 
 import { SERVICE_LABELS } from './aws-service-catalog.js';
-import { showToast } from '../components/toast.js';
 import { buildXml } from './json-to-xml-builder.js';
 import { summarizeXml } from './xml-summarizer.js';
 
@@ -15,63 +14,47 @@ const DEFAULT_EDGE_STYLE =
     'edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;' +
     'html=1;strokeColor=#6B7785;strokeWidth=1.5;';
 
-let _nextId = 1000;
 function generateId() {
-    return `ai_${_nextId++}_${Date.now()}`;
-}
-
-/**
- * mxCell XML 문자열에서 value(라벨) 속성을 추출한다.
- * @param {string} cellXml - 단일 mxCell XML
- * @returns {string}
- */
-function extractLabel(cellXml) {
-    const match = cellXml.match(/value="([^"]*)"/);
-    return match ? match[1] : '';
+    return `ai_${crypto.randomUUID()}`;
 }
 
 /**
  * XML 문자열에서 모든 mxCell을 파싱하여 배열로 반환한다.
  * @param {string} xml
- * @returns {Array<{id: string, value: string, style: string, source: string, target: string, raw: string}>}
+ * @returns {Array<{id: string, value: string, style: string, source: string, target: string}>}
  */
 function parseCells(xml) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'text/xml');
+    const cellElements = doc.querySelectorAll('mxCell');
     const cells = [];
-    const regex = /<mxCell\s[^>]*?\/?>/g;
-    let m;
-    while ((m = regex.exec(xml)) !== null) {
-        const raw = m[0];
-        const id = (raw.match(/\bid="([^"]*)"/) || [])[1] || '';
-        const value = (raw.match(/\bvalue="([^"]*)"/) || [])[1] || '';
-        const style = (raw.match(/\bstyle="([^"]*)"/) || [])[1] || '';
-        const source = (raw.match(/\bsource="([^"]*)"/) || [])[1] || '';
-        const target = (raw.match(/\btarget="([^"]*)"/) || [])[1] || '';
-        cells.push({ id, value, style, source, target, raw });
+    for (const el of cellElements) {
+        cells.push({
+            id: el.getAttribute('id') || '',
+            value: el.getAttribute('value') || '',
+            style: el.getAttribute('style') || '',
+            source: el.getAttribute('source') || '',
+            target: el.getAttribute('target') || '',
+        });
     }
     return cells;
 }
 
 /**
- * XML에서 특정 id의 mxCell(및 자식 mxGeometry 포함 블록)을 제거한다.
+ * XML에서 특정 id의 mxCell(및 자식 요소 포함)을 제거한다.
  * @param {string} xml
  * @param {string} cellId
  * @returns {string}
  */
 function removeCellById(xml, cellId) {
-    // 자기 닫힘 태그 제거
-    const selfClosing = new RegExp(`<mxCell\\s[^>]*?\\bid="${escapeRegex(cellId)}"[^>]*?/>`, 'g');
-    let result = xml.replace(selfClosing, '');
-    // 열림/닫힘 태그 제거 (mxGeometry 자식 포함)
-    const block = new RegExp(
-        `<mxCell\\s[^>]*?\\bid="${escapeRegex(cellId)}"[^>]*?>\\s*(?:<mxGeometry[^]*?/>|<mxGeometry[^]*?>[^]*?</mxGeometry>)?\\s*</mxCell>`,
-        'g'
-    );
-    result = result.replace(block, '');
-    return result;
-}
-
-function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'text/xml');
+    const cell = doc.querySelector(`mxCell[id="${CSS.escape(cellId)}"]`);
+    if (cell) {
+        cell.parentNode.removeChild(cell);
+    }
+    const serializer = new XMLSerializer();
+    return serializer.serializeToString(doc);
 }
 
 export class DiagramController {
@@ -112,7 +95,6 @@ export class DiagramController {
             if (snapshot) {
                 this._bridge.loadXml(snapshot.xml);
             }
-            showToast(`커맨드 실행 오류: ${err.message}`, 'error');
             return { success: false, message: err.message };
         }
     }
@@ -262,19 +244,8 @@ export class DiagramController {
      */
     async _replaceAll(params) {
         if (params.architecture) {
-            // 새 경로: Lightweight_JSON → Builder → XML
-            try {
-                const xml = buildXml(params.architecture);
-                this._bridge.loadXml(xml);
-            } catch (err) {
-                // Builder 오류 시 스냅샷에서 롤백
-                const snapshot = this._snapshotManager.restore();
-                if (snapshot) {
-                    this._bridge.loadXml(snapshot.xml);
-                }
-                showToast(`replace_all 빌더 오류: ${err.message}`, 'error');
-                throw err;
-            }
+            const xml = buildXml(params.architecture);
+            this._bridge.loadXml(xml);
         } else if (params.xml) {
             // 하위 호환: 기존 XML 직접 로드
             this._bridge.loadXml(params.xml);
