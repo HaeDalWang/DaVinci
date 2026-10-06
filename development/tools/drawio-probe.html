@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<title>DaVinci 기준선 — draw.io 왕복 검사</title>
+<style>body{margin:0} iframe{border:0;width:100vw;height:100vh}</style>
+<iframe title="기준선 측정용 draw.io"></iframe>
+<script type="module">
+  import { DrawIOBridge } from '../../src/core/drawio-bridge.js';
+  const bridge = new DrawIOBridge();
+  window.baselineProbe = { bridge, ready: false, loaded: false };
+  bridge.onReady(() => { window.baselineProbe.ready = true; });
+  window.addEventListener('message', (event) => {
+    if (event.source !== document.querySelector('iframe').contentWindow || event.origin !== 'https://embed.diagrams.net') return;
+    try {
+      if (JSON.parse(event.data).event === 'load') window.baselineProbe.loaded = true;
+    } catch { /* Other browser messages are outside this probe. */ }
+  });
+  bridge.init(document.querySelector('iframe'));
+</script>
+</html>

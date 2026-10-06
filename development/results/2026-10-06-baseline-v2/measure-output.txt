@@ -1,0 +1,2 @@
+Recorded 19 cases; measurement failures: 0. Product preservation failures are observations, not measurement failures.
+development/results/2026-10-06-baseline-v2

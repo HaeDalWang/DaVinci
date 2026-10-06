@@ -1,0 +1,21 @@
+{
+  "loaded": true,
+  "markers": [
+    {
+      "id": "ecs-a",
+      "value": "davinciBaselineProbe=keep-me"
+    },
+    {
+      "id": "ecs-b",
+      "value": "davinciBaselineProbe=keep-me"
+    }
+  ],
+  "time": "2026-10-06T10:15:31.394Z",
+  "viewport": {
+    "height": 812,
+    "width": 1001
+  },
+  "passed": true,
+  "method": "load fixed multi-az fixture → export xml → write file → fetch saved file and reload in draw.io → export xml",
+  "scope": "2 ECS cells, 1 arbitrary style key, one live embed runtime. Not proof for all keys or future versions."
+}

@@ -1,0 +1,25 @@
+# 레거시 기준선 원시 표
+
+| 입력 | 변환 | vertex/edge | 좌표 측정/전체 | 사각형 겹침 쌍 | 경계 상자 면적 | 예상 밖 ID 누락 | 보존 판정 |
+|---|---|---:|---:|---:|---:|---:|---|
+| example1 | original | 91/29 | 86/91 | 291 | 2306270 | 0 | 통과 |
+| example1 | hierarchy | 57/2 | 57/57 | 0 | 8378960 | 120 | 실패 |
+| example1 | horizontal | 57/2 | 57/57 | 0 | 8664624 | 120 | 실패 |
+| example1 | add-service | 68/2 | 68/68 | 0 | 7796096 | 120 | 실패 |
+| test2 | original | 18/0 | 18/18 | 153 | 16900 | 0 | 통과 |
+| test2 | hierarchy | 23/0 | 23/23 | 0 | 2103904 | 18 | 실패 |
+| test2 | horizontal | 23/0 | 23/23 | 0 | 2103904 | 18 | 실패 |
+| test2 | add-service | 19/0 | 19/19 | 0 | 759088 | 18 | 실패 |
+| multi-az | original | 10/4 | 10/10 | 0 | 500000 | 0 | 통과 |
+| multi-az | hierarchy | 18/4 | 18/18 | 0 | 1385624 | 14 | 실패 |
+| multi-az | horizontal | 18/4 | 18/18 | 0 | 1385624 | 14 | 실패 |
+| multi-az | add-service | 11/4 | 11/11 | 0 | 670308 | 14 | 실패 |
+| preservation | original | 5/2 | 5/5 | 0 | 510000 | 0 | 통과 |
+| preservation | hierarchy | 15/1 | 15/15 | 0 | 1434136 | 7 | 실패 |
+| preservation | horizontal | 15/1 | 15/15 | 0 | 1434136 | 7 | 실패 |
+| preservation | add-service | 5/1 | 5/5 | 0 | 150416 | 7 | 실패 |
+| preservation | remove-by-id | 4/1 | 4/4 | 0 | 510000 | 0 | 통과 |
+| preservation | add-then-remove | 5/2 | 5/5 | 0 | 510000 | 0 | 통과 |
+| preservation | rollback | 5/2 | 5/5 | 0 | 510000 | 0 | 통과 |
+
+겹침은 라벨을 제외한 사각형 지표이며, 부모 포함 관계는 제외한다. 누락/변경이 있는 결과는 겹침 개선으로 인정하지 않는다. 미측정·시간·명령 정확성·변경 ID 상세는 baseline.json을 확인한다.

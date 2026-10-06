@@ -1,0 +1,9 @@
+CONFIRMED: add_service removes non-AWS memo, renumbers existing ID, resets manual geometry
+CONFIRMED: command batch using original service ID fails after add_service; rollback restores XML
+CONFIRMED: bridge accepts autosave message from unrelated origin/source
+CONFIRMED: successful merge does not refresh cached XML before subsequent edit
+CONFIRMED: connections do not affect layout; alignment discards input groups and ignores mode
+CONFIRMED: summary channel drops service type because analyzer no longer supplies shapeName
+CONFIRMED: add_connection produces invalid XML for a quoted connection label
+{"file":"example-xml/example1.drawio","vertices":91,"edges":29,"boundEdges":2,"summaryServices":45,"summaryGroups":22,"summaryConnections":2}
+{"file":"test-xml/test-2.drawio","vertices":18,"edges":0,"boundEdges":0,"summaryServices":11,"summaryGroups":7,"summaryConnections":0}

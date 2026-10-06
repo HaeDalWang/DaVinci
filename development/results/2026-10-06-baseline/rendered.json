@@ -1,0 +1,84 @@
+{
+  "time": "2026-10-06T10:16:42.175Z",
+  "viewport": {
+    "height": 812,
+    "width": 1001
+  },
+  "method": "actual draw.io load → export svg, sequentially for 4 inputs × 3 variants",
+  "scale": "export default scale=1, natural SVG dimensions; no fit-to-pane scaling",
+  "userJudgement": "pending",
+  "files": [
+    {
+      "file": "example1-original.svg",
+      "width": "1670px",
+      "height": "1381px",
+      "viewBox": "0 0 1670 1381"
+    },
+    {
+      "file": "example1-hierarchy.svg",
+      "width": "4041px",
+      "height": "2076px",
+      "viewBox": "0 0 4041 2076"
+    },
+    {
+      "file": "example1-horizontal.svg",
+      "width": "3884px",
+      "height": "2254px",
+      "viewBox": "0 0 3884 2254"
+    },
+    {
+      "file": "test2-original.svg",
+      "width": "132px",
+      "height": "132px",
+      "viewBox": "0 0 132 132"
+    },
+    {
+      "file": "test2-hierarchy.svg",
+      "width": "2226px",
+      "height": "948px",
+      "viewBox": "0 0 2226 948"
+    },
+    {
+      "file": "test2-horizontal.svg",
+      "width": "2226px",
+      "height": "948px",
+      "viewBox": "0 0 2226 948"
+    },
+    {
+      "file": "multi-az-original.svg",
+      "width": "1002px",
+      "height": "502px",
+      "viewBox": "0 0 1002 502"
+    },
+    {
+      "file": "multi-az-hierarchy.svg",
+      "width": "1830px",
+      "height": "760px",
+      "viewBox": "0 0 1830 760"
+    },
+    {
+      "file": "multi-az-horizontal.svg",
+      "width": "1830px",
+      "height": "760px",
+      "viewBox": "0 0 1830 760"
+    },
+    {
+      "file": "preservation-original.svg",
+      "width": "882px",
+      "height": "601px",
+      "viewBox": "0 0 882 601"
+    },
+    {
+      "file": "preservation-hierarchy.svg",
+      "width": "1518px",
+      "height": "948px",
+      "viewBox": "0 0 1518 948"
+    },
+    {
+      "file": "preservation-horizontal.svg",
+      "width": "1518px",
+      "height": "948px",
+      "viewBox": "0 0 1518 948"
+    }
+  ]
+}

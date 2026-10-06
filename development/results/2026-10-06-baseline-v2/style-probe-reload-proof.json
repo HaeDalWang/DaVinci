@@ -1,0 +1,24 @@
+{
+  "beforeLoad": "2026-10-06T10:23:48.735Z",
+  "exportedAt": "2026-10-06T10:23:48.972Z",
+  "fetchStatus": 200,
+  "inputPath": "/development/results/2026-10-06-baseline/style-probe-first-export.drawio",
+  "inputSha256": "70b8088685f8fa269bfaa38d2a83d984d73b766f0f40b4be9091c9d997d0195a",
+  "loadEvent": {
+    "origin": "https://embed.diagrams.net",
+    "sourceMatches": true,
+    "time": "2026-10-06T10:23:48.919Z"
+  },
+  "markers": [
+    {
+      "id": "ecs-a",
+      "value": "davinciBaselineProbe=keep-me"
+    },
+    {
+      "id": "ecs-b",
+      "value": "davinciBaselineProbe=keep-me"
+    }
+  ],
+  "outputSha256": "70b8088685f8fa269bfaa38d2a83d984d73b766f0f40b4be9091c9d997d0195a",
+  "passed": true
+}

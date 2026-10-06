@@ -1,0 +1,29 @@
+
+> davinci@0.1.0 test
+> vitest --run
+
+
+ RUN  v4.1.2 /Users/baeseungdo/work/DaVinci
+
+ ❯ tests/baseline-runner.test.js (1 test | 1 failed) 7ms
+   × records fixed inputs from another cwd, distinguishes missing metrics, and refuses overwrite 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/baseline-runner.test.js > records fixed inputs from another cwd, distinguishes missing metrics, and refuses overwrite
+TypeError: The URL must be of scheme file
+ ❯ tests/baseline-runner.test.js:12:20
+     10|     const scratch = mkdtempSync(join(tmpdir(), 'davinci-baseline-test-…
+     11|     const output = join(scratch, 'result');
+     12|     const runner = fileURLToPath(new URL('../scripts/measure-baseline.…
+       |                    ^
+     13|     const run = () => spawnSync(process.execPath, [runner, output], { …
+     14|     try {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  1 failed | 115 passed (116)
+   Start at  19:22:16
+   Duration  1.41s (transform 573ms, setup 0ms, import 972ms, tests 645ms, environment 7.79s)

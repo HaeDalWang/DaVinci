@@ -1,0 +1,56 @@
+{
+  "images": [
+    {
+      "loaded": true,
+      "src": "example1-original.svg"
+    },
+    {
+      "loaded": true,
+      "src": "example1-hierarchy.svg"
+    },
+    {
+      "loaded": true,
+      "src": "example1-horizontal.svg"
+    },
+    {
+      "loaded": true,
+      "src": "test2-original.svg"
+    },
+    {
+      "loaded": true,
+      "src": "test2-hierarchy.svg"
+    },
+    {
+      "loaded": true,
+      "src": "test2-horizontal.svg"
+    },
+    {
+      "loaded": true,
+      "src": "multi-az-original.svg"
+    },
+    {
+      "loaded": true,
+      "src": "multi-az-hierarchy.svg"
+    },
+    {
+      "loaded": true,
+      "src": "multi-az-horizontal.svg"
+    },
+    {
+      "loaded": true,
+      "src": "preservation-original.svg"
+    },
+    {
+      "loaded": true,
+      "src": "preservation-hierarchy.svg"
+    },
+    {
+      "loaded": true,
+      "src": "preservation-horizontal.svg"
+    }
+  ],
+  "viewport": {
+    "height": 812,
+    "width": 1001
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "userGoldens": {
+    "status": "not-provided",
+    "requestedCount": 3
+  },
+  "inputs": [
+    {
+      "id": "example1",
+      "path": "example-xml/example1.drawio",
+      "origin": "legacy sample",
+      "description": "실제 사용자 XML을 포함한 기존 예제; 정답으로 검증되지 않음",
+      "sha256": "a04b3ad4fa57225f361d233cd37672f8827a74917017b6e58a97a7368b78da1c"
+    },
+    {
+      "id": "test2",
+      "path": "test-xml/test-2.drawio",
+      "origin": "legacy sample",
+      "description": "기존 소형 예제; 정답으로 검증되지 않음",
+      "sha256": "bcc4cf95fdb6cc3ce19aa8c7fc513b942b2c7835ea26b96b7b6a10735039de74"
+    },
+    {
+      "id": "multi-az",
+      "path": "development/fixtures/baseline/multi-az.drawio",
+      "origin": "synthetic",
+      "description": "2 AZ × ALB → ECS → Aurora. 사용자 정답이 아닌 측정용 사례",
+      "primaryDirection": "horizontal",
+      "primaryEdgeIds": [
+        "flow-alb-ecs-a",
+        "flow-ecs-db-a",
+        "flow-alb-ecs-b",
+        "flow-ecs-db-b"
+      ],
+      "azPairs": [
+        [
+          "alb-a",
+          "alb-b"
+        ],
+        [
+          "ecs-a",
+          "ecs-b"
+        ],
+        [
+          "aurora-a",
+          "aurora-b"
+        ]
+      ],
+      "sha256": "da0f64ab1579e86a218eeee8a0d9cdb83b75ee57a83180e0dd4fda480ef97086"
+    },
+    {
+      "id": "preservation",
+      "path": "development/fixtures/baseline/preservation.drawio",
+      "origin": "synthetic",
+      "description": "수동 위치, 메모, 미등록 AWS 아이콘, 동일 라벨, waypoint와 수동 끝점 선",
+      "commandTargetId": "original-ec2-a",
+      "expectedRemovedWithTarget": [
+        "original-ec2-a",
+        "edge-a-b"
+      ],
+      "sha256": "8adecb358ef16a86df44aa63e8c16a8b8b85167419b3de348d3fe6b5797cdff7"
+    }
+  ]
+}
