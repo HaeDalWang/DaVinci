@@ -36,22 +36,41 @@ export class ChannelRouter {
     /**
      * 메시지 의도를 분석하여 적절한 채널과 데이터를 반환한다.
      * @param {string} userMessage
-     * @returns {Promise<{channel: ChannelType, data: object}>}
+     * @returns {Promise<{channel: ChannelType, data: object, pageId: string|null}>}
      */
     async preparePayload(userMessage) {
         const channel = this._detectChannel(userMessage);
-        const xml = await this._bridge.getCurrentXml();
+        const state = typeof this._bridge.getEditingState === 'function'
+            ? await this._bridge.getEditingState()
+            : { xml: await this._bridge.getCurrentXml(), pageIndex: null };
+        const doc = new DOMParser().parseFromString(state.xml, 'text/xml');
+        if (doc.querySelector('parsererror')) throw new Error('현재 XML을 읽을 수 없습니다.');
+        let model = doc.documentElement;
+        let pageId = null;
+        if (model.localName === 'mxfile') {
+            const pages = Array.from(model.children).filter(el => el.localName === 'diagram');
+            const index = Number.isInteger(state.pageIndex) ? state.pageIndex : pages.length === 1 ? 0 : null;
+            const page = index === null ? null : pages[index];
+            if (!page) throw new Error('현재 편집 페이지를 확인할 수 없습니다.');
+            pageId = page.getAttribute('id');
+            const models = Array.from(page.children).filter(el => el.localName === 'mxGraphModel');
+            if (models.length !== 1) throw new Error('현재 페이지의 XML을 읽을 수 없습니다.');
+            model = models[0];
+        }
+        if (model.localName !== 'mxGraphModel') throw new Error('지원하지 않는 XML 형식입니다.');
+        const xml = new XMLSerializer().serializeToString(model);
 
         if (channel === 'xml') {
             // 변경: XML 대신 Lightweight_JSON 전달
             const lightweightJson = summarizeXml(xml);
-            return { channel, data: { architecture: lightweightJson } };
+            return { channel, pageId, data: { architecture: { ...lightweightJson, pageId } } };
         }
 
         // Summary 채널: 분석 요약 JSON 생성
         const analysis = analyzeArchitecture(xml);
         return {
             channel,
+            pageId,
             data: {
                 services: analysis.services.map(s => ({
                     type: s.shapeName, label: s.label, category: s.category,

@@ -1,0 +1,60 @@
+{
+  "records": [
+    {
+      "caseIndex": 0,
+      "afterInfo": "vertex 196, 선 79 · 보존 통과 · 명령 반환 성공 · 전체 계약 통과",
+      "rendered": true
+    },
+    {
+      "caseIndex": 1,
+      "afterInfo": "vertex 126, 선 62 · 보존 통과 · 명령 반환 성공 · 전체 계약 통과",
+      "rendered": true
+    },
+    {
+      "caseIndex": 2,
+      "afterInfo": "vertex 78, 선 23 · 보존 통과 · 명령 반환 성공 · 전체 계약 통과",
+      "rendered": true
+    },
+    {
+      "caseIndex": 3,
+      "afterInfo": "vertex 73, 선 23 · 보존 통과 · 명령 반환 성공 · 전체 계약 통과",
+      "rendered": true
+    },
+    {
+      "caseIndex": 4,
+      "afterInfo": "vertex 102, 선 27 · 보존 통과 · 명령 반환 성공 · 전체 계약 통과",
+      "rendered": true
+    },
+    {
+      "caseIndex": 5,
+      "afterInfo": "vertex 157, 선 48 · 보존 통과 · 명령 반환 성공 · 전체 계약 통과",
+      "rendered": true
+    },
+    {
+      "caseIndex": 6,
+      "afterInfo": "vertex 72, 선 19 · 보존 통과 · 명령 반환 성공 · 전체 계약 통과",
+      "rendered": true
+    },
+    {
+      "caseIndex": 7,
+      "afterInfo": "vertex 469, 선 187 · 보존 통과 · 보존된 페이지 4/4 · 명령 반환 실패 · 전체 계약 실패",
+      "rendered": true
+    },
+    {
+      "caseIndex": 8,
+      "afterInfo": "vertex 328, 선 94 · 보존 통과 · 보존된 페이지 3/3 · 명령 반환 실패 · 전체 계약 실패",
+      "rendered": true
+    }
+  ],
+  "zooms": [
+    "0.25",
+    "0.5",
+    "1",
+    "2"
+  ],
+  "defaultVariant": "add-service",
+  "checkedAt": "2026-10-07T04:35:23.711Z",
+  "baselineSha256": "ff4b6ab74e6d95f139b962d6810fb102bda8785befab272317240e860a4ebb85",
+  "renderProofSha256": "92dcdd6bfbdb0e368db6b949625ca3341ac6afb37f8ebd5d6e0d5278d6ea4da7",
+  "viewerSha256": "495689634d8137c05feedd7c63457124752141a2d0088210944f90dc69f471a9"
+}

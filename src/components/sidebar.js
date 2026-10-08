@@ -91,12 +91,24 @@ export function initSidebar(bridge) {
     // "되돌리기" 버튼
     const undoBtn = document.getElementById('btn-undo');
     if (undoBtn) {
-        undoBtn.addEventListener('click', () => {
+        undoBtn.addEventListener('click', async () => {
+            if (chatMessages.querySelector('[id^="loading-"]') || document.getElementById('btn-open').disabled) return;
             const snapshot = snapshotManager.restore();
             if (snapshot) {
-                bridge.loadXml(snapshot.xml);
-                const time = new Date(snapshot.timestamp).toLocaleTimeString('ko-KR');
-                showToast(`다이어그램을 복원했습니다 (${time}: ${snapshot.description})`, 'success');
+                try {
+                    await bridge.loadXmlAndWait(snapshot.xml);
+                    conversationContext.reset();
+                    resetChatUI(chatMessages);
+                    try {
+                        localStorage.setItem('davinci_diagram', snapshot.xml);
+                    } catch {
+                        showToast('브라우저에 저장하지 못했습니다. 다운로드로 보관해주세요.', 'error');
+                    }
+                    showToast('다이어그램을 복원했습니다.', 'success');
+                } catch (error) {
+                    snapshotManager.save(snapshot.xml, snapshot.description);
+                    showToast(`되돌리기 실패: ${error.message}`, 'error');
+                }
             } else {
                 showToast('되돌릴 수 있는 변경 사항이 없습니다.', 'info');
             }
@@ -107,6 +119,13 @@ export function initSidebar(bridge) {
 /**
  * 채팅 UI를 웰컴 화면으로 복원한다.
  */
+export function resetDiagramSession(previousXml) {
+    conversationContext.reset();
+    snapshotManager.clear();
+    if (previousXml) snapshotManager.save(previousXml, '그림 열기 전');
+    resetChatUI(document.getElementById('chat-messages'));
+}
+
 function resetChatUI(messagesEl) {
     messagesEl.innerHTML = `
     <div class="sidebar__welcome">
@@ -159,6 +178,7 @@ function parseCommandResponse(data) {
 async function sendMessage(inputEl, messagesEl, bridge) {
     const text = inputEl.value.trim();
     if (!text) return;
+    if (messagesEl.querySelector('[id^="loading-"]')) return;
 
     // 웰컴 메시지 제거 (첫 전송 시)
     const welcome = messagesEl.querySelector('.sidebar__welcome');
@@ -166,10 +186,10 @@ async function sendMessage(inputEl, messagesEl, bridge) {
 
     // 사용자 메시지 추가
     appendMessage(messagesEl, text, 'user');
-    conversationContext.addMessage('user', text);
 
     // 입력 초기화
     inputEl.value = '';
+    inputEl.disabled = true;
     inputEl.style.height = 'auto';
     document.getElementById('chat-send').disabled = true;
 
@@ -195,19 +215,16 @@ async function sendMessage(inputEl, messagesEl, bridge) {
             ? payload.data.architecture
             : payload.data;
 
-        const response = await fetch('http://localhost:3000/api/chat', {
+        const response = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 message: text,
                 architecture: architectureData,
                 channel: payload.channel,
-                conversationHistory: conversationContext.getMessages().slice(0, -1), // 현재 메시지 제외 (서버에서 추가)
+                conversationHistory: conversationContext.getMessages(),
             }),
         });
-
-        // 로딩 제거
-        document.getElementById(loadingId)?.remove();
 
         if (!response.ok) {
             const errData = await response.json().catch(() => ({}));
@@ -216,6 +233,7 @@ async function sendMessage(inputEl, messagesEl, bridge) {
         }
 
         const data = await response.json();
+        conversationContext.addMessage('user', text);
         const commandResponse = parseCommandResponse(data);
 
         // AI 텍스트 메시지 표시
@@ -241,7 +259,11 @@ async function sendMessage(inputEl, messagesEl, bridge) {
 
         // 커맨드 실행
         if (commandResponse.commands && commandResponse.commands.length > 0) {
-            const result = await diagramController.executeCommands(commandResponse.commands);
+            // AI 대기 중 사용자가 페이지를 바꿔도 추가 대상은 요청한 페이지다.
+            const commands = commandResponse.commands.map(command => command.type === 'add_service' && payload.pageId
+                ? { ...command, params: { ...command.params, pageId: payload.pageId } }
+                : command);
+            const result = await diagramController.executeCommands(commands);
             if (result.success) {
                 appendMessage(messagesEl, `✅ ${result.message}`, 'system');
             } else {
@@ -249,9 +271,12 @@ async function sendMessage(inputEl, messagesEl, bridge) {
             }
         }
     } catch (err) {
-        document.getElementById(loadingId)?.remove();
         console.error('AI 연결 에러:', err);
-        appendMessage(messagesEl, 'AI Agent 서버(localhost:3000)에 연결할 수 없습니다.', 'error');
+        appendMessage(messagesEl, 'AI 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.', 'error');
+    } finally {
+        document.getElementById(loadingId)?.remove();
+        inputEl.disabled = false;
+        document.getElementById('chat-send').disabled = !inputEl.value.trim();
     }
 }
 

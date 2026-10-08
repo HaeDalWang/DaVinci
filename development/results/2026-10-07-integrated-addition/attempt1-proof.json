@@ -1,0 +1,12 @@
+{
+  "passedWholeFileTargetsBeforeFailure": 4,
+  "failedTarget": "kb-homepage-p1",
+  "failure": "Same-service integration failed",
+  "debug": {
+    "eligibleS3Peers": 1,
+    "invalidGeometryCount": 0,
+    "nearestSlot": null,
+    "enclosingAwsGroupDetectedAsBackground": false
+  },
+  "rootCause": "group catalog entry has no tier property; isBackgroundCell checked service.tier before container classification"
+}

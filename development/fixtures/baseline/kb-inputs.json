@@ -1,0 +1,47 @@
+{
+  "description": "KB mandatory inputs; private raw artifacts stay local; page extraction diagnostics are distinct from whole-file behavior",
+  "inputs": [
+    {
+      "id": "kb-ra",
+      "path": "drawio-sample/KB자산운용 RA 시스템 아키텍쳐 v1.6.drawio",
+      "sha256": "9e57ca339512c8bc356e91eaf062762285b48d776ab27e1ade9c54a45f9b21aa",
+      "pages": [
+        {
+          "id": "_6woe9L5Q8Xcz-eNpBZi",
+          "name": "Architecture"
+        },
+        {
+          "id": "_ZidVH7YzdKDn6GDP9hi",
+          "name": "운영"
+        },
+        {
+          "id": "pcGMWNsWkNKhRIoRb7Vs",
+          "name": "개발 WEB/WAS"
+        },
+        {
+          "id": "dRoYGnCYf8xLQt_17jfz",
+          "name": "운영 WEB/WAS"
+        }
+      ]
+    },
+    {
+      "id": "kb-homepage",
+      "path": "drawio-sample/KB자산운용 통합홈페이지 아키텍쳐(운영 포함) v1.0.drawio",
+      "sha256": "c3475cabbc609fee87d503c528e9f9104467485d835026f68e13c80188c65732",
+      "pages": [
+        {
+          "id": "KLQXjKm4aJ4K4JO641-5",
+          "name": "개발"
+        },
+        {
+          "id": "PcTXquFdPpOWCEBpZO16",
+          "name": "운영(Multi-AZ)"
+        },
+        {
+          "id": "i8NhiL8yqsVPyXG8hNco",
+          "name": "운영 - 홈페이지"
+        }
+      ]
+    }
+  ]
+}

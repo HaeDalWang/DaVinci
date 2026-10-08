@@ -1,0 +1,752 @@
+{
+  "scope": "real controller and iframe, whole files, all seven target pages; native export normalized before comparison",
+  "records": [
+    {
+      "input": "kb-ra",
+      "pageIndex": 1,
+      "explicitPageId": false,
+      "artifacts": {
+        "beforeXml": {
+          "path": "private.local/live-addition/kb-ra-p1-before.drawio",
+          "sha256": "8fb510556effa755c3ba0fe04d480d7fa923a323a66191b6828ba3be80142dcd"
+        },
+        "afterXml": {
+          "path": "private.local/live-addition/kb-ra-p1-after.drawio",
+          "sha256": "9442adf816af91ca511b61aae7ae4368f719aed7fcfbf5790b9464c82a2fe7ce"
+        },
+        "beforeSvg": {
+          "path": "private.local/live-addition/kb-ra-p1-before.svg",
+          "sha256": "19ff1240ffc48e7e31f0acff309458f3564923bbf5b97dc6d3c47d0531d5c19c"
+        },
+        "afterSvg": {
+          "path": "private.local/live-addition/kb-ra-p1-after.svg",
+          "sha256": "0309bd4c0e06720fb0ac66f213280f207d458595e186ac221038eed2b1f276ba"
+        }
+      },
+      "sourceSha256": "9e57ca339512c8bc356e91eaf062762285b48d776ab27e1ade9c54a45f9b21aa",
+      "beforeSha256": "8fb510556effa755c3ba0fe04d480d7fa923a323a66191b6828ba3be80142dcd",
+      "afterSha256": "9442adf816af91ca511b61aae7ae4368f719aed7fcfbf5790b9464c82a2fe7ce",
+      "beforePageIndex": 0,
+      "afterPageIndex": 0,
+      "orderedPages": true,
+      "commandSuccess": true,
+      "newOverlap": 0,
+      "pages": [
+        {
+          "pageIndex": 0,
+          "preservationPassed": true,
+          "input": {
+            "cells": 285,
+            "vertices": 195,
+            "edges": 79,
+            "groups": 51
+          },
+          "output": {
+            "cells": 286,
+            "vertices": 196,
+            "edges": 79,
+            "groups": 51
+          },
+          "added": 1,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": null,
+          "countContract": true
+        },
+        {
+          "pageIndex": 1,
+          "preservationPassed": true,
+          "input": {
+            "cells": 198,
+            "vertices": 125,
+            "edges": 62,
+            "groups": 34
+          },
+          "output": {
+            "cells": 198,
+            "vertices": 125,
+            "edges": 62,
+            "groups": 34
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 2,
+          "preservationPassed": true,
+          "input": {
+            "cells": 104,
+            "vertices": 77,
+            "edges": 23,
+            "groups": 14
+          },
+          "output": {
+            "cells": 104,
+            "vertices": 77,
+            "edges": 23,
+            "groups": 14
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 3,
+          "preservationPassed": true,
+          "input": {
+            "cells": 99,
+            "vertices": 72,
+            "edges": 23,
+            "groups": 14
+          },
+          "output": {
+            "cells": 99,
+            "vertices": 72,
+            "edges": 23,
+            "groups": 14
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        }
+      ],
+      "checkedAt": "2026-10-07T04:30:56.875Z"
+    },
+    {
+      "input": "kb-ra",
+      "pageIndex": 2,
+      "explicitPageId": true,
+      "artifacts": {
+        "beforeXml": {
+          "path": "private.local/live-addition/kb-ra-p2-before.drawio",
+          "sha256": "e880ef60072192c76702e0473f12bf6007962ec2dd696908c83953342c68eae8"
+        },
+        "afterXml": {
+          "path": "private.local/live-addition/kb-ra-p2-after.drawio",
+          "sha256": "78345421cf2b66ac26cd71e1950044dafba12988e2fa31da39a8f8a311259e3e"
+        },
+        "beforeSvg": {
+          "path": "private.local/live-addition/kb-ra-p2-before.svg",
+          "sha256": "ce3f80c76e3713880bd8a444010754c026dd1f48462a06adad1941af272b95f7"
+        },
+        "afterSvg": {
+          "path": "private.local/live-addition/kb-ra-p2-after.svg",
+          "sha256": "43715faef5a70e8202b7f888462423a5f42ffe669c986741a57ee991126fac3f"
+        }
+      },
+      "sourceSha256": "9e57ca339512c8bc356e91eaf062762285b48d776ab27e1ade9c54a45f9b21aa",
+      "beforeSha256": "e880ef60072192c76702e0473f12bf6007962ec2dd696908c83953342c68eae8",
+      "afterSha256": "78345421cf2b66ac26cd71e1950044dafba12988e2fa31da39a8f8a311259e3e",
+      "beforePageIndex": 1,
+      "afterPageIndex": 1,
+      "orderedPages": true,
+      "commandSuccess": true,
+      "newOverlap": 0,
+      "pages": [
+        {
+          "pageIndex": 0,
+          "preservationPassed": true,
+          "input": {
+            "cells": 285,
+            "vertices": 195,
+            "edges": 79,
+            "groups": 51
+          },
+          "output": {
+            "cells": 285,
+            "vertices": 195,
+            "edges": 79,
+            "groups": 51
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 1,
+          "preservationPassed": true,
+          "input": {
+            "cells": 198,
+            "vertices": 125,
+            "edges": 62,
+            "groups": 34
+          },
+          "output": {
+            "cells": 199,
+            "vertices": 126,
+            "edges": 62,
+            "groups": 34
+          },
+          "added": 1,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": null,
+          "countContract": true
+        },
+        {
+          "pageIndex": 2,
+          "preservationPassed": true,
+          "input": {
+            "cells": 104,
+            "vertices": 77,
+            "edges": 23,
+            "groups": 14
+          },
+          "output": {
+            "cells": 104,
+            "vertices": 77,
+            "edges": 23,
+            "groups": 14
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 3,
+          "preservationPassed": true,
+          "input": {
+            "cells": 99,
+            "vertices": 72,
+            "edges": 23,
+            "groups": 14
+          },
+          "output": {
+            "cells": 99,
+            "vertices": 72,
+            "edges": 23,
+            "groups": 14
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        }
+      ],
+      "checkedAt": "2026-10-07T04:30:58.336Z"
+    },
+    {
+      "input": "kb-ra",
+      "pageIndex": 3,
+      "explicitPageId": false,
+      "artifacts": {
+        "beforeXml": {
+          "path": "private.local/live-addition/kb-ra-p3-before.drawio",
+          "sha256": "77428299ba335e51df11aee3187a15da128a0fd9da0007561b76edc52e21b22e"
+        },
+        "afterXml": {
+          "path": "private.local/live-addition/kb-ra-p3-after.drawio",
+          "sha256": "dc3b7f2be63f0e5d376fd50d0a73b189463e4d904d40d7c6ec725928a67c1192"
+        },
+        "beforeSvg": {
+          "path": "private.local/live-addition/kb-ra-p3-before.svg",
+          "sha256": "3f8543ba39ecfa6862374ef9db4a2c3a0702e8b74c335d13d21b1c7f8f822296"
+        },
+        "afterSvg": {
+          "path": "private.local/live-addition/kb-ra-p3-after.svg",
+          "sha256": "e4300ae1196fc2af7fad8857f5b3963324ea428234b29a54f9290273288cd059"
+        }
+      },
+      "sourceSha256": "9e57ca339512c8bc356e91eaf062762285b48d776ab27e1ade9c54a45f9b21aa",
+      "beforeSha256": "77428299ba335e51df11aee3187a15da128a0fd9da0007561b76edc52e21b22e",
+      "afterSha256": "dc3b7f2be63f0e5d376fd50d0a73b189463e4d904d40d7c6ec725928a67c1192",
+      "beforePageIndex": 2,
+      "afterPageIndex": 2,
+      "orderedPages": true,
+      "commandSuccess": true,
+      "newOverlap": 0,
+      "pages": [
+        {
+          "pageIndex": 0,
+          "preservationPassed": true,
+          "input": {
+            "cells": 285,
+            "vertices": 195,
+            "edges": 79,
+            "groups": 51
+          },
+          "output": {
+            "cells": 285,
+            "vertices": 195,
+            "edges": 79,
+            "groups": 51
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 1,
+          "preservationPassed": true,
+          "input": {
+            "cells": 198,
+            "vertices": 125,
+            "edges": 62,
+            "groups": 34
+          },
+          "output": {
+            "cells": 198,
+            "vertices": 125,
+            "edges": 62,
+            "groups": 34
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 2,
+          "preservationPassed": true,
+          "input": {
+            "cells": 104,
+            "vertices": 77,
+            "edges": 23,
+            "groups": 14
+          },
+          "output": {
+            "cells": 105,
+            "vertices": 78,
+            "edges": 23,
+            "groups": 14
+          },
+          "added": 1,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": null,
+          "countContract": true
+        },
+        {
+          "pageIndex": 3,
+          "preservationPassed": true,
+          "input": {
+            "cells": 99,
+            "vertices": 72,
+            "edges": 23,
+            "groups": 14
+          },
+          "output": {
+            "cells": 99,
+            "vertices": 72,
+            "edges": 23,
+            "groups": 14
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        }
+      ],
+      "checkedAt": "2026-10-07T04:30:59.670Z"
+    },
+    {
+      "input": "kb-ra",
+      "pageIndex": 4,
+      "explicitPageId": true,
+      "artifacts": {
+        "beforeXml": {
+          "path": "private.local/live-addition/kb-ra-p4-before.drawio",
+          "sha256": "19c74732995412fa5c6a27edb786b806829006c1e8f15a22775a9fe877fcd4dc"
+        },
+        "afterXml": {
+          "path": "private.local/live-addition/kb-ra-p4-after.drawio",
+          "sha256": "e4cd98b80ce24c04ee01a59470dbd8cc299988bf339655ec18c6b49f3861cab2"
+        },
+        "beforeSvg": {
+          "path": "private.local/live-addition/kb-ra-p4-before.svg",
+          "sha256": "ca52470b097fe6736ca869e6fef73e5abbe5e5ba4fc12357a9e7f45345e7c1ca"
+        },
+        "afterSvg": {
+          "path": "private.local/live-addition/kb-ra-p4-after.svg",
+          "sha256": "319ab436a6ba63a936f8e53aa84b32de9394cf3f24a7e4e1fcc5b0be4cf7dfb8"
+        }
+      },
+      "sourceSha256": "9e57ca339512c8bc356e91eaf062762285b48d776ab27e1ade9c54a45f9b21aa",
+      "beforeSha256": "19c74732995412fa5c6a27edb786b806829006c1e8f15a22775a9fe877fcd4dc",
+      "afterSha256": "e4cd98b80ce24c04ee01a59470dbd8cc299988bf339655ec18c6b49f3861cab2",
+      "beforePageIndex": 3,
+      "afterPageIndex": 3,
+      "orderedPages": true,
+      "commandSuccess": true,
+      "newOverlap": 0,
+      "pages": [
+        {
+          "pageIndex": 0,
+          "preservationPassed": true,
+          "input": {
+            "cells": 285,
+            "vertices": 195,
+            "edges": 79,
+            "groups": 51
+          },
+          "output": {
+            "cells": 285,
+            "vertices": 195,
+            "edges": 79,
+            "groups": 51
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 1,
+          "preservationPassed": true,
+          "input": {
+            "cells": 198,
+            "vertices": 125,
+            "edges": 62,
+            "groups": 34
+          },
+          "output": {
+            "cells": 198,
+            "vertices": 125,
+            "edges": 62,
+            "groups": 34
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 2,
+          "preservationPassed": true,
+          "input": {
+            "cells": 104,
+            "vertices": 77,
+            "edges": 23,
+            "groups": 14
+          },
+          "output": {
+            "cells": 104,
+            "vertices": 77,
+            "edges": 23,
+            "groups": 14
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 3,
+          "preservationPassed": true,
+          "input": {
+            "cells": 99,
+            "vertices": 72,
+            "edges": 23,
+            "groups": 14
+          },
+          "output": {
+            "cells": 100,
+            "vertices": 73,
+            "edges": 23,
+            "groups": 14
+          },
+          "added": 1,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": null,
+          "countContract": true
+        }
+      ],
+      "checkedAt": "2026-10-07T04:31:00.926Z"
+    },
+    {
+      "input": "kb-homepage",
+      "pageIndex": 1,
+      "explicitPageId": false,
+      "artifacts": {
+        "beforeXml": {
+          "path": "private.local/live-addition/kb-homepage-p1-before.drawio",
+          "sha256": "43f7735ed50c8ba5ec5e6b4ee92d23609f306f7466ec0480d154342222845742"
+        },
+        "afterXml": {
+          "path": "private.local/live-addition/kb-homepage-p1-after.drawio",
+          "sha256": "c051dc34cc986494b90012e95e980ed3b9001e32ef5f0431984fd77984b6c9c2"
+        },
+        "beforeSvg": {
+          "path": "private.local/live-addition/kb-homepage-p1-before.svg",
+          "sha256": "6a97c8123bdfeb94ba23375d9eaa4ed39e91d4f880148917a73325c2cbaf76b4"
+        },
+        "afterSvg": {
+          "path": "private.local/live-addition/kb-homepage-p1-after.svg",
+          "sha256": "411c89cc97919f9a5f317b8309d6f0bcb3f677f8e365efb47bce88971d89ceee"
+        }
+      },
+      "sourceSha256": "c3475cabbc609fee87d503c528e9f9104467485d835026f68e13c80188c65732",
+      "beforeSha256": "43f7735ed50c8ba5ec5e6b4ee92d23609f306f7466ec0480d154342222845742",
+      "afterSha256": "c051dc34cc986494b90012e95e980ed3b9001e32ef5f0431984fd77984b6c9c2",
+      "beforePageIndex": 0,
+      "afterPageIndex": 0,
+      "orderedPages": true,
+      "commandSuccess": true,
+      "newOverlap": 0,
+      "pages": [
+        {
+          "pageIndex": 0,
+          "preservationPassed": true,
+          "input": {
+            "cells": 139,
+            "vertices": 101,
+            "edges": 27,
+            "groups": 25
+          },
+          "output": {
+            "cells": 140,
+            "vertices": 102,
+            "edges": 27,
+            "groups": 25
+          },
+          "added": 1,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": null,
+          "countContract": true
+        },
+        {
+          "pageIndex": 1,
+          "preservationPassed": true,
+          "input": {
+            "cells": 216,
+            "vertices": 156,
+            "edges": 48,
+            "groups": 41
+          },
+          "output": {
+            "cells": 216,
+            "vertices": 156,
+            "edges": 48,
+            "groups": 41
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 2,
+          "preservationPassed": true,
+          "input": {
+            "cells": 102,
+            "vertices": 71,
+            "edges": 19,
+            "groups": 20
+          },
+          "output": {
+            "cells": 102,
+            "vertices": 71,
+            "edges": 19,
+            "groups": 20
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        }
+      ],
+      "checkedAt": "2026-10-07T04:31:02.136Z"
+    },
+    {
+      "input": "kb-homepage",
+      "pageIndex": 2,
+      "explicitPageId": true,
+      "artifacts": {
+        "beforeXml": {
+          "path": "private.local/live-addition/kb-homepage-p2-before.drawio",
+          "sha256": "c5423721b26f02b45c6bbf4088d7815d2c28557b638938c97c7a7e4581ab3908"
+        },
+        "afterXml": {
+          "path": "private.local/live-addition/kb-homepage-p2-after.drawio",
+          "sha256": "ce6692a1c977edb5aa59d95e602c9d99506649f2bb265f68f5ea56b38f592f4c"
+        },
+        "beforeSvg": {
+          "path": "private.local/live-addition/kb-homepage-p2-before.svg",
+          "sha256": "0a70116df780e82d767ff9bae2bb0c58f84ed5b042ca17e5f1d44f33454c3ce3"
+        },
+        "afterSvg": {
+          "path": "private.local/live-addition/kb-homepage-p2-after.svg",
+          "sha256": "1a838d3b6bd73ac410794315648610299a46f65ba9b731e48a8e683e312c32b1"
+        }
+      },
+      "sourceSha256": "c3475cabbc609fee87d503c528e9f9104467485d835026f68e13c80188c65732",
+      "beforeSha256": "c5423721b26f02b45c6bbf4088d7815d2c28557b638938c97c7a7e4581ab3908",
+      "afterSha256": "ce6692a1c977edb5aa59d95e602c9d99506649f2bb265f68f5ea56b38f592f4c",
+      "beforePageIndex": 1,
+      "afterPageIndex": 1,
+      "orderedPages": true,
+      "commandSuccess": true,
+      "newOverlap": 0,
+      "pages": [
+        {
+          "pageIndex": 0,
+          "preservationPassed": true,
+          "input": {
+            "cells": 139,
+            "vertices": 101,
+            "edges": 27,
+            "groups": 25
+          },
+          "output": {
+            "cells": 139,
+            "vertices": 101,
+            "edges": 27,
+            "groups": 25
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 1,
+          "preservationPassed": true,
+          "input": {
+            "cells": 216,
+            "vertices": 156,
+            "edges": 48,
+            "groups": 41
+          },
+          "output": {
+            "cells": 217,
+            "vertices": 157,
+            "edges": 48,
+            "groups": 41
+          },
+          "added": 1,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": null,
+          "countContract": true
+        },
+        {
+          "pageIndex": 2,
+          "preservationPassed": true,
+          "input": {
+            "cells": 102,
+            "vertices": 71,
+            "edges": 19,
+            "groups": 20
+          },
+          "output": {
+            "cells": 102,
+            "vertices": 71,
+            "edges": 19,
+            "groups": 20
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        }
+      ],
+      "checkedAt": "2026-10-07T04:31:03.502Z"
+    },
+    {
+      "input": "kb-homepage",
+      "pageIndex": 3,
+      "explicitPageId": false,
+      "artifacts": {
+        "beforeXml": {
+          "path": "private.local/live-addition/kb-homepage-p3-before.drawio",
+          "sha256": "a2dd68ddeef5b083c2a4025134dcad51054b2e43b5100012371d899cd92008a2"
+        },
+        "afterXml": {
+          "path": "private.local/live-addition/kb-homepage-p3-after.drawio",
+          "sha256": "85cd617846ca632cc87ce94f580cac549ac943d6a1b087c125c8892c15652eb3"
+        },
+        "beforeSvg": {
+          "path": "private.local/live-addition/kb-homepage-p3-before.svg",
+          "sha256": "738ba73f71cbe623f85b73ff8b888d81701ac0c1a7cbf794d2cdc232aa1950eb"
+        },
+        "afterSvg": {
+          "path": "private.local/live-addition/kb-homepage-p3-after.svg",
+          "sha256": "7a92aa5b4ffaa9cf527b38a4dc10fa78f8e828658aaf7be908ba490069a43c82"
+        }
+      },
+      "sourceSha256": "c3475cabbc609fee87d503c528e9f9104467485d835026f68e13c80188c65732",
+      "beforeSha256": "a2dd68ddeef5b083c2a4025134dcad51054b2e43b5100012371d899cd92008a2",
+      "afterSha256": "85cd617846ca632cc87ce94f580cac549ac943d6a1b087c125c8892c15652eb3",
+      "beforePageIndex": 2,
+      "afterPageIndex": 2,
+      "orderedPages": true,
+      "commandSuccess": true,
+      "newOverlap": 0,
+      "pages": [
+        {
+          "pageIndex": 0,
+          "preservationPassed": true,
+          "input": {
+            "cells": 139,
+            "vertices": 101,
+            "edges": 27,
+            "groups": 25
+          },
+          "output": {
+            "cells": 139,
+            "vertices": 101,
+            "edges": 27,
+            "groups": 25
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 1,
+          "preservationPassed": true,
+          "input": {
+            "cells": 216,
+            "vertices": 156,
+            "edges": 48,
+            "groups": 41
+          },
+          "output": {
+            "cells": 216,
+            "vertices": 156,
+            "edges": 48,
+            "groups": 41
+          },
+          "added": 0,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": true,
+          "countContract": true
+        },
+        {
+          "pageIndex": 2,
+          "preservationPassed": true,
+          "input": {
+            "cells": 102,
+            "vertices": 71,
+            "edges": 19,
+            "groups": 20
+          },
+          "output": {
+            "cells": 103,
+            "vertices": 72,
+            "edges": 19,
+            "groups": 20
+          },
+          "added": 1,
+          "existingCellSubtreesUnchanged": true,
+          "otherPageUnchanged": null,
+          "countContract": true
+        }
+      ],
+      "checkedAt": "2026-10-07T04:31:04.665Z"
+    }
+  ],
+  "sourceSha256": {
+    "src/core/diagram-controller.js": "7a97ae091f4c42721bd0429499fa7e82aa1ba1f815e1f17e83e31fb2e1ab7477",
+    "src/core/drawio-bridge.js": "8c0864780ba0a0bdbb24dca52e85dcf54190e386980de9abe2e599dcf643ea4d",
+    "scripts/layout-metrics.js": "74905e3f75fa8f675c655e0111e4f966b4b52175222c2a1e239124af80098a4b",
+    "src/core/aws-service-catalog.js": "fcfbff1d5cf186aff331e320963de4c42849496ee3ae4f20c416b16bad0e4bd5",
+    "src/core/snapshot-manager.js": "8ead58931ed2dfe55665b9d84138e9d78e9494f771975374007358dd521bf6bb",
+    "development/tools/verify-kb-addition.py": "04285506f89a55a6bdcdc6afa5ee5e540d47e1abe56d7785de4ca35bf2fb6cff",
+    "development/tools/drawio-probe.html": "89e88433a533b1ad89a3ad83766f1d6c5f9b7f2dfd451a1a9658ceef1dc54c08"
+  }
+}

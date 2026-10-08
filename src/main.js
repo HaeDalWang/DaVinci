@@ -3,7 +3,7 @@
 import { DrawIOBridge } from './core/drawio-bridge.js';
 import { analyzeArchitecture, getOptimizationTips } from './core/aws-analyzer.js';
 import { initToolbar } from './components/toolbar.js';
-import { initSidebar } from './components/sidebar.js';
+import { initSidebar, resetDiagramSession } from './components/sidebar.js';
 import { showAnalysisModal, showOptimizationModal } from './components/analysis-modal.js';
 import { showToast } from './components/toast.js';
 
@@ -63,6 +63,11 @@ function init() {
 
     // 상단 툴바 초기화
     initToolbar(bridge, {
+        onOpen: (previousXml) => {
+            clearTimeout(autoSaveTimer);
+            pendingXml = null;
+            resetDiagramSession(previousXml);
+        },
         onAnalyze: (xml) => {
             const analysis = analyzeArchitecture(xml);
             showAnalysisModal(analysis);

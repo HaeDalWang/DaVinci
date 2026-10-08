@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KB 기준선 비교</title>
+<style>
+  body{margin:0;font:14px system-ui;background:#f3f4f6;color:#17202a}
+  header{padding:16px;background:white;border-bottom:1px solid #bbb}
+  h1{margin:0 0 12px;font-size:20px}label{display:inline-block;margin:0 16px 8px 0}
+  select{font:inherit;padding:5px}p{margin:8px 0}.warning{color:#9b2600}
+  main{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+  section{min-width:0}h2{font-size:16px}.viewport{height:65vh;overflow:auto;background:white;border:1px solid #aaa}
+  img{display:block;max-width:none}img[hidden]{display:none}pre{white-space:pre-wrap;font:inherit}
+  @media(max-width:700px){main{grid-template-columns:1fr}}
+</style>
+<header>
+  <h1>KB자산운용 — 원본과 처리 결과</h1>
+  <label>측정 <select id="run"><option value="baseline">수정 전</option><option value="preserved-addition">서비스 추가 수정 후</option></select></label>
+  <label>사례 <select id="case"></select></label>
+  <label>변환 <select id="variant"><option value="hierarchy">계층 정렬</option><option value="horizontal">좌→우 정렬</option><option value="add-service">S3 추가</option></select></label>
+  <label>공통 배율 <select id="zoom"><option value="0.25">25%</option><option value="0.5" selected>50%</option><option value="1">100%</option><option value="2">200%</option></select></label>
+  <p id="scope"></p>
+  <p class="warning">보존 실패는 배치 개선으로 인정하지 않습니다. 교차·관통·라벨 겹침은 미측정이며 사용자 시각 판정은 별도입니다.</p>
+</header>
+<main>
+  <section><h2>원본</h2><pre id="before-info"></pre><div class="viewport"><img id="before" alt="선택한 KB 사례 원본"></div></section>
+  <section><h2>변환 결과</h2><pre id="after-info"></pre><div class="viewport"><img id="after" alt="선택한 KB 사례 변환 결과"></div></section>
+</main>
+<script type="module">
+  const fixed = new URLSearchParams(location.search).get('result') === 'preserved-addition';
+  const base = '/development/results/2026-10-07-' + (fixed ? 'preserved-addition' : 'kb-baseline') + '/';
+  document.querySelector('#run').value = fixed ? 'preserved-addition' : 'baseline';
+  document.querySelector('#run').onchange = event => {location.search = '?result=' + event.target.value;};
+  if (fixed) document.querySelector('#variant').value = 'add-service';
+  const fetchJson = async name => {const r = await fetch(base + name); if (!r.ok) throw new Error(name + ' 읽기 실패'); return r.json();};
+  try {
+    const [report, proof, manifest] = await Promise.all([
+      fetchJson('baseline.json'), fetchJson('render-proof.json'),
+      fetch('/development/fixtures/baseline/kb-inputs.json').then(r => r.json()),
+    ]);
+    const cases = report.records.filter(r => r.variant === 'original');
+    const caseSelect = document.querySelector('#case');
+    const imageByXml = new Map(proof.records.map(r => [r.xmlFile, r]));
+    for (const [index, record] of cases.entries()) {
+      const input = manifest.inputs.find(i => i.id === record.input);
+      const label = record.input === 'kb-homepage' ? '통합홈페이지' : 'RA 시스템';
+      const page = record.scope === 'whole-file' ? '파일 전체(대상 미지정)' : input.pages[record.pageIndex - 1].name;
+      caseSelect.add(new Option(label + ' / ' + page, index));
+    }
+    function draw() {
+      const before = cases[caseSelect.value || 0];
+      const after = report.records.find(r => r.input === before.input && r.scope === before.scope && r.pageIndex === before.pageIndex && r.variant === document.querySelector('#variant').value);
+      document.querySelector('#scope').textContent = before.scope === 'whole-file'
+        ? '대상 페이지를 지정하지 않은 파일 전체 진단입니다. 수정 후 서비스 추가는 원본을 유지하고 거부합니다. 원본 SVG는 첫 페이지만, 개수는 전체 합계를 보여 줍니다.'
+        : '한 페이지를 추출한 진단입니다. 실제 파일 전체 편집의 페이지 보존 결과와 구분합니다.';
+      for (const [side, record] of [['before', before], ['after', after]]) {
+        const image = document.querySelector('#' + side);
+        const rendered = imageByXml.get(record.xmlFile);
+        image.hidden = record.status !== 'measured';
+        if (image.hidden) {
+          image.removeAttribute('src');
+          const p = record.pageStructure;
+          document.querySelector('#' + side + '-info').textContent =
+            `보존 실패 · 출력 무효: ${record.errorCode}` + (p ? ` · 보존된 페이지 ${p.preservedPages}/${p.originalPages}` : '');
+          continue;
+        }
+        if (!rendered) throw new Error('렌더링 결과 누락');
+        image.src = base + rendered.svgFile;
+        const zoom = Number(document.querySelector('#zoom').value);
+        image.onload = () => {image.width = Math.round(image.naturalWidth * zoom);};
+        const m = record.measurement, p = record.pageStructure, c = record.command;
+        document.querySelector('#' + side + '-info').textContent =
+          `vertex ${m.counts.vertices}, 선 ${m.counts.edges} · 보존 ${record.preservation.passed ? '통과' : '실패'}` +
+          (p ? ` · 보존된 페이지 ${p.preservedPages}/${p.originalPages}` : '') +
+          (c ? ` · 명령 반환 ${c.observedSuccess ? '성공' : '실패'} · 전체 계약 ${c.passed ? '통과' : '실패'}` : '');
+        image.closest('.viewport').scrollTo(0, 0);
+      }
+    }
+    for (const id of ['case', 'variant', 'zoom']) document.querySelector('#' + id).addEventListener('change', draw);
+    // Begin with the homepage Multi-AZ page; both KB files remain mandatory.
+    caseSelect.value = cases.findIndex(r => r.input === 'kb-homepage' && r.pageIndex === 2);
+    draw();
+  } catch (error) {document.querySelector('#scope').textContent = '비교 준비 실패: ' + error.message;}
+</script>
+</html>

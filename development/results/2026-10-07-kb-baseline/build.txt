@@ -1,0 +1,16 @@
+
+> davinci@0.1.0 build
+> vite build
+
+vite v6.4.1 building for production...
+transforming...
+✓ 23 modules transformed.
+[plugin vite:reporter]
+(!) /Users/baeseungdo/work/DaVinci/src/components/toast.js is dynamically imported by /Users/baeseungdo/work/DaVinci/src/components/align-modal.js, /Users/baeseungdo/work/DaVinci/src/components/align-modal.js, /Users/baeseungdo/work/DaVinci/src/components/align-modal.js, /Users/baeseungdo/work/DaVinci/src/components/align-modal.js but also statically imported by /Users/baeseungdo/work/DaVinci/src/components/sidebar.js, /Users/baeseungdo/work/DaVinci/src/components/toolbar.js, /Users/baeseungdo/work/DaVinci/src/main.js, dynamic import will not move module into another chunk.
+
+rendering chunks...
+computing gzip size...
+dist/index.html                  6.73 kB │ gzip:  2.09 kB
+dist/assets/index-DlhNfL5U.css  19.90 kB │ gzip:  4.19 kB
+dist/assets/index-Dht3YelA.js   78.50 kB │ gzip: 19.00 kB │ map: 200.44 kB
+✓ built in 367ms

@@ -1,0 +1,7 @@
+[31m   [31m×[31m rds alias rds_instance: joins the row with the peer style, size and parent and moves only service icons[39m[32m 6[2mms[22m[39m
+[31m   [31m×[31m rds alias rds_instance_alt: joins the row with the peer style, size and parent and moves only service icons[39m[32m 2[2mms[22m[39m
+[31m   [31m×[31m rds alias rds_postgresql_instance: joins the row with the peer style, size and parent and moves only service icons[39m[32m 3[2mms[22m[39m
+[31m   [31m×[31m rds alias rds_postgresql_instance_alt: joins the row with the peer style, size and parent and moves only service icons[39m[32m 2[2mms[22m[39m
+[31m   [31m×[31m different AWS shapes are not recognised as RDS[39m[32m 1[2mms[22m[39m
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 5 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m16 passed[39m[22m[90m (21)[39m

@@ -1,0 +1,33 @@
+name: davinci
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: davinci:local
+    # 호스트 127.0.0.1에서만 접근한다. 호스트 3000은 다른 앱이 쓰므로 건드리지 않는다.
+    ports:
+      - "127.0.0.1:8080:3000"
+    # 값 없는 항목은 호스트에 설정된 경우에만 전달된다. 자격 증명을 파일에 적지 않는다.
+    # ~/.aws는 마운트하지 않는다. BEDROCK_MODEL_ID는 호스트 값으로 덮어쓸 수 있고,
+    # 기본값은 Claude Sonnet 5.5의 global 추론 프로필이다. 인증(자격 증명 또는 AWS_BEARER_TOKEN_BEDROCK)이
+    # 연결되지 않으면 웹은 뜨지만 AI 호출은 503 안내를 반환한다.
+    environment:
+      - PORT=3000
+      - ALLOWED_ORIGINS=http://127.0.0.1:8080,http://localhost:8080
+      - AWS_REGION
+      - BEDROCK_MODEL_ID=${BEDROCK_MODEL_ID:-global.anthropic.claude-sonnet-5-5}
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
+      - AWS_BEARER_TOKEN_BEDROCK
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped

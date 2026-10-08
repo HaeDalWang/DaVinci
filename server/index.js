@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -15,6 +18,57 @@ app.use(cors({ origin: ALLOWED_ORIGINS }));
 
 app.use(express.json({ limit: '5mb' }));
 
+const MODEL_ID = (process.env.BEDROCK_MODEL_ID || '').trim();
+const MODEL_NOT_CONFIGURED_MESSAGE =
+    'AI 모델이 설정되지 않았습니다. 서버 환경변수 BEDROCK_MODEL_ID를 지정한 뒤 다시 실행해주세요.';
+// 보수적인 출력 한도: 모델별로 지원 범위가 달라 큰 기본값은 요청 자체를 실패시킬 수 있다.
+const MAX_OUTPUT_TOKENS = 4096;
+
+// Claude Sonnet 5.5는 temperature를 기본값 외로 보내면 400이고 adaptive thinking이 기본 켜진다.
+// 그래서 temperature를 빼고 thinking/effort는 별도 필드로 명시한다. 다른 모델은 기존 설정을 유지한다.
+const IS_SONNET_5_5 = /anthropic\.claude-sonnet-5-5/.test(MODEL_ID);
+const SONNET_5_5_MODEL_FIELDS = {
+    thinking: { type: 'adaptive' },
+    output_config: { effort: 'medium' },
+};
+const CREDENTIALS_NOT_CONNECTED_MESSAGE =
+    'AWS 인증이 연결되지 않았습니다. AWS 자격 증명 또는 AWS_BEARER_TOKEN_BEDROCK을 서버 환경에 설정한 뒤 다시 실행해주세요.';
+
+/** Converse 요청의 모델별 추론 설정 */
+function buildModelOptions(temperature) {
+    if (IS_SONNET_5_5) {
+        return {
+            inferenceConfig: { maxTokens: MAX_OUTPUT_TOKENS },
+            additionalModelRequestFields: SONNET_5_5_MODEL_FIELDS,
+        };
+    }
+    return { inferenceConfig: { maxTokens: MAX_OUTPUT_TOKENS, temperature } };
+}
+
+/** 응답의 text 블록만 이어 붙인다 (첫 블록이 reasoning일 수 있다). text가 없으면 오류. */
+function extractText(response) {
+    const blocks = response?.output?.message?.content;
+    const text = Array.isArray(blocks)
+        ? blocks.filter(b => typeof b?.text === 'string').map(b => b.text).join('')
+        : '';
+    if (!text) throw new Error('Bedrock 응답에 text 블록이 없습니다.');
+    return text;
+}
+
+/** 인증 미연결은 안내 503으로, 그 외는 일반 500으로 응답한다. 인증 오류 원문은 기록하지 않는다. */
+function sendBedrockError(res, error, logLabel, fallbackMessage) {
+    if (error?.name === 'CredentialsProviderError') {
+        return res.status(503).json({ error: CREDENTIALS_NOT_CONNECTED_MESSAGE });
+    }
+    console.error(logLabel, error);
+    return res.status(500).json({ error: fallbackMessage });
+}
+
+// 상태 확인: 모델 ID 설정 여부만 알려준다. 자격 증명이나 Bedrock 호출 가능 여부는 확인하지 않는다.
+app.get('/api/health', (_req, res) => {
+    res.json({ status: 'ok', modelConfigured: MODEL_ID !== '' });
+});
+
 // Rate limiting: 분당 30회 제한
 const apiLimiter = rateLimit({
     windowMs: 60 * 1000,
@@ -28,8 +82,6 @@ app.use('/api/', apiLimiter);
 const client = new BedrockRuntimeClient({
     region: process.env.AWS_REGION || 'us-east-1',
 });
-
-const MODEL_ID = process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-5-sonnet-20240620-v1:0';
 
 // ---------------------------------------------------------------------------
 // 시스템 프롬프트 빌더
@@ -66,10 +118,14 @@ function buildBaseSystemPrompt() {
 
 ### add_service
 서비스를 다이어그램에 추가합니다.
-params: { "serviceType": "ec2", "label": "Web Server", "x": 400, "y": 300 }
-- serviceType: 아래 서비스 카탈로그의 type 값
-- label: 표시할 라벨
-- x, y: 다이어그램 내 좌표
+params: { "serviceType": "ec2", "label": "Web Server", "group": "컨테이너 그룹 id (선택)", "pageId": "대상 페이지 id (선택)" }
+- serviceType: 아래 서비스 카탈로그의 type 값 (필수)
+- label: 표시할 라벨 (선택, 없으면 기본 라벨)
+- group: 사용자가 특정 위치를 요청했을 때 서비스를 넣을 현재 페이지의 컨테이너 그룹 id (선택). 기존 같은 서비스가 있는 줄에 크기·색·글꼴을 맞춰 추가하고 필요한 주변 아이콘의 위치도 함께 정리합니다. 줄을 정리할 자리가 없으면 가까운 빈자리나 안전한 기본 위치를 사용합니다.
+- 기존 스타일을 유지하는 단순 추가 요청에서는 group을 임의 지정하지 마세요. S3처럼 VPC 밖에서 쓰는 서비스를 무관한 subnet이나 VPC에 넣지 마세요.
+- pageId: 대상 페이지 id (선택). 생략하면 현재 보고 있는 페이지에 추가됩니다.
+- 좌표(x, y)는 지정하지 않습니다. 위치는 시스템이 기존 요소와 겹치지 않게 정합니다. 배치·저장 성공은 클라이언트가 확인하므로 message에서 이미 추가 완료되었다고 단정하지 말고 어떤 변경을 요청했는지 설명하세요.
+- 이미 그려진 다이어그램에 서비스를 더할 때는 replace_all이 아니라 add_service를 사용하세요. 기존 템플릿은 변경할 수 있습니다. add_service는 관련 서비스 줄의 위치를 정리하면서 기존 요소의 내용·ID·연결 관계·다른 영역과 페이지를 유지합니다.
 
 ### remove_service
 서비스를 다이어그램에서 제거합니다.
@@ -133,6 +189,7 @@ GroupType: 'vpc' | 'subnet_public' | 'subnet_private' | 'az' | 'asg' | 'aws_clou
 ## 제약 조건
 
 - 응답은 반드시 순수 JSON 텍스트로만 반환하세요. 마크다운 코드블록(\`\`\`json ... \`\`\`)이나 기타 포맷팅을 절대 사용하지 마세요.
+- 기존 그림을 유지한 채 변경하는 요청에는 replace_all을 사용하지 마세요. 그림 전체를 새로 만들거나 사용자가 명시적으로 교체를 요청한 경우에만 replace_all을 사용하세요.
 - **절대로 drawio XML을 직접 생성하지 마세요.** replace_all 커맨드 사용 시 params.architecture에 Lightweight_JSON 객체를 넣으세요. params.xml은 사용하지 마세요.
 - 현재 아키텍처에 존재하지 않는 서비스에 대해 remove_service 또는 remove_connection 커맨드를 생성하지 마세요.
 - 커맨드의 serviceType은 반드시 위 서비스 카탈로그에 정의된 type 값을 사용하세요.
@@ -351,6 +408,8 @@ function tryRecoverTruncatedCommands(text) {
 // ---------------------------------------------------------------------------
 
 app.post('/api/chat', async (req, res) => {
+    if (!MODEL_ID) return res.status(503).json({ error: MODEL_NOT_CONFIGURED_MESSAGE });
+
     const { message, architecture, channel, conversationHistory } = req.body;
 
     if (!message) {
@@ -370,14 +429,11 @@ app.post('/api/chat', async (req, res) => {
             modelId: MODEL_ID,
             system: [{ text: systemPrompt }],
             messages,
-            inferenceConfig: {
-                maxTokens: 32768,
-                temperature: 0.1,
-            },
+            ...buildModelOptions(0.1),
         });
 
         const response = await client.send(command);
-        const reply = response.output.message.content[0].text;
+        const reply = extractText(response);
 
         // 응답이 토큰 한도로 잘렸는지 확인
         const stopReason = response.stopReason;
@@ -394,10 +450,7 @@ app.post('/api/chat', async (req, res) => {
 
         res.json(commandResponse);
     } catch (error) {
-        console.error('Bedrock API 에러:', error);
-        res.status(500).json({
-            error: 'AWS Bedrock 통신 중 서버 오류가 발생했습니다.',
-        });
+        sendBedrockError(res, error, 'Bedrock API 에러:', 'AWS Bedrock 통신 중 서버 오류가 발생했습니다.');
     }
 });
 
@@ -406,6 +459,8 @@ app.post('/api/chat', async (req, res) => {
 // ---------------------------------------------------------------------------
 
 app.post('/api/well-architected', async (req, res) => {
+    if (!MODEL_ID) return res.status(503).json({ error: MODEL_NOT_CONFIGURED_MESSAGE });
+
     const { architecture, conversationHistory } = req.body;
 
     try {
@@ -420,22 +475,16 @@ app.post('/api/well-architected', async (req, res) => {
             modelId: MODEL_ID,
             system: [{ text: systemPrompt }],
             messages,
-            inferenceConfig: {
-                maxTokens: 16384,
-                temperature: 0.2,
-            },
+            ...buildModelOptions(0.2),
         });
 
         const response = await client.send(command);
-        const reply = response.output.message.content[0].text;
+        const reply = extractText(response);
 
         const parsed = parseCommandResponse(reply);
         res.json(parsed);
     } catch (error) {
-        console.error('Well-Architected 평가 에러:', error);
-        res.status(500).json({
-            error: 'Well-Architected 평가 중 서버 오류가 발생했습니다.',
-        });
+        sendBedrockError(res, error, 'Well-Architected 평가 에러:', 'Well-Architected 평가 중 서버 오류가 발생했습니다.');
     }
 });
 
@@ -443,7 +492,13 @@ app.post('/api/well-architected', async (req, res) => {
 // 서버 시작
 // ---------------------------------------------------------------------------
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+// 빌드된 웹(dist)만 정적으로 제공한다. 개발 중 dist가 없으면 API만 동작한다.
+const DIST_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist');
+if (fs.existsSync(path.join(DIST_DIR, 'index.html'))) {
+    app.use(express.static(DIST_DIR));
+}
+
+const PORT = process.env.PORT || 3001;
+export const server = app.listen(PORT, () => {
     console.log(`AI Agent Backend running at http://localhost:${PORT}`);
 });

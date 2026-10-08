@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "url": "/api/chat",
+      "status": 503,
+      "pageId": "PcTXquFdPpOWCEBpZO16",
+      "channel": "xml",
+      "historyLength": 0
+    },
+    {
+      "url": "/api/chat",
+      "status": 503,
+      "pageId": "PcTXquFdPpOWCEBpZO16",
+      "channel": "xml",
+      "historyLength": 0
+    }
+  ],
+  "credentialsMissingVisible": true,
+  "inputEnabled": true
+}

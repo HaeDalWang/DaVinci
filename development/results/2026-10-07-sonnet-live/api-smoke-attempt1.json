@@ -1,0 +1,14 @@
+{
+  "scope": "real web API, synthetic architecture, authorized default AWS profile",
+  "model": "global.anthropic.claude-sonnet-5-5",
+  "effort": "medium",
+  "status": 500,
+  "elapsedSeconds": 0.04,
+  "response": {
+    "error": "AWS Bedrock 통신 중 서버 오류가 발생했습니다."
+  },
+  "actualRequests": 1,
+  "tokenUsage": null,
+  "failureStage": "local SDK signing: empty bearer token",
+  "bedrockInvocationCompleted": false
+}

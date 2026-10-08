@@ -35,6 +35,14 @@ const DRAWIO_CONFIG = {
     },
 };
 
+// 페이지 ID 없는 모델을 열면 draw.io의 첫 merge가 성공 응답만 주고 반영되지 않는다.
+function withPageId(xml) {
+    const model = new DOMParser().parseFromString(xml, 'text/xml').documentElement;
+    return model?.localName === 'mxGraphModel'
+        ? `<mxfile><diagram id="${crypto.randomUUID()}" name="페이지-1">${model.outerHTML}</diagram></mxfile>`
+        : xml;
+}
+
 /**
  * draw.io iframe과의 JSON 프로토콜 통신 브릿지
  */
@@ -103,6 +111,7 @@ export class DrawIOBridge {
      * @param {string} xml - mxGraphModel XML 문자열
      */
     loadXml(xml) {
+        xml = withPageId(xml);
         this._currentXml = xml;
         this._postMessage({
             action: 'load',
@@ -111,50 +120,69 @@ export class DrawIOBridge {
         });
     }
 
+    /** 파일 열기는 편집기의 load 성공 응답을 확인한 뒤 완료한다. */
+    loadXmlAndWait(xml) {
+        if (this._pendingCallbacks.has('load')) return Promise.reject(new Error('[Bridge] load 요청이 진행 중입니다.'));
+        xml = withPageId(xml);
+        return new Promise((resolve, reject) => {
+            const requestId = crypto.randomUUID();
+            const timer = setTimeout(() => {
+                this._pendingCallbacks.delete('load');
+                reject(new Error('[Bridge] load 타임아웃 (15s)'));
+            }, 15000);
+            this._pendingCallbacks.set('load', (msg) => {
+                // XML load 응답은 requestId를 돌려주지 않고 입력 XML을 그대로 돌려준다.
+                if (msg.message?.requestId !== requestId && (msg.message || msg.xml !== xml)) return;
+                clearTimeout(timer);
+                this._pendingCallbacks.delete('load');
+                if (msg.error) reject(new Error(msg.error));
+                else {
+                    this._currentXml = xml;
+                    resolve();
+                }
+            });
+            this._postMessage({ action: 'load', xml, autosave: 1, requestId });
+        });
+    }
+
     /**
      * 현재 다이어그램 XML을 반환한다.
-     * 캐시된 _currentXml이 있으면 즉시 반환, 없으면 export 요청.
+     * 편집기에서 최신 상태를 export한다.
      * @returns {Promise<string>} mxGraphModel XML 문자열
      */
-    getCurrentXml() {
-        // save/autosave/loadXml 시 축적된 XML 우선 반환
-        if (this._currentXml && this._currentXml.includes('<mxCell')) {
-            return Promise.resolve(this._currentXml);
-        }
-        return new Promise((resolve, reject) => {
-            const timer = setTimeout(() => {
-                this._exportCallback = null;
-                if (this._currentXml) {
-                    resolve(this._currentXml);
-                } else {
-                    reject(new Error('[Bridge] getCurrentXml 타임아웃 (5s): draw.io 응답 없음'));
-                }
-            }, 5000);
-            this._exportCallback = (data) => {
-                clearTimeout(timer);
-                const xml = data.xml || data.data || '';
-                resolve(xml);
-            };
-            this._postMessage({ action: 'export', format: 'xml' });
-        });
+    async getCurrentXml() {
+        return (await this.getEditingState()).xml;
+    }
+
+    /** 최신 XML과 그 XML의 활성 페이지를 같은 응답에서 읽는다. */
+    async getEditingState() {
+        const { xml, currentPage } = await this.exportDiagram('xml');
+        if (typeof xml !== 'string' || !xml.trim()) throw new Error('[Bridge] XML export 응답이 비어 있습니다.');
+        this._currentXml = xml;
+        return { xml, pageIndex: Number.isInteger(currentPage) && currentPage >= 0 ? currentPage : null };
     }
 
     /**
      * 다이어그램을 PNG/SVG로 내보내기한다.
      * @param {'png'|'svg'|'xml'} format
-     * @returns {Promise<{data: string, xml: string}>}
+     * @returns {Promise<{data: string, xml: string, currentPage: number}>}
      */
     exportDiagram(format) {
+        // ponytail: export 하나만 허용한다. 동시 사용이 필요해지면 요청 큐를 둔다.
+        if (this._exportCallback) return Promise.reject(new Error('[Bridge] export 요청이 진행 중입니다.'));
         return new Promise((resolve, reject) => {
+            const requestId = crypto.randomUUID();
             const timer = setTimeout(() => {
                 this._exportCallback = null;
                 reject(new Error(`[Bridge] exportDiagram(${format}) 타임아웃 (15s)`));
             }, 15000);
             this._exportCallback = (data) => {
+                if (data.message?.requestId !== requestId || data.format !== format) return;
                 clearTimeout(timer);
-                resolve({ data: data.data, xml: data.xml });
+                this._exportCallback = null;
+                resolve({ data: data.data, xml: data.xml, currentPage: data.currentPage });
             };
-            const params = { action: 'export', format };
+            const params = { action: 'export', format, requestId };
             if (format === 'png') {
                 params.scale = 2;
                 params.border = 10;
@@ -171,16 +199,20 @@ export class DrawIOBridge {
      * @returns {Promise<{error: string|null}>}
      */
     merge(xml) {
+        if (this._pendingCallbacks.has('merge')) return Promise.reject(new Error('[Bridge] merge 요청이 진행 중입니다.'));
         return new Promise((resolve, reject) => {
+            const requestId = crypto.randomUUID();
             const timer = setTimeout(() => {
                 this._pendingCallbacks.delete('merge');
                 reject(new Error('[Bridge] merge 타임아웃 (10s)'));
             }, 10000);
             this._pendingCallbacks.set('merge', (msg) => {
+                if (msg.message?.requestId !== requestId) return;
                 clearTimeout(timer);
+                this._pendingCallbacks.delete('merge');
                 resolve({ error: msg.error || null });
             });
-            this._postMessage({ action: 'merge', xml });
+            this._postMessage({ action: 'merge', xml, requestId });
         });
     }
 
@@ -208,6 +240,7 @@ export class DrawIOBridge {
      * @private
      */
     _handleMessage(event) {
+        if (event.origin !== DRAWIO_BASE_URL || event.source !== this._iframe?.contentWindow) return;
         if (!event.data || typeof event.data !== 'string') return;
 
         let msg;
@@ -229,6 +262,7 @@ export class DrawIOBridge {
                 break;
 
             case 'load':
+                this._pendingCallbacks.get('load')?.(msg);
                 break;
 
             case 'save':
@@ -244,14 +278,12 @@ export class DrawIOBridge {
             case 'export':
                 if (this._exportCallback) {
                     this._exportCallback(msg);
-                    this._exportCallback = null;
                 }
                 break;
 
             case 'merge':
                 if (this._pendingCallbacks.has('merge')) {
                     this._pendingCallbacks.get('merge')(msg);
-                    this._pendingCallbacks.delete('merge');
                 }
                 break;
 

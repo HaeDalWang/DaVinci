@@ -1,0 +1,36 @@
+{
+  "records": [
+    {
+      "variant": "hierarchy",
+      "casesChecked": 9,
+      "imagesLoaded": true,
+      "commonScaleVerified": true
+    },
+    {
+      "variant": "horizontal",
+      "casesChecked": 9,
+      "imagesLoaded": true,
+      "commonScaleVerified": true
+    },
+    {
+      "variant": "add-service",
+      "casesChecked": 9,
+      "imagesLoaded": true,
+      "commonScaleVerified": true
+    }
+  ],
+  "scope": "9 cases x 3 variants loaded and checked at 50%; UI function only, not user quality judgment",
+  "finalChecks": {
+    "zoomsChecked": [
+      0.25,
+      0.5,
+      1,
+      2
+    ],
+    "hiddenCssPassed": true,
+    "selectedCase": "kb-homepage-p2",
+    "selectedVariant": "hierarchy",
+    "qualityJudgment": false
+  },
+  "sourceSha256": "e77bbbc8cdf832ef5403ec6c6f85d6a08ddd0ec9b0d07159b056a74f5afa6b28"
+}

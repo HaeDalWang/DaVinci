@@ -1,0 +1,104 @@
+{
+  "origin": "http://localhost:8080",
+  "imports": [
+    {
+      "input": "kb-ra",
+      "download": {
+        "filename": "architecture.drawio",
+        "mime": "application/xml",
+        "sha256": "6ee05e1cb60cfd9efd335d5930f12e420d9e515a557a9f3112545eeca27631e8"
+      },
+      "pages": [
+        {
+          "pageIndex": 0,
+          "counts": {
+            "vertices": 195,
+            "edges": 79,
+            "cells": 285
+          },
+          "preserved": true
+        },
+        {
+          "pageIndex": 1,
+          "counts": {
+            "vertices": 125,
+            "edges": 62,
+            "cells": 198
+          },
+          "preserved": true
+        },
+        {
+          "pageIndex": 2,
+          "counts": {
+            "vertices": 77,
+            "edges": 23,
+            "cells": 104
+          },
+          "preserved": true
+        },
+        {
+          "pageIndex": 3,
+          "counts": {
+            "vertices": 72,
+            "edges": 23,
+            "cells": 99
+          },
+          "preserved": true
+        }
+      ]
+    },
+    {
+      "input": "kb-homepage",
+      "download": {
+        "filename": "architecture.drawio",
+        "mime": "application/xml",
+        "sha256": "3215f2ed2fa7cd13dc31274a40ee0e7ec7cbb81c74115d1f674ebf0f583e994e"
+      },
+      "pages": [
+        {
+          "pageIndex": 0,
+          "counts": {
+            "vertices": 101,
+            "edges": 27,
+            "cells": 139
+          },
+          "preserved": true
+        },
+        {
+          "pageIndex": 1,
+          "counts": {
+            "vertices": 156,
+            "edges": 48,
+            "cells": 216
+          },
+          "preserved": true
+        },
+        {
+          "pageIndex": 2,
+          "counts": {
+            "vertices": 71,
+            "edges": 19,
+            "cells": 102
+          },
+          "preserved": true
+        }
+      ]
+    }
+  ],
+  "syntheticChat": {
+    "request": {
+      "url": "/api/chat",
+      "pageId": "PcTXquFdPpOWCEBpZO16",
+      "channel": "xml"
+    },
+    "mockResponse": true
+  },
+  "selectedPageOnlyAdded": true,
+  "existingCellSubtreesUnchanged": true,
+  "replaceAllRejectedWithoutChanges": true,
+  "undoRestoredDrawing": true,
+  "invalidFilePreservedDrawing": true,
+  "realBedrockTested": false,
+  "nativeDownloadDialogTested": false,
+  "downloadCheck": "Production download button Blob captured into private.local; native browser save bypassed to avoid raw company data outside private artifacts"
+}

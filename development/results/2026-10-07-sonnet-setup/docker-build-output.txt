@@ -1,0 +1,84 @@
+ Image davinci:local Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 502B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.16kB done
+#2 DONE 0.0s
+
+#3 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#3 DONE 1.3s
+
+#4 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#4 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e done
+#4 CACHED
+
+#5 [internal] load metadata for docker.io/library/node:22-alpine
+#5 DONE 1.2s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 297B done
+#6 DONE 0.0s
+
+#7 [build 1/7] FROM docker.io/library/node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
+#7 resolve docker.io/library/node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 done
+#7 DONE 0.0s
+
+#8 [internal] load build context
+#8 transferring context: 22.57kB done
+#8 DONE 0.0s
+
+#9 [runtime 3/7] COPY --from=deps /app/node_modules ./node_modules
+#9 CACHED
+
+#10 [build 2/7] WORKDIR /app
+#10 CACHED
+
+#11 [build 3/7] COPY package.json package-lock.json ./
+#11 CACHED
+
+#12 [deps 4/4] RUN npm ci --omit=dev && npm cache clean --force
+#12 CACHED
+
+#13 [build 4/7] RUN npm ci
+#13 CACHED
+
+#14 [build 5/7] COPY vite.config.js index.html ./
+#14 CACHED
+
+#15 [build 6/7] COPY src ./src
+#15 CACHED
+
+#16 [runtime 4/7] COPY package.json ./
+#16 CACHED
+
+#17 [build 7/7] RUN npm run build
+#17 CACHED
+
+#18 [runtime 5/7] COPY server ./server
+#18 DONE 0.0s
+
+#19 [runtime 6/7] COPY src/core/aws-service-catalog.js ./src/core/aws-service-catalog.js
+#19 DONE 0.0s
+
+#20 [runtime 7/7] COPY --from=build /app/dist ./dist
+#20 DONE 0.0s
+
+#21 exporting to image
+#21 exporting layers 0.1s done
+#21 exporting manifest sha256:3e27655f154e0e6c2c395731908b4908b358dea8cd110b6bfe84785c189031a9 done
+#21 exporting config sha256:51fc367c676c0b2af3be5acdfee29bace7be3a92cc3dafd60b6d758f76e45915 done
+#21 exporting attestation manifest sha256:8197ac03094353c85c03a7974719159ee37725ba402ae48e031f5bd7220bd855 0.0s done
+#21 exporting manifest list sha256:4434157813609a1b38c0004388e2e940b7128d2b5662e5b221667ba43078f94d done
+#21 naming to docker.io/library/davinci:local done
+#21 unpacking to docker.io/library/davinci:local 0.0s done
+#21 DONE 0.1s
+
+#22 resolving provenance for metadata file
+#22 DONE 0.0s
+ Image davinci:local Built
+ Container davinci-web-1 Recreate
+ Container davinci-web-1 Recreated
+ Container davinci-web-1 Starting
+ Container davinci-web-1 Started

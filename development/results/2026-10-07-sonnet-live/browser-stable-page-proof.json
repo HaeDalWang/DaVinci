@@ -1,0 +1,28 @@
+{
+  "captured": {
+    "status": 200,
+    "channel": "xml",
+    "servicesBefore": 0,
+    "connectionsBefore": 0,
+    "response": {
+      "message": "로그 보관용 S3 버킷 한 개를 현재 페이지에 추가했습니다. 다른 요소나 연결은 변경하지 않았습니다.",
+      "commands": [
+        {
+          "type": "add_service",
+          "params": {
+            "serviceType": "s3",
+            "label": "Log Bucket"
+          }
+        }
+      ]
+    }
+  },
+  "applied": true,
+  "filename": "architecture.drawio",
+  "mockResponse": false,
+  "scope": "real browser chat + actual Sonnet 5.5 + real iframe controller, empty synthetic drawing",
+  "verticesAfter": 1,
+  "edgesAfter": 0,
+  "xmlSha256": "092685201878a35b4bcf29a2d4b55013948379bcb62747ed13a0a1c6c50f4f37",
+  "modelInferenceVerified": true
+}

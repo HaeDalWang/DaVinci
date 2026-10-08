@@ -1,0 +1,8 @@
+
+ RUN  v4.1.2 /Users/baeseungdo/work/DaVinci
+
+
+ Test Files  16 passed (16)
+      Tests  196 passed (196)
+   Start at  09:29:29
+   Duration  4.82s (transform 317ms, setup 0ms, import 705ms, tests 6.42s, environment 7.46s)

@@ -1,0 +1,42 @@
+{
+  "filename": "architecture.drawio",
+  "mime": "application/xml",
+  "sha256": "5eb102642d4674d3306dc69edda087020933d09fc38071d578e51316d81aa73a",
+  "storageMatches": false,
+  "pages": [
+    {
+      "pageIndex": 0,
+      "counts": {
+        "cells": 139,
+        "vertices": 101,
+        "edges": 27
+      },
+      "countsPreserved": true,
+      "idsPreserved": true,
+      "pageIdPreserved": true
+    },
+    {
+      "pageIndex": 1,
+      "counts": {
+        "cells": 216,
+        "vertices": 156,
+        "edges": 48
+      },
+      "countsPreserved": true,
+      "idsPreserved": true,
+      "pageIdPreserved": true
+    },
+    {
+      "pageIndex": 2,
+      "counts": {
+        "cells": 102,
+        "vertices": 71,
+        "edges": 19
+      },
+      "countsPreserved": true,
+      "idsPreserved": true,
+      "pageIdPreserved": true
+    }
+  ],
+  "downloadArtifact": "development/results/2026-10-07-docker-use/private.local/kb-homepage-download.drawio"
+}

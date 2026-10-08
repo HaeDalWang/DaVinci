@@ -1,0 +1,16 @@
+# 화이트리스트: 빌드에 필요한 파일만 컨텍스트로 보낸다.
+*
+
+!package.json
+!package-lock.json
+!vite.config.js
+!index.html
+!server/
+!src/
+
+# 화이트리스트 안에서도 제외
+**/__tests__
+**/.DS_Store
+**/.env*
+**/*.local
+**/*.log

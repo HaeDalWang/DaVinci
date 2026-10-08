@@ -1,0 +1,10 @@
+{
+  "scope": "production Docker UI, synthetic model response, active KB page only",
+  "sameParentAndStyle": true,
+  "addedSize": {
+    "width": "50",
+    "height": "50"
+  },
+  "realModelResponse": false,
+  "actualBuiltFrontend": true
+}

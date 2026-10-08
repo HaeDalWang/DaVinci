@@ -23,7 +23,10 @@
       </div>
     </div>
     <div class="toolbar__center">
-      <button id="btn-align" class="toolbar__btn toolbar__btn--action" title="아키텍처 자동 정렬">
+      <button id="btn-open" type="button" class="toolbar__btn" disabled>그림 열기</button>
+      <input id="diagram-file-input" type="file" accept=".drawio,.xml" aria-label="draw.io 그림 파일" hidden>
+      <button id="btn-download" type="button" class="toolbar__btn" disabled>다운로드</button>
+      <button id="btn-align" class="toolbar__btn toolbar__btn--action" disabled title="원본을 보존하는 정렬 기능을 준비 중입니다">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
           <line x1="21" y1="10" x2="3" y2="10" />

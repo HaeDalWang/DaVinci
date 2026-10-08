@@ -1,0 +1,29 @@
+{
+  "captured": {
+    "status": 200,
+    "channel": "xml",
+    "servicesBefore": 0,
+    "connectionsBefore": 0,
+    "response": {
+      "message": "로그 보관용 S3 버킷 한 개를 'Log Bucket'이라는 라벨로 추가했습니다. 다른 요소나 연결은 변경하지 않았습니다.",
+      "commands": [
+        {
+          "type": "add_service",
+          "params": {
+            "serviceType": "s3",
+            "label": "Log Bucket",
+            "pageId": "49056ea4-537f-4f45-a8b3-a4c3b882f4d3"
+          }
+        }
+      ]
+    }
+  },
+  "applied": true,
+  "filename": "architecture.drawio",
+  "mockResponse": false,
+  "scope": "real browser chat + actual Sonnet 5.5 + real iframe controller, empty synthetic drawing",
+  "verticesAfter": 1,
+  "edgesAfter": 0,
+  "xmlSha256": "2fbd48733da505234f35604ab1ef47e7140788df6e0851222ef970442e4e3dc5",
+  "modelInferenceVerified": true
+}

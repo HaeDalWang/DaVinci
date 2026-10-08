@@ -1,0 +1,21 @@
+{
+  "scope": "real web API, synthetic architecture, authorized default AWS profile",
+  "model": "global.anthropic.claude-sonnet-5-5",
+  "effort": "medium",
+  "status": 200,
+  "elapsedSeconds": 1.559,
+  "response": {
+    "message": "로그 보관용 S3 버킷 1개를 현재 페이지에 추가했습니다. 다른 요소는 변경하지 않았으며, 연결은 요청하지 않으셔서 추가하지 않았습니다.",
+    "commands": [
+      {
+        "type": "add_service",
+        "params": {
+          "serviceType": "s3",
+          "label": "Log Bucket"
+        }
+      }
+    ]
+  },
+  "attempt": 2,
+  "tokenUsage": null
+}

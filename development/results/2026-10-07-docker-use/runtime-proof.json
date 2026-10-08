@@ -1,0 +1,23 @@
+{
+  "sourceSha256": {
+    "Dockerfile": "c623e09263ae928383d984962f7c966a27472a4ed286d6a406f04214a6c24266",
+    "compose.yaml": "6cf1b1577d090faaf95e1d1524099b0a8b5443dababcb4600018d4d297d1a16a",
+    ".dockerignore": "1e3e6a05ec78ea4d317e4aae2b45476d5484a442ad5153d2eaad510207ac25ee",
+    "server/index.js": "971ec17cd6b4ab794e573a1f0a794bca75eb0517029d20fdd8a92f9afcaa531e",
+    "index.html": "f1866fdd09254e157ffd82204e8abe90185957ff47910f100b88e2b87cb63f4f",
+    "vite.config.js": "f2ef434e65aeabeb2b8457e0e70d4c98efaa8618f2576bd3e36ef01456924b65",
+    "src/main.js": "2a6dee365ef58832494bd6e9ae96d163638d71d1a8b65b5e69a8139672b116e6",
+    "src/components/sidebar.js": "2ddb25b7a6044c6c1a0cabfd0531a92d70e2ff9afbe89a2c2a767b6e22a9d560",
+    "src/components/toolbar.js": "c22f9543ad19cd7dba7ae2fc20049c0674b9d9f164502922d65062d371ba99b3",
+    "src/core/channel-router.js": "3dd19d3fe9e5d7697d817c311f6ea1a3f53b7f9f872b2d805da46a60586f31d9",
+    "src/core/drawio-bridge.js": "ccfb8ffbcb7fa2601396fc77947af87c9f6ac122a30e6aa10e6cb7f61a863380",
+    "src/core/diagram-controller.js": "291eb65091079636e1b96468bec0ee7a6831a20464ecac90618f1d03eaad3f7b",
+    "development/tools/verify-docker-use.py": "9b1252114ba1344b014700ef41ac1322a6a19c81ed9268184c027e5127cf3e1e"
+  },
+  "servedAsset": "/assets/index-DbN1wO44.js",
+  "servedAssetMatchesBuild": true,
+  "assetSha256": "4fe8c0fdbdbfc5415019791e9b490bffd31e45f8b38ef5a8f8ad7f8104fcf598",
+  "containerHealthy": true,
+  "modelConfigured": false,
+  "realBedrockCalls": 0
+}

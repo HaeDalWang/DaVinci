@@ -10,10 +10,71 @@ import { showAlignModal } from './align-modal.js';
  * @param {Function} options.onAnalyze - 분석 버튼 클릭 콜백
  * @param {Function} options.onOptimize - 최적화 팁 버튼 클릭 콜백
  */
-export function initToolbar(bridge, { onAnalyze, onOptimize }) {
+export function initToolbar(bridge, { onAnalyze, onOptimize, onOpen }) {
     const btnAlign = document.getElementById('btn-align');
     const btnAnalyze = document.getElementById('btn-analyze');
     const btnOptimize = document.getElementById('btn-optimize');
+    const btnOpen = document.getElementById('btn-open');
+    const btnDownload = document.getElementById('btn-download');
+    const fileInput = document.getElementById('diagram-file-input');
+
+    bridge.onReady(() => {
+        btnOpen.disabled = false;
+        btnDownload.disabled = false;
+    });
+    btnOpen.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        if (document.querySelector('#chat-messages [id^="loading-"]')) {
+            showToast('AI 응답이 끝난 뒤 그림을 열어주세요.', 'info');
+            fileInput.value = '';
+            return;
+        }
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        btnOpen.disabled = btnDownload.disabled = chatInput.disabled = chatSend.disabled = true;
+        try {
+            const xml = await file.text();
+            const doc = new DOMParser().parseFromString(xml, 'text/xml');
+            if (doc.querySelector('parsererror') || !['mxfile', 'mxGraphModel'].includes(doc.documentElement.tagName)) {
+                throw new Error('올바른 .drawio 또는 XML 그림 파일을 선택해주세요.');
+            }
+            const top = doc.documentElement;
+            if ((top.tagName === 'mxfile' && ![...top.children].some(el => el.tagName === 'diagram'))
+                || (top.tagName === 'mxGraphModel' && ![...top.children].some(el => el.tagName === 'root'))) {
+                throw new Error('파일에 그림 데이터가 없습니다.');
+            }
+            const previousXml = await bridge.getCurrentXml();
+            await bridge.loadXmlAndWait(xml);
+            onOpen?.(previousXml);
+            try {
+                localStorage.setItem('davinci_diagram', xml);
+            } catch {
+                showToast('브라우저에 저장하지 못했습니다. 다운로드로 파일을 보관해주세요.', 'error');
+            }
+            showToast('그림을 열었습니다. 변경 결과는 다운로드로 저장하세요.', 'success');
+        } catch (error) {
+            showToast(`그림 열기 실패: ${error.message}`, 'error');
+        } finally {
+            btnOpen.disabled = btnDownload.disabled = chatInput.disabled = false;
+            chatSend.disabled = !chatInput.value.trim();
+            fileInput.value = '';
+        }
+    });
+    btnDownload.addEventListener('click', async () => {
+        try {
+            const xml = await bridge.getCurrentXml();
+            const url = URL.createObjectURL(new Blob([xml], { type: 'application/xml' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'architecture.drawio';
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (error) {
+            showToast(`다운로드 실패: ${error.message}`, 'error');
+        }
+    });
 
 
     // 아키텍처 정렬 — 레이아웃 프리셋 모달 표시

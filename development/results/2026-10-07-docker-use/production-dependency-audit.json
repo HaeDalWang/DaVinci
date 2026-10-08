@@ -1,0 +1,61 @@
+{
+  "source": "npm audit --omit=dev",
+  "counts": {
+    "info": 0,
+    "low": 1,
+    "moderate": 3,
+    "high": 3,
+    "critical": 1,
+    "total": 8
+  },
+  "packages": [
+    {
+      "name": "@aws-sdk/xml-builder",
+      "severity": "moderate",
+      "direct": false,
+      "fixAvailable": true
+    },
+    {
+      "name": "body-parser",
+      "severity": "low",
+      "direct": false,
+      "fixAvailable": true
+    },
+    {
+      "name": "express-rate-limit",
+      "severity": "moderate",
+      "direct": true,
+      "fixAvailable": true
+    },
+    {
+      "name": "fast-xml-parser",
+      "severity": "high",
+      "direct": false,
+      "fixAvailable": true
+    },
+    {
+      "name": "ip-address",
+      "severity": "high",
+      "direct": false,
+      "fixAvailable": true
+    },
+    {
+      "name": "path-to-regexp",
+      "severity": "high",
+      "direct": false,
+      "fixAvailable": true
+    },
+    {
+      "name": "proxy-addr",
+      "severity": "critical",
+      "direct": false,
+      "fixAvailable": true
+    },
+    {
+      "name": "qs",
+      "severity": "moderate",
+      "direct": false,
+      "fixAvailable": true
+    }
+  ]
+}

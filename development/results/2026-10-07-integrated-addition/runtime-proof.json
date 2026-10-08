@@ -1,0 +1,15 @@
+{
+  "health": {
+    "status": "ok",
+    "modelConfigured": true
+  },
+  "modelId": "global.anthropic.claude-sonnet-5-5",
+  "effort": "medium",
+  "modelCallsThisTask": 0,
+  "customerDataSubmittedToModel": false,
+  "tests": 203,
+  "testFiles": 16,
+  "buildPassed": true,
+  "comparisonViewed": true,
+  "newContainerHealthy": true
+}

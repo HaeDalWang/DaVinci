@@ -1,0 +1,32 @@
+{
+  "configuration": {
+    "model": "global.anthropic.claude-sonnet-5-5",
+    "region": "ap-northeast-2",
+    "authEnvironmentPresent": false,
+    "awsConfigMounted": false
+  },
+  "health": {
+    "status": "ok",
+    "modelConfigured": true
+  },
+  "routes": {
+    "/api/chat": {
+      "status": 503,
+      "body": {
+        "error": "AWS 인증이 연결되지 않았습니다. AWS 자격 증명 또는 AWS_BEARER_TOKEN_BEDROCK을 서버 환경에 설정한 뒤 다시 실행해주세요."
+      }
+    },
+    "/api/well-architected": {
+      "status": 503,
+      "body": {
+        "error": "AWS 인증이 연결되지 않았습니다. AWS 자격 증명 또는 AWS_BEARER_TOKEN_BEDROCK을 서버 환경에 설정한 뒤 다시 실행해주세요."
+      }
+    }
+  },
+  "actualModelInferenceTested": false,
+  "sourceSha256": {
+    "server/index.js": "745fb0bf351c6485ea8f99d520502147c73f32aea32dd6975c3ffefcb2463351",
+    "compose.yaml": "ac609c288e85a60b5a456b706172f26fc8d03a3ef67d06da230188bb874324b9",
+    "tests/server-sonnet.test.js": "8962c7a65319fbaab08a77cde0687def9ec5cde0c9db707129db9452c471c1fe"
+  }
+}

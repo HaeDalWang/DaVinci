@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Local architecture references
+/drawio-sample/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

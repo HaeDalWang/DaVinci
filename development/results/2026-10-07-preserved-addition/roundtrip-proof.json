@@ -1,0 +1,145 @@
+{
+  "scope": "original whole files loaded into real draw.io and exported as uncompressed XML; metric fields and ordered page identity checked",
+  "records": [
+    {
+      "xmlFile": "private.local/xml/kb-ra-whole-original.drawio",
+      "sourceSha256": "9e57ca339512c8bc356e91eaf062762285b48d776ab27e1ade9c54a45f9b21aa",
+      "exportFile": "private.local/roundtrip/kb-ra-whole-original.drawio",
+      "exportSha256": "77428299ba335e51df11aee3187a15da128a0fd9da0007561b76edc52e21b22e",
+      "fetchStatus": 200,
+      "loadedAt": "2026-10-07T04:31:52.805Z",
+      "exportedAt": "2026-10-07T04:31:52.843Z",
+      "sourcePageCount": 4,
+      "exportPageCount": 4,
+      "pageIdentityOrderPreserved": true,
+      "pages": [
+        {
+          "id": "_6woe9L5Q8Xcz-eNpBZi",
+          "input": {
+            "cells": 285,
+            "vertices": 195,
+            "edges": 79,
+            "groups": 51
+          },
+          "output": {
+            "cells": 285,
+            "vertices": 195,
+            "edges": 79,
+            "groups": 51
+          },
+          "preservationPassed": true
+        },
+        {
+          "id": "_ZidVH7YzdKDn6GDP9hi",
+          "input": {
+            "cells": 198,
+            "vertices": 125,
+            "edges": 62,
+            "groups": 34
+          },
+          "output": {
+            "cells": 198,
+            "vertices": 125,
+            "edges": 62,
+            "groups": 34
+          },
+          "preservationPassed": true
+        },
+        {
+          "id": "pcGMWNsWkNKhRIoRb7Vs",
+          "input": {
+            "cells": 104,
+            "vertices": 77,
+            "edges": 23,
+            "groups": 14
+          },
+          "output": {
+            "cells": 104,
+            "vertices": 77,
+            "edges": 23,
+            "groups": 14
+          },
+          "preservationPassed": true
+        },
+        {
+          "id": "dRoYGnCYf8xLQt_17jfz",
+          "input": {
+            "cells": 99,
+            "vertices": 72,
+            "edges": 23,
+            "groups": 14
+          },
+          "output": {
+            "cells": 99,
+            "vertices": 72,
+            "edges": 23,
+            "groups": 14
+          },
+          "preservationPassed": true
+        }
+      ]
+    },
+    {
+      "xmlFile": "private.local/xml/kb-homepage-whole-original.drawio",
+      "sourceSha256": "c3475cabbc609fee87d503c528e9f9104467485d835026f68e13c80188c65732",
+      "exportFile": "private.local/roundtrip/kb-homepage-whole-original.drawio",
+      "exportSha256": "a2dd68ddeef5b083c2a4025134dcad51054b2e43b5100012371d899cd92008a2",
+      "fetchStatus": 200,
+      "loadedAt": "2026-10-07T04:31:54.672Z",
+      "exportedAt": "2026-10-07T04:31:54.699Z",
+      "sourcePageCount": 3,
+      "exportPageCount": 3,
+      "pageIdentityOrderPreserved": true,
+      "pages": [
+        {
+          "id": "KLQXjKm4aJ4K4JO641-5",
+          "input": {
+            "cells": 139,
+            "vertices": 101,
+            "edges": 27,
+            "groups": 25
+          },
+          "output": {
+            "cells": 139,
+            "vertices": 101,
+            "edges": 27,
+            "groups": 25
+          },
+          "preservationPassed": true
+        },
+        {
+          "id": "PcTXquFdPpOWCEBpZO16",
+          "input": {
+            "cells": 216,
+            "vertices": 156,
+            "edges": 48,
+            "groups": 41
+          },
+          "output": {
+            "cells": 216,
+            "vertices": 156,
+            "edges": 48,
+            "groups": 41
+          },
+          "preservationPassed": true
+        },
+        {
+          "id": "i8NhiL8yqsVPyXG8hNco",
+          "input": {
+            "cells": 102,
+            "vertices": 71,
+            "edges": 19,
+            "groups": 20
+          },
+          "output": {
+            "cells": 102,
+            "vertices": 71,
+            "edges": 19,
+            "groups": 20
+          },
+          "preservationPassed": true
+        }
+      ]
+    }
+  ]
+}

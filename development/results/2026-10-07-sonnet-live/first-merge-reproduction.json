@@ -1,0 +1,19 @@
+{
+  "scope": "synthetic, native iframe export/load/merge only; no model calls",
+  "standaloneModel": {
+    "verticesBefore": 0,
+    "verticesAfterFirstMerge": 0,
+    "mergeError": null
+  },
+  "sameModelWithExplicitPageId": {
+    "verticesBefore": 0,
+    "verticesAfterFirstMerge": 1,
+    "mergeError": null
+  },
+  "fix": "normalize standalone mxGraphModel to mxfile/diagram with a page id in both bridge load methods",
+  "firstBrowserAttempt": {
+    "httpStatus": 200,
+    "uiCommandSuccess": true,
+    "verticesInDownload": 0
+  }
+}

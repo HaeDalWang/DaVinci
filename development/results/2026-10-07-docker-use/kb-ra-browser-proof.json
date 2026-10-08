@@ -1,0 +1,53 @@
+{
+  "filename": "architecture.drawio",
+  "mime": "application/xml",
+  "sha256": "965cbeacbd264d7c8f5885cf32e35f7dab658531d661e33066173931f9490767",
+  "storageMatches": false,
+  "pages": [
+    {
+      "pageIndex": 0,
+      "counts": {
+        "cells": 285,
+        "vertices": 195,
+        "edges": 79
+      },
+      "countsPreserved": true,
+      "idsPreserved": true,
+      "pageIdPreserved": true
+    },
+    {
+      "pageIndex": 1,
+      "counts": {
+        "cells": 198,
+        "vertices": 125,
+        "edges": 62
+      },
+      "countsPreserved": true,
+      "idsPreserved": true,
+      "pageIdPreserved": true
+    },
+    {
+      "pageIndex": 2,
+      "counts": {
+        "cells": 104,
+        "vertices": 77,
+        "edges": 23
+      },
+      "countsPreserved": true,
+      "idsPreserved": true,
+      "pageIdPreserved": true
+    },
+    {
+      "pageIndex": 3,
+      "counts": {
+        "cells": 99,
+        "vertices": 72,
+        "edges": 23
+      },
+      "countsPreserved": true,
+      "idsPreserved": true,
+      "pageIdPreserved": true
+    }
+  ],
+  "downloadArtifact": "development/results/2026-10-07-docker-use/private.local/kb-ra-download.drawio"
+}

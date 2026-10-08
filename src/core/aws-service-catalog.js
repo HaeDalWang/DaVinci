@@ -52,7 +52,7 @@ export const SERVICE_PATTERNS = [
     { type: 'redshift', tier: 'db', pattern: /resIcon=mxgraph\.aws4\.redshift/ },
     { type: 'sagemaker', tier: 'mgmt', pattern: /resIcon=mxgraph\.aws4\.sagemaker/ },
     { type: 'bedrock', tier: 'mgmt', pattern: /resIcon=mxgraph\.aws4\.bedrock/ },
-    { type: 'rds', tier: 'db', pattern: /resIcon=mxgraph\.aws4\.rds|shape=mxgraph\.aws4\.rds_instance_alt/ },
+    { type: 'rds', tier: 'db', pattern: /resIcon=mxgraph\.aws4\.rds|shape=mxgraph\.aws4\.rds(?:_postgresql)?_instance(?:_alt)?(?:;|$)/ },
     { type: 'aurora', tier: 'db', pattern: /resIcon=mxgraph\.aws4\.aurora/ },
     { type: 'elasticache', tier: 'db', pattern: /resIcon=mxgraph\.aws4\.elasticache|shape=mxgraph\.aws4\.cache_node/ },
     { type: 'dynamodb', tier: 'db', pattern: /resIcon=mxgraph\.aws4\.dynamodb/ },

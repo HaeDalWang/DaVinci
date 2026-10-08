@@ -1,0 +1,20 @@
+{
+  "modelId": "global.anthropic.claude-sonnet-5-5",
+  "region": "ap-northeast-2",
+  "iamCredentialsPresent": true,
+  "bearerVariablePresent": false,
+  "health": {
+    "status": "ok",
+    "modelConfigured": true
+  },
+  "successfulModelCalls": 4,
+  "localSigningFailures": 1,
+  "customerDataSubmitted": false,
+  "tokenUsage": null,
+  "codeHashes": {
+    "src/core/drawio-bridge.js": "0130d1a7aa4a97815fe3727435b74e43bc3b23ed6030b309661944a8cbce7eca",
+    "server/index.js": "745fb0bf351c6485ea8f99d520502147c73f32aea32dd6975c3ffefcb2463351",
+    "compose.yaml": "ac609c288e85a60b5a456b706172f26fc8d03a3ef67d06da230188bb874324b9",
+    "development/tools/start-docker-with-default-aws.py": "3830a9e6e87a9ff67568207a4997b93e978d1c78eadf0b7ab2ce1e82c9a9e3a8"
+  }
+}

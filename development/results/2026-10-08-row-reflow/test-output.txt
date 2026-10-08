@@ -1,0 +1,96 @@
+
+> davinci@0.1.0 test
+> vitest --run
+
+
+ RUN  v4.1.2 /Users/baeseungdo/work/DaVinci
+
+ ❯ tests/server-sonnet.test.js (10 tests | 10 failed) 50024ms
+     × Sonnet 5.5 omits temperature and declares adaptive thinking with medium effort 5004ms
+     × other explicit models keep temperature and get no extra fields 5002ms
+     × returns 500 when the response has no text block 5002ms
+     × maps CredentialsProviderError to a Korean 503 without logging the raw error 5001ms
+     × keeps the 503 contract when no model is configured 5003ms
+     × Sonnet 5.5 omits temperature and declares adaptive thinking with medium effort 5002ms
+     × other explicit models keep temperature and get no extra fields 5001ms
+     × returns 500 when the response has no text block 5002ms
+     × maps CredentialsProviderError to a Korean 503 without logging the raw error 5003ms
+     × keeps the 503 contract when no model is configured 5002ms
+
+ Test Files  1 failed | 16 passed (17)
+      Tests  10 failed | 196 passed (206)
+   Start at  09:27:27
+   Duration  50.21s (transform 247ms, setup 0ms, import 668ms, tests 56.69s, environment 6.88s)
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/server-sonnet.test.js > chat route > Sonnet 5.5 omits temperature and declares adaptive thinking with medium effort
+ FAIL  tests/server-sonnet.test.js > well-architected route > Sonnet 5.5 omits temperature and declares adaptive thinking with medium effort
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/server-sonnet.test.js:70:9
+     68|
+     69| describe.each(Object.keys(ROUTES))('%s route', (name) => {
+     70|     test('Sonnet 5.5 omits temperature and declares adaptive thinking …
+       |         ^
+     71|         send.mockResolvedValue(REASONING_THEN_TEXT);
+     72|         const base = await start(SONNET);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/server-sonnet.test.js > chat route > other explicit models keep temperature and get no extra fields
+ FAIL  tests/server-sonnet.test.js > well-architected route > other explicit models keep temperature and get no extra fields
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/server-sonnet.test.js:88:9
+     86|     });
+     87|
+     88|     test('other explicit models keep temperature and get no extra fiel…
+       |         ^
+     89|         send.mockResolvedValue(REASONING_THEN_TEXT);
+     90|         const base = await start(OTHER);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/server-sonnet.test.js > chat route > returns 500 when the response has no text block
+ FAIL  tests/server-sonnet.test.js > well-architected route > returns 500 when the response has no text block
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/server-sonnet.test.js:100:9
+     98|     });
+     99|
+    100|     test('returns 500 when the response has no text block', async () =…
+       |         ^
+    101|         vi.spyOn(console, 'error').mockImplementation(() => {});
+    102|         send.mockResolvedValue({ output: { message: { content: [{ reas…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/server-sonnet.test.js > chat route > maps CredentialsProviderError to a Korean 503 without logging the raw error
+ FAIL  tests/server-sonnet.test.js > well-architected route > maps CredentialsProviderError to a Korean 503 without logging the raw error
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/server-sonnet.test.js:110:9
+    108|     });
+    109|
+    110|     test('maps CredentialsProviderError to a Korean 503 without loggin…
+       |         ^
+    111|         const errorLog = vi.spyOn(console, 'error').mockImplementation…
+    112|         const err = new Error('secret-detail');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  tests/server-sonnet.test.js > chat route > keeps the 503 contract when no model is configured
+ FAIL  tests/server-sonnet.test.js > well-architected route > keeps the 503 contract when no model is configured
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/server-sonnet.test.js:125:9
+    123|     });
+    124|
+    125|     test('keeps the 503 contract when no model is configured', async (…
+       |         ^
+    126|         const base = await start('');
+    127|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
