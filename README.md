@@ -1,104 +1,130 @@
-# DaVinci — AWS 아키텍처 다이어그램 에디터
+# DaVinci
 
-DrawIO 임베드 모드 기반 AWS 아키텍처 다이어그램 에디터. AI Agent가 자연어로 다이어그램을 생성·수정·분석합니다.
+DaVinci는 **앱을 이루는 부품과 그 연결을 그린 "지도"(아키텍처 그림)**를 고치는 웹 도구입니다.
+이미 가진 draw.io 그림을 열고, "로그 보관용 S3 추가해줘"처럼 말로 부탁하면 AI가 그림에 부품을 넣어 줍니다.
+핵심 목표는 하나입니다. **원래 그림을 망가뜨리지 않고, 새 부품을 원래 그림에 어울리게 끼워 넣는 것.**
 
-## 주요 기능
+## 용어 먼저
 
-- 자연어 채팅으로 AWS 아키텍처 다이어그램 생성 및 수정 (Amazon Bedrock)
-- AWS 서비스 자동 감지, 연결 관계 분석, 카테고리 분류
-- AWS Well-Architected Framework 5-Pillar 평가
-- 자동 정렬: AWS Cloud > VPC > AZ > Subnet 계층 구조 배치
-- 최적화 팁 엔진 (규칙 기반 모범사례 검사)
-- 다이어그램 되돌리기 (스냅샷 관리)
-- localStorage 자동 저장 (debounce + 페이지 종료 시 즉시 저장)
+- **AWS**: 아마존이 빌려주는 클라우드 서비스 모음입니다. 내 컴퓨터가 아니라 인터넷 너머의 컴퓨터를 씁니다.
+- **S3**: 파일 보관함입니다.
+- **EC2**: 빌려 쓰는 컴퓨터입니다.
+- **RDS**: 데이터베이스(정보를 정리해 두는 서랍장)입니다.
+- **Lambda**: 필요할 때만 실행되는 작은 프로그램입니다.
 
-## 퀵스타트
+## 그림은 이렇게 생겼어요
+
+![draw.io에서 연 합성 아키텍처 그림: 아이콘(부품)과 화살표(연결)가 두 줄로 놓여 있다 (검사를 위해 만든 예시)](development/results/2026-10-06-baseline/multi-az-original.png)
+
+*2026-10-06 기준선 측정 때 draw.io에서 연 공개용으로 검사를 위해 만든 예시 그림입니다(회사 실제 그림이 아닙니다).
+두 줄의 아이콘·그룹·연결을 유지하는지 보는 입력이며, 최신 서비스 추가 결과가 아닙니다.
+네모난 **아이콘이 부품**이고 **화살표가 부품 사이의 연결**입니다.*
+
+## 무엇을 해 주나요
+
+기존 그림에 S3 같은 서비스를 추가할 때 이렇게 동작합니다.
+
+- 기존 아이콘, 고유번호(ID), 메모, 라벨, 연결선, 다른 페이지는 각각 그대로 둡니다.
+- 같은 서비스가 이미 있으면 그 스타일·크기·소속 그룹을 참고하고, 같은 줄에 공간이 있으면 그 줄 안에 끼워 넣습니다.
+  이때 그 줄의 아이콘 몇 개가 옆으로 조금 움직일 수 있습니다.
+- 새 아이콘이 다른 아이콘과 겹치지 않는지 확인합니다(그룹 틀 안에 들어가는 것은 오류가 아닙니다). 자리가 부족하면 기존 방식으로 빈자리에 놓습니다.
+
+## 기준선과 합격 기준
+
+**기준선**은 고치기 전에 같은 그림으로 남겨 둔 성적표입니다. 고친 뒤 같은 방법으로 재서 나아졌는지 비교합니다.
+처음 도구는 그림을 정리하다가 부품과 연결을 잃어버리는 문제가 있었습니다.
+
+![기준선 비교 화면: 왼쪽 원본, 가운데 계층 정렬, 오른쪽 좌→우 정렬](development/results/2026-10-06-baseline-v2/comparison-page.png)
+
+*2026-10-06 비교 화면입니다. 왼쪽이 원본, 가운데가 계층 정렬, 오른쪽이 좌→우 정렬입니다.
+각 창은 일부분만 보여 주며 전체 판정은 [측정표](development/results/2026-10-06-baseline-v2/table.md)를 보세요.
+초기의 실패 결과이고 현재 합격 스크린샷이 아닙니다.*
+
+합격하려면 아래를 모두 지켜야 합니다.
+
+| 지켜야 할 것 | 뜻 |
+|---|---|
+| 기존 것 유지 | 부품 고유번호(ID)·메모·그룹·연결·다른 페이지가 그대로 |
+| 관련 줄만 이동 | 새 아이콘이 들어가는 줄의 아이콘만 움직여도 됨 |
+| 참고해서 만들기 | 참고할 같은 서비스가 있을 때 그 스타일·크기·그룹을 따라감 (없어서 빈자리에 놓는 fallback도 합격 가능) |
+| 겹침 0 | 새 아이콘 영역이 다른 아이콘과 겹치지 않음 (선·글자 겹침은 아직 안 잼) |
+
+초기 기록의 예: example1은 연결선이 29개였는데 정렬 뒤 2개만 남았습니다
+([측정표](development/results/2026-10-06-baseline-v2/table.md)).
+초기 KB 그림의 서비스 추가도 보존 검사를 통과하지 못했습니다
+([KB 기준선](development/results/2026-10-07-kb-baseline/README.md)).
+이 초기 기록과 아래 최신 검사는 입력이 달라서 같은 성능끼리의 비교로 읽으면 안 됩니다.
+
+## 실행하기 (Docker)
+
+준비물: Docker(설치 후 실행 중), Python 3, AWS CLI.
 
 ```bash
-npm install
+docker compose up -d --build
 ```
 
-`.env` 파일을 프로젝트 루트에 생성:
+브라우저에서 <http://localhost:8080> 을 엽니다. 인증을 따로 연결하지 않았다면 **화면만** 쓸 수 있고 AI는 동작하지 않습니다.
+(실행 환경에 AWS 인증 환경변수가 이미 있으면 AI도 동작합니다.)
+
+AI까지 쓰려면 AWS CLI의 `default` 프로필에 Amazon Bedrock 사용 권한을 준비한 뒤 실행합니다.
+자격 증명 값을 파일에 적을 필요는 없습니다.
+
+```bash
+python3 development/tools/start-docker-with-default-aws.py
+```
+
+- 기본 모델은 `global.anthropic.claude-sonnet-5-5`이고 생각의 깊이(effort)는 `medium`, 즉 보통 정도입니다.
+- AI 요청은 AWS를 실제로 호출하므로 **사용 요금이 생길 수 있습니다.**
+
+## 사용 순서
+
+1. **그림 열기**로 `.drawio` 파일을 엽니다.
+2. 고칠 페이지를 고릅니다.
+3. 채팅창에 `로그 보관용 S3 추가해줘`처럼 적습니다.
+4. 그림에서 새 아이콘을 확인하고, 마음에 들면 **다운로드**합니다.
+
+## 개발자용 실행
+
+먼저 프로젝트 루트의 `.env`에 환경변수를 준비합니다.
 
 ```
 AWS_REGION=us-east-1
-BEDROCK_MODEL_ID=global.anthropic.claude-sonnet-4-6
+BEDROCK_MODEL_ID=global.anthropic.claude-sonnet-5-5
 ALLOWED_ORIGINS=http://localhost:5173
 ```
 
-> AWS 자격 증명은 환경변수 또는 `~/.aws/credentials`로 설정하세요.
+AWS 자격 증명은 환경변수나 로컬 AWS 프로필에서 읽습니다. 키를 저장소 파일에 넣지 마세요.
 
 ```bash
+npm install
 npm run dev
 ```
 
-프론트엔드 `http://localhost:5173`, 백엔드 `http://localhost:3000`으로 실행됩니다.
+화면은 <http://localhost:5173>, 서버는 3001번 포트입니다.
 
-## 명령어
-
-| 명령어 | 설명 |
-|---|---|
-| `npm install` | 의존성 설치 |
-| `npm run dev` | 프론트엔드 + 백엔드 동시 실행 |
-| `npm run dev:frontend` | Vite 개발 서버만 실행 |
-| `npm run dev:server` | Express 백엔드만 실행 (nodemon) |
-| `npm run build` | 프로덕션 빌드 |
-| `npm test` | 테스트 실행 (vitest --run) |
-
-## 프로젝트 구조
-
-```
-├── index.html                     # SPA 진입점 (한국어 UI)
-├── server/
-│   └── index.js                   # Express 백엔드 — Bedrock AI 프록시
-├── src/
-│   ├── main.js                    # 앱 초기화, 브릿지·툴바·사이드바 연결
-│   ├── components/                # UI 컴포넌트 (vanilla JS)
-│   │   ├── toolbar.js             # 상단 툴바: 정렬, 분석, 최적화
-│   │   ├── sidebar.js             # 사이드바: AI 채팅, 되돌리기
-│   │   ├── align-modal.js         # 정렬 프리셋 선택 모달
-│   │   ├── analysis-modal.js      # 분석 결과 모달
-│   │   ├── well-architected-modal.js  # WA 평가 모달
-│   │   └── toast.js               # 토스트 알림
-│   ├── core/                      # 비즈니스 로직 (DOM 비의존)
-│   │   ├── utils.js               # 공통 유틸리티 (escapeHtml 등)
-│   │   ├── drawio-bridge.js       # draw.io iframe 통신
-│   │   ├── aws-service-catalog.js # AWS 서비스 카탈로그
-│   │   ├── aws-architecture-builder.js  # 계층 구조 재구성
-│   │   ├── json-to-xml-builder.js # Lightweight_JSON → XML
-│   │   ├── xml-summarizer.js      # XML → Lightweight_JSON
-│   │   ├── layout-engine.js       # 자동 레이아웃 좌표 계산
-│   │   ├── channel-router.js      # 의도 기반 채널 라우팅
-│   │   ├── diagram-controller.js  # AI 커맨드 실행
-│   │   ├── conversation-context.js # 대화 히스토리 관리
-│   │   ├── snapshot-manager.js    # 되돌리기 스냅샷
-│   │   ├── aws-analyzer.js        # 아키텍처 분석 + 최적화 규칙
-│   │   └── __tests__/             # 테스트 (unit + property-based)
-│   └── styles/
-│       └── index.css
-├── vite.config.js
-└── package.json
+```bash
+npm test         # 테스트
+npm run build    # 빌드
 ```
 
-## 아키텍처
+## 어디까지 확인했나요
 
-- **Components → Core** 단방향 의존. Core 모듈은 component를 import하지 않음.
-- **Lightweight_JSON** (`{ groups, services, connections }`)이 AI, XML 파서, 레이아웃 엔진 간 중앙 교환 포맷.
-- **AI 채팅 흐름**: 사용자 메시지 → ChannelRouter → `/api/chat` → DiagramController → DrawIOBridge
-- **정렬 흐름**: XML → `summarizeXml()` → `reorganizeForAlignment()` → `buildXml()` → DrawIOBridge
+확인한 것:
 
-## 기술 스택
+- 2026-10-08 검사 결과, 테스트 17개 파일 225개와 빌드가 통과했습니다.
+- 실제 KB 그림 7페이지에 S3·EC2·RDS·Lambda를 각각 추가한 **28건**을 검사했습니다(2026-10-08).
+  그림 파일의 내용과 편집 코드를 컴퓨터에서 자동으로 검사한 **보존 검사**이고, 28건을 브라우저로 눈으로 본 것은 아닙니다.
+  기존 아이콘·ID·메모·연결선·다른 페이지 유지와 새 아이콘 겹침 0을 확인했습니다.
+- EC2·Lambda처럼 "같은 서비스가 있는 줄에 끼워 넣기"는 검사용 예시 그림(합성 시험)으로만 확인했습니다.
 
-- Vanilla JavaScript (ES modules) — 프레임워크 없음
-- Vite v6 (프론트엔드)
-- Express v5 + `express-rate-limit` (백엔드)
-- Amazon Bedrock Converse API (AI)
-- Vitest v4 + fast-check v4 (테스트)
+아직 안 한 것:
 
-## 환경변수
+- 선이 서로 교차하거나 글자(라벨)가 겹치는 정도를 재는 자동 지표는 없습니다.
+- 자동 정렬 기능은 "원래 그림 보존"이 검증되지 않아 꺼 두었습니다.
+- 기존 그림을 참고해 **새 아키텍처를 처음부터 만드는 품질**은 검증하지 않았습니다.
+- 2026-10-08 확인 당시, 최신 수정(RDS 표기 인식 등)은 돌고 있던 Docker에 아직 반영되지 않았습니다.
 
-| 변수 | 설명 | 기본값 |
-|---|---|---|
-| `AWS_REGION` | AWS 리전 | `us-east-1` |
-| `BEDROCK_MODEL_ID` | Bedrock 모델 ID | `anthropic.claude-3-5-sonnet-20240620-v1:0` |
-| `ALLOWED_ORIGINS` | CORS 허용 origin (쉼표 구분) | `http://localhost:5173` |
+## 더 보기
+
+- 개발 기록: [development/README.md](development/README.md), [backlog](development/backlog.md)
+- 최신 검증 상세: [multiservice 결과](development/results/2026-10-08-multiservice/README.md)
