@@ -25,7 +25,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY package.json ./
 COPY server ./server
 # server/index.js가 import하는 파일만 포함한다.
-COPY src/core/aws-service-catalog.js ./src/core/aws-service-catalog.js
+COPY src/core/aws-service-catalog.js src/core/generation-flow.js ./src/core/
 COPY --from=build /app/dist ./dist
 USER node
 EXPOSE 3000

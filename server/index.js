@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import { getAllServicesAsJSON } from '../src/core/aws-service-catalog.js';
+import { parseQuestions } from '../src/core/generation-flow.js';
 
 dotenv.config();
 
@@ -198,6 +199,73 @@ GroupType: 'vpc' | 'subnet_public' | 'subnet_private' | 'az' | 'asg' | 'aws_clou
 }
 
 /**
+ * 새 그림 생성 모드 전용 프롬프트. 기존 편집 커맨드는 알려주지 않는다.
+ * 선택한 페이지의 내용은 보내지 않는다(스타일 참고는 클라이언트가 코드로 처리하며 요구사항이 아니다).
+ */
+function buildGenerationPrompt() {
+    const serviceCatalog = JSON.stringify(getAllServicesAsJSON(), null, 2);
+
+    return `당신은 AWS 아키텍처 구조를 정리하는 DaVinci AI Agent입니다.
+사용자가 새 그림을 요청하면, 사용자가 말한 사실만 구조화된 JSON으로 옮깁니다. 그림은 시스템이 그립니다.
+
+## 응답 형식
+반드시 순수 JSON 텍스트만 반환하세요. 마크다운 코드블록을 쓰지 마세요.
+
+{
+  "message": "짧은 한국어 설명 (최대 3문장)",
+  "questions": ["사용자에게 물어볼 질문"],
+  "commands": [
+    { "type": "generate_architecture",
+      "params": { "title": "새 페이지 이름(선택)", "architecture": { "groups": [], "services": [], "connections": [] } } }
+  ]
+}
+
+- 지원하는 커맨드는 generate_architecture 하나뿐입니다. add_service, replace_all 등은 쓰지 마세요.
+- 질문이 하나라도 있으면 "commands"는 반드시 빈 배열 []로 두고 "questions"에 질문만 적으세요.
+- 질문이 없고 구조가 충분히 명시되었을 때만 generate_architecture를 한 번 반환하세요.
+
+## architecture 규칙
+- groups: { "id", "type", "label", "children": [하위 그룹 id 또는 서비스 id] }. type: aws_cloud | vpc | az | subnet_public | subnet_private | asg | eks_cluster
+- services: { "id", "type", "label", "group": 소속 그룹 id 또는 null }. type은 아래 카탈로그의 값만 쓰세요.
+- connections: { "from", "to", "label"(선택) }. from/to는 서비스 또는 그룹 id입니다.
+- id는 영문·숫자·_ . - 로 된 짧은 문자열이며 모두 서로 달라야 합니다. "0"과 "1"은 쓰지 마세요.
+- 서비스가 그룹 밖(최상위)이면 "group": null 로 명시하세요. 그룹이 있는데 소속을 모르겠으면 질문하세요.
+- 사용자가 연결을 말하지 않았으면 "connections" 키를 아예 빼고 연결을 질문하세요. 사용자가 연결이 없다고 말한 경우에만 "connections": [] 로 두세요.
+
+## 절대 하지 말 것
+- 사용자가 말하지 않은 AZ, 서브넷, 서비스, 연결, 보안 구성을 모범사례라는 이유로 만들어 넣지 마세요. 필요해 보이면 질문이나 제안(message)으로만 말하세요.
+- 선택한 페이지의 기존 내용은 이 대화에 없습니다. 기존 그림의 리소스를 요구사항으로 가정하지 마세요.
+- 구조가 너무 커서 한 번에 다 담기 어렵다면 일부만 만들지 말고, 규모를 줄이거나 나누어 요청해 달라고 questions 없이 message로 안내하고 commands를 []로 두세요.
+- drawio XML을 직접 만들지 마세요.
+
+## 사용 가능한 AWS 서비스 카탈로그
+
+\`\`\`json
+${serviceCatalog}
+\`\`\`
+
+응답은 반드시 한국어로 작성하세요.`;
+}
+
+/** 생성 모드 응답을 정리한다: 잘렸으면 아무것도 실행하지 않고, 질문이 있으면 질문만 남긴다. */
+function finishGenerationResponse(parsed, stopReason) {
+    if (stopReason === 'max_tokens' || parsed._truncated) {
+        return {
+            message: '요청한 구조가 너무 커서 응답이 중간에 끊겼습니다. 일부만 그리지 않고 아무것도 실행하지 않았습니다. 규모를 줄이거나 나누어 다시 요청해주세요.',
+            commands: [],
+            questions: [],
+            truncated: true,
+        };
+    }
+    const { ok, questions } = parseQuestions(parsed.questions);
+    if (!ok) {
+        // 형식이 잘못된 questions를 "질문 없음"으로 보고 commands를 실행하면 안 된다.
+        return { message: '응답의 질문 형식이 올바르지 않아 아무것도 실행하지 않았습니다. 같은 요청을 다시 보내주세요.', commands: [], questions: [], invalid: true };
+    }
+    return { message: parsed.message, commands: questions.length > 0 ? [] : parsed.commands, questions };
+}
+
+/**
  * 채널 유형과 아키텍처 데이터에 따라 컨텍스트 섹션을 추가한다.
  */
 function buildArchitectureContext(channel, architecture) {
@@ -316,7 +384,7 @@ function parseCommandResponse(text) {
         }
         // message 필드가 있지만 commands가 없는 경우
         if (typeof parsed.message === 'string') {
-            return { message: parsed.message, commands: [] };
+            return { message: parsed.message, commands: [], ...(Array.isArray(parsed.questions) && { questions: parsed.questions }) };
         }
         // 유효한 Command_Response가 아닌 JSON
         return { message: text, commands: [] };
@@ -410,17 +478,22 @@ function tryRecoverTruncatedCommands(text) {
 app.post('/api/chat', async (req, res) => {
     if (!MODEL_ID) return res.status(503).json({ error: MODEL_NOT_CONFIGURED_MESSAGE });
 
-    const { message, architecture, channel, conversationHistory } = req.body;
+    const { message, architecture, channel, conversationHistory, mode } = req.body;
 
     if (!message) {
         return res.status(400).json({ error: 'message 필드는 필수입니다.' });
     }
+    if (mode !== undefined && mode !== 'edit' && mode !== 'generate') {
+        return res.status(400).json({ error: 'mode는 edit 또는 generate여야 합니다.' });
+    }
+    const generating = mode === 'generate';
 
     try {
         // 시스템 프롬프트 구성
-        const basePrompt = buildBaseSystemPrompt();
-        const archContext = buildArchitectureContext(channel, architecture);
-        const systemPrompt = basePrompt + archContext;
+        // 생성 모드는 현재 그림의 내용을 모델에 보내지 않는다(선택 페이지는 표현 참고일 뿐 요구사항이 아니다).
+        const systemPrompt = generating
+            ? buildGenerationPrompt()
+            : buildBaseSystemPrompt() + buildArchitectureContext(channel, architecture);
 
         // 대화 히스토리 + 현재 메시지
         const messages = buildMessages(conversationHistory, message);
@@ -443,6 +516,8 @@ app.post('/api/chat', async (req, res) => {
 
         // Command_Response 파싱 (유효하지 않은 JSON이면 텍스트 폴백)
         const commandResponse = parseCommandResponse(reply);
+
+        if (generating) return res.json(finishGenerationResponse(commandResponse, stopReason));
 
         if (commandResponse._truncated) {
             console.warn('[Chat] JSON 파싱 실패 — message만 추출됨 (응답 잘림 가능성)');

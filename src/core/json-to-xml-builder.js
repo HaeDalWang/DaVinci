@@ -3,6 +3,7 @@
 // AI Agent가 출력하는 경량 JSON을 draw.io가 인식하는 XML로 변환한다.
 
 import { calculateLayout } from './layout-engine.js';
+import { routeConnections } from './edge-router.js';
 import { getServiceStyle, getGroupStyle, getServiceDimensions } from './aws-service-catalog.js';
 
 const GENERIC_SERVICE_STYLE =
@@ -24,11 +25,27 @@ function escapeXml(str) {
     .replace(/'/g, '&apos;');
 }
 
+/** 명시적 경로를 가진 연결의 style: 자동 라우팅 키를 빼고 출구·입구 포트를 고정한다(경유점이 그대로 지나가도록). */
+function routedStyle(base, route) {
+  const kept = base.split(';').filter(part => part && !/^(edgeStyle|orthogonalLoop|jettySize|rounded)=/.test(part));
+  const [ex, ey] = route.exit;
+  const [nx, ny] = route.entry;
+  return [...kept, 'rounded=0', `exitX=${ex}`, `exitY=${ey}`, 'exitDx=0', 'exitDy=0', 'exitPerimeter=0',
+    `entryX=${nx}`, `entryY=${ny}`, 'entryDx=0', 'entryDy=0', 'entryPerimeter=0'].join(';') + ';';
+}
+
 /**
  * Lightweight_JSON을 drawio mxGraphModel XML로 변환한다.
  * @param {object} json - Lightweight_JSON (groups, services, connections)
  * @param {object} [options={}] - Layout options forwarded to calculateLayout()
  * @param {string} [options.direction='vertical'] - 'vertical' (default) or 'horizontal'
+ * @param {Record<string, {width: number, height: number}>} [options.serviceSizes] - 타입별 아이콘 크기 override
+ * @param {Record<string, string>} [options.serviceStyles] - 타입별 서비스 스타일 override
+ * @param {Record<string, string>} [options.groupStyles] - 타입별 그룹 스타일 override
+ * @param {string} [options.edgeStyle] - 연결선 기본 스타일 override
+ * @param {boolean} [options.tiered=false] - 신규 생성 전용 배치(calculateLayout에 전달)
+ * @param {boolean} [options.routeEdges=false] - 지원하는 경우에만 명시적 포트·경유점을 만든다(나머지는 기존 라우팅)
+ * @param {boolean} [options.useInputIds=false] - true면 입력 id를 mxCell id로 쓴다(호출자가 유일성·예약값을 검증해야 함)
  * @returns {string} drawio XML 문자열
  */
 export function buildXml(json, options = {}) {
@@ -37,6 +54,7 @@ export function buildXml(json, options = {}) {
   }
 
   const { groups = [], services = [], connections = [] } = json;
+  const { serviceSizes, serviceStyles, groupStyles, edgeStyle: defaultEdgeStyle = DEFAULT_EDGE_STYLE, useInputIds = false } = options;
 
   // 모든 서비스/그룹 id를 수집 (연결 검증용)
   const allIds = new Set();
@@ -78,11 +96,19 @@ export function buildXml(json, options = {}) {
 
   // mxCell id 할당
   for (const g of groups) {
-    groupIdMap.set(g.id, String(nextId++));
+    groupIdMap.set(g.id, useInputIds ? g.id : String(nextId++));
   }
   for (const s of services) {
-    serviceIdMap.set(s.id, String(nextId++));
+    serviceIdMap.set(s.id, useInputIds ? s.id : String(nextId++));
   }
+  // 입력 id를 쓸 때 연결선 id는 입력 id와 겹치지 않게 만든다.
+  const usedCellIds = new Set([...groupIdMap.values(), ...serviceIdMap.values()]);
+  const nextEdgeId = () => {
+    if (!useInputIds) return String(nextId++);
+    let id;
+    do { id = `edge-${nextId++}`; } while (usedCellIds.has(id));
+    return id;
+  };
 
   const cells = [];
 
@@ -97,7 +123,7 @@ export function buildXml(json, options = {}) {
     const parentCellId = parentGroupId ? groupIdMap.get(parentGroupId) : '1';
     const pos = positions[g.id];
 
-    let style = getGroupStyle(g.type);
+    let style = groupStyles?.[g.type] || getGroupStyle(g.type);
     if (!style) {
       console.warn(`buildXml: unknown group type "${g.type}", using default style`);
       style = 'fillColor=none;strokeColor=#232F3E;dashed=1;verticalAlign=top;fontStyle=0;fontColor=#232F3E;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;';
@@ -122,13 +148,13 @@ export function buildXml(json, options = {}) {
     const parentCellId = (s.group && groupIdMap.has(s.group)) ? groupIdMap.get(s.group) : '1';
     const pos = positions[s.id];
 
-    let style = getServiceStyle(s.type);
+    let style = serviceStyles?.[s.type] || getServiceStyle(s.type);
     if (!style) {
       console.warn(`buildXml: unknown service type "${s.type}", using generic style`);
       style = GENERIC_SERVICE_STYLE;
     }
 
-    const dims = getServiceDimensions(s.type) || { width: 78, height: 78 };
+    const dims = serviceSizes?.[s.type] || getServiceDimensions(s.type) || { width: 78, height: 78 };
     // 부모 기준 상대 좌표로 변환
     const parentGroupId = s.group || null;
     const rel = toRelative(s.id, parentGroupId);
@@ -140,23 +166,32 @@ export function buildXml(json, options = {}) {
     );
   }
 
+  // 신규 생성 전용: 지원하는 연결만 명시적 경로를 받는다. 입력 연결에 style이 있으면 존중한다.
+  const routes = options.routeEdges
+    ? routeConnections({ connections, services, groups, positions, parentOf: groupParentMap, groupStyles })
+    : [];
+
   // 연결 edge mxCell 생성
-  for (const conn of connections) {
+  for (const [index, conn] of connections.entries()) {
     // 존재하지 않는 id 참조 검증
     if (!allIds.has(conn.from) || !allIds.has(conn.to)) {
       console.warn(`buildXml: connection references non-existent id (from="${conn.from}", to="${conn.to}"), skipping`);
       continue;
     }
 
-    const edgeId = String(nextId++);
+    const edgeId = nextEdgeId();
     const sourceId = serviceIdMap.get(conn.from) || groupIdMap.get(conn.from);
     const targetId = serviceIdMap.get(conn.to) || groupIdMap.get(conn.to);
-    const edgeStyle = conn.style || DEFAULT_EDGE_STYLE;
+    const route = conn.style ? null : routes[index];
+    const edgeStyle = conn.style || (route ? routedStyle(defaultEdgeStyle, route) : defaultEdgeStyle);
     const label = conn.label || '';
+    const geometry = route
+      ? `<mxGeometry relative="1" as="geometry"><Array as="points">${route.points.map(p => `<mxPoint x="${p.x}" y="${p.y}"/>`).join('')}</Array></mxGeometry>`
+      : `<mxGeometry relative="1" as="geometry"/>`;
 
     cells.push(
       `<mxCell id="${escapeXml(edgeId)}" value="${escapeXml(label)}" style="${escapeXml(edgeStyle)}" edge="1" source="${escapeXml(sourceId)}" target="${escapeXml(targetId)}" parent="1">` +
-      `<mxGeometry relative="1" as="geometry"/>` +
+      geometry +
       `</mxCell>`
     );
   }

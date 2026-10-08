@@ -1,0 +1,12 @@
+
+> davinci@0.1.0 test
+> vitest --run
+
+
+ RUN  v4.1.2 /Users/baeseungdo/work/DaVinci
+
+
+ Test Files  20 passed (20)
+      Tests  301 passed (301)
+   Start at  17:40:17
+   Duration  5.27s (transform 663ms, setup 0ms, import 1.20s, tests 8.67s, environment 9.42s)

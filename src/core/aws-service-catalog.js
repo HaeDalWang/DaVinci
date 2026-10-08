@@ -248,7 +248,7 @@ const GROUP_STYLES = {
  */
 export function getServiceStyle(type) {
     if (!type) return null;
-    return SERVICE_STYLES[type] || null;
+    return Object.hasOwn(SERVICE_STYLES, type) ? SERVICE_STYLES[type] : null;
 }
 
 /**
@@ -258,7 +258,7 @@ export function getServiceStyle(type) {
  */
 export function getGroupStyle(type) {
     if (!type) return null;
-    return GROUP_STYLES[type] || null;
+    return Object.hasOwn(GROUP_STYLES, type) ? GROUP_STYLES[type] : null;
 }
 
 /**
@@ -268,7 +268,7 @@ export function getGroupStyle(type) {
  */
 export function getServiceDimensions(type) {
     if (!type) return null;
-    if (SERVICE_STYLES[type]) {
+    if (Object.hasOwn(SERVICE_STYLES, type)) {
         return { width: 78, height: 78 };
     }
     return null;

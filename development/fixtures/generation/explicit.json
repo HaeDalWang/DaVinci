@@ -1,0 +1,25 @@
+{
+  "groups": [
+    {"id":"cloud","type":"aws_cloud","label":"Example Cloud","children":["vpc","logs"]},
+    {"id":"vpc","type":"vpc","label":"Application VPC","children":["az-a","az-c"]},
+    {"id":"az-a","type":"az","label":"Zone A","children":["public-a","private-a"]},
+    {"id":"az-c","type":"az","label":"Zone C","children":["public-c","private-c"]},
+    {"id":"public-a","type":"subnet_public","label":"Public A","children":["web-a"]},
+    {"id":"private-a","type":"subnet_private","label":"Private A","children":["db-a"]},
+    {"id":"public-c","type":"subnet_public","label":"Public C","children":["web-c"]},
+    {"id":"private-c","type":"subnet_private","label":"Private C","children":["db-c"]}
+  ],
+  "services": [
+    {"id":"web-a","type":"ec2","label":"Application A","group":"public-a"},
+    {"id":"web-c","type":"ec2","label":"Application C","group":"public-c"},
+    {"id":"db-a","type":"rds","label":"Database A","group":"private-a"},
+    {"id":"db-c","type":"rds","label":"Database C","group":"private-c"},
+    {"id":"logs","type":"s3","label":"Log Archive","group":"cloud"}
+  ],
+  "connections": [
+    {"from":"web-a","to":"db-a","label":"Query"},
+    {"from":"web-c","to":"db-c","label":"Query"},
+    {"from":"web-a","to":"logs","label":"Logs"},
+    {"from":"web-c","to":"logs","label":"Logs"}
+  ]
+}

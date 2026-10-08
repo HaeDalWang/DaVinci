@@ -1,0 +1,211 @@
+{
+  "scope": "Public fixture XML geometry only. Unspecified routes are unmeasured. Not browser-rendered routes, text bounds, or complete crossing metrics.",
+  "before": {
+    "vertices": 13,
+    "edges": 4,
+    "cloudWidth": 874,
+    "cloudHeight": 906,
+    "publicAbovePrivate": true,
+    "subnetColumnsAligned": true,
+    "azRowsAligned": true,
+    "subnetWidthsAligned": true,
+    "logsRightOfVpc": true,
+    "explicitRoutes": 2,
+    "explicitRouteIconIntersections": 0,
+    "explicitRouteTotalLength": 1086,
+    "explicitRouteStrictCrossings": null,
+    "inventory": [
+      [
+        "az-a",
+        "AZ A",
+        "vpc"
+      ],
+      [
+        "az-c",
+        "AZ C",
+        "vpc"
+      ],
+      [
+        "cloud",
+        "AWS Cloud",
+        "1"
+      ],
+      [
+        "db-a",
+        "RDS A",
+        "private-a"
+      ],
+      [
+        "db-c",
+        "RDS C",
+        "private-c"
+      ],
+      [
+        "logs",
+        "로그 S3",
+        "cloud"
+      ],
+      [
+        "private-a",
+        "Private Subnet A",
+        "az-a"
+      ],
+      [
+        "private-c",
+        "Private Subnet C",
+        "az-c"
+      ],
+      [
+        "public-a",
+        "Public Subnet A",
+        "az-a"
+      ],
+      [
+        "public-c",
+        "Public Subnet C",
+        "az-c"
+      ],
+      [
+        "vpc",
+        "VPC",
+        "cloud"
+      ],
+      [
+        "web-a",
+        "EC2 A",
+        "public-a"
+      ],
+      [
+        "web-c",
+        "EC2 C",
+        "public-c"
+      ]
+    ],
+    "connections": [
+      [
+        "web-a",
+        "db-a",
+        "Query"
+      ],
+      [
+        "web-a",
+        "logs",
+        "Logs"
+      ],
+      [
+        "web-c",
+        "db-c",
+        "Query"
+      ],
+      [
+        "web-c",
+        "logs",
+        "Logs"
+      ]
+    ]
+  },
+  "after": {
+    "vertices": 13,
+    "edges": 4,
+    "cloudWidth": 750,
+    "cloudHeight": 640,
+    "publicAbovePrivate": true,
+    "subnetColumnsAligned": true,
+    "azRowsAligned": true,
+    "subnetWidthsAligned": true,
+    "logsRightOfVpc": true,
+    "explicitRoutes": 4,
+    "explicitRouteIconIntersections": 0,
+    "explicitRouteTotalLength": 1944,
+    "explicitRouteStrictCrossings": 0,
+    "inventory": [
+      [
+        "az-a",
+        "AZ A",
+        "vpc"
+      ],
+      [
+        "az-c",
+        "AZ C",
+        "vpc"
+      ],
+      [
+        "cloud",
+        "AWS Cloud",
+        "1"
+      ],
+      [
+        "db-a",
+        "RDS A",
+        "private-a"
+      ],
+      [
+        "db-c",
+        "RDS C",
+        "private-c"
+      ],
+      [
+        "logs",
+        "로그 S3",
+        "cloud"
+      ],
+      [
+        "private-a",
+        "Private Subnet A",
+        "az-a"
+      ],
+      [
+        "private-c",
+        "Private Subnet C",
+        "az-c"
+      ],
+      [
+        "public-a",
+        "Public Subnet A",
+        "az-a"
+      ],
+      [
+        "public-c",
+        "Public Subnet C",
+        "az-c"
+      ],
+      [
+        "vpc",
+        "VPC",
+        "cloud"
+      ],
+      [
+        "web-a",
+        "EC2 A",
+        "public-a"
+      ],
+      [
+        "web-c",
+        "EC2 C",
+        "public-c"
+      ]
+    ],
+    "connections": [
+      [
+        "web-a",
+        "db-a",
+        "Query"
+      ],
+      [
+        "web-a",
+        "logs",
+        "Logs"
+      ],
+      [
+        "web-c",
+        "db-c",
+        "Query"
+      ],
+      [
+        "web-c",
+        "logs",
+        "Logs"
+      ]
+    ]
+  }
+}

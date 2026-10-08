@@ -1,0 +1,184 @@
+{
+  "codeHashes": {
+    "src/core/architecture-generator.js": "0c074e343bad774878c32142b1c5b855f0b1c9a36746d9d2f90fa916ba049239",
+    "src/core/architecture-template.js": "794e2dfb9bc30f5dc8465334dd0a30e26f528e12dc3c79b4f349e05cdb5cfa2e",
+    "src/core/json-to-xml-builder.js": "7ca7f52eb2004d2ad7857f5e4c3e9a008c8c2efecece452d40d697576f199f71",
+    "src/core/layout-engine.js": "cbe403a30c5e7f27e3a0567fae82cfe2a6fde9c6489660359ab1f10f63bdeb8e",
+    "src/core/edge-router.js": "97af40543279a1c6b33a86e372e66597e92abf76958c24406933cc7b2656af63",
+    "src/core/diagram-controller.js": "98fc2fc2ec6f5433f8409419d6e9f40668d044e49ee49e44739d2d7605e89a41"
+  },
+  "date": "2026-10-08T10:37:40.573Z",
+  "scope": "public explicit input through generator and controller with KB page styles; not KB architecture reconstruction or browser proof",
+  "inputSha256": "12a2e3d96b13db742ff05adba252c15c686390cf44332399319e804f759c6aac",
+  "catalog": {
+    "vertices": 13,
+    "edges": 4,
+    "contentPassed": true,
+    "siblingOverlaps": 0,
+    "parentOverflows": 0
+  },
+  "missingConnectionsQuestion": true,
+  "explicitEmptyConnectionsAllowed": true,
+  "records": [
+    {
+      "fixture": "kb-ra",
+      "page": 1,
+      "inputSha256": "6067fe714debda524a5f6ed42cd493877d550cc5cb3ece4292c40e5e26d50266",
+      "vertices": 13,
+      "edges": 4,
+      "contentPassed": true,
+      "siblingOverlaps": 0,
+      "parentOverflows": 0,
+      "templateUsed": {
+        "services": [
+          "rds",
+          "s3"
+        ],
+        "groups": [
+          "aws_cloud",
+          "vpc",
+          "az",
+          "subnet_public",
+          "subnet_private"
+        ]
+      },
+      "originalPagesPreserved": true,
+      "outputSha256": "12197b18d12a83e8998bc63b25e39f3341a266d7213f667cf4718a48de35b025"
+    },
+    {
+      "fixture": "kb-ra",
+      "page": 2,
+      "inputSha256": "4fb1c98cffe0f991150837f26cc0214c68110649b07f8bb6b14cd8fe49019797",
+      "vertices": 13,
+      "edges": 4,
+      "contentPassed": true,
+      "siblingOverlaps": 0,
+      "parentOverflows": 0,
+      "templateUsed": {
+        "services": [
+          "rds",
+          "s3"
+        ],
+        "groups": [
+          "aws_cloud",
+          "vpc",
+          "az",
+          "subnet_public",
+          "subnet_private"
+        ]
+      },
+      "originalPagesPreserved": true,
+      "outputSha256": "12197b18d12a83e8998bc63b25e39f3341a266d7213f667cf4718a48de35b025"
+    },
+    {
+      "fixture": "kb-ra",
+      "page": 3,
+      "inputSha256": "05ff93a5f8714336167567d81cd4eead454baf2898c8b35813133a707235e1e3",
+      "vertices": 13,
+      "edges": 4,
+      "contentPassed": true,
+      "siblingOverlaps": 0,
+      "parentOverflows": 0,
+      "templateUsed": {
+        "services": [
+          "rds"
+        ],
+        "groups": []
+      },
+      "originalPagesPreserved": true,
+      "outputSha256": "485022c60cf559bd5ba723501e25249288096597429587a48d7db222a9b62e5c"
+    },
+    {
+      "fixture": "kb-ra",
+      "page": 4,
+      "inputSha256": "040126d9f809bcda9ecddb0e86a342fa52dbb9384937121151e3a6386f610516",
+      "vertices": 13,
+      "edges": 4,
+      "contentPassed": true,
+      "siblingOverlaps": 0,
+      "parentOverflows": 0,
+      "templateUsed": {
+        "services": [
+          "rds"
+        ],
+        "groups": []
+      },
+      "originalPagesPreserved": true,
+      "outputSha256": "2b6cc4c0e74a2bc1ad566c978f6a9fe18cd20ab44770d89991585931eaf6193c"
+    },
+    {
+      "fixture": "kb-homepage",
+      "page": 1,
+      "inputSha256": "f297fcbfaae12b49acf6efa4f083db209692be8ee98b154fe376fbc74a13dd15",
+      "vertices": 13,
+      "edges": 4,
+      "contentPassed": true,
+      "siblingOverlaps": 0,
+      "parentOverflows": 0,
+      "templateUsed": {
+        "services": [
+          "rds",
+          "s3"
+        ],
+        "groups": [
+          "aws_cloud",
+          "vpc",
+          "az",
+          "subnet_public",
+          "subnet_private"
+        ]
+      },
+      "originalPagesPreserved": true,
+      "outputSha256": "6da3973cbcfb04e133dfe859bbd8c4232adc0a5e7245ff6b7f9bd01af0f898e6"
+    },
+    {
+      "fixture": "kb-homepage",
+      "page": 2,
+      "inputSha256": "3fcdbe7ff5fe1c34d6c39aae8048017557881acea7969fb2ddd3960a1bc04b33",
+      "vertices": 13,
+      "edges": 4,
+      "contentPassed": true,
+      "siblingOverlaps": 0,
+      "parentOverflows": 0,
+      "templateUsed": {
+        "services": [
+          "rds",
+          "s3"
+        ],
+        "groups": [
+          "aws_cloud",
+          "vpc",
+          "az",
+          "subnet_public",
+          "subnet_private"
+        ]
+      },
+      "originalPagesPreserved": true,
+      "outputSha256": "069cd63456728b2766939c389c1194f3774de0208f618f24693cfb9038a8ff9b"
+    },
+    {
+      "fixture": "kb-homepage",
+      "page": 3,
+      "inputSha256": "c855ce4015a0f90f1fe38f70ad762bf93cf85f865c8ca889a6c1cee9beb1c2dd",
+      "vertices": 13,
+      "edges": 4,
+      "contentPassed": true,
+      "siblingOverlaps": 0,
+      "parentOverflows": 0,
+      "templateUsed": {
+        "services": [
+          "rds"
+        ],
+        "groups": [
+          "aws_cloud",
+          "vpc",
+          "az",
+          "subnet_public",
+          "subnet_private"
+        ]
+      },
+      "originalPagesPreserved": true,
+      "outputSha256": "d21859b9c686944f5ff77b0cc687417aa9d4d5b3620ddc50a966b236eea2bed0"
+    }
+  ]
+}

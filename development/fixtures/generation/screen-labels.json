@@ -1,0 +1,126 @@
+{
+  "groups": [
+    {
+      "id": "cloud",
+      "type": "aws_cloud",
+      "label": "AWS Cloud",
+      "children": [
+        "vpc",
+        "logs"
+      ]
+    },
+    {
+      "id": "vpc",
+      "type": "vpc",
+      "label": "VPC",
+      "children": [
+        "az-a",
+        "az-c"
+      ]
+    },
+    {
+      "id": "az-a",
+      "type": "az",
+      "label": "AZ A",
+      "children": [
+        "public-a",
+        "private-a"
+      ]
+    },
+    {
+      "id": "az-c",
+      "type": "az",
+      "label": "AZ C",
+      "children": [
+        "public-c",
+        "private-c"
+      ]
+    },
+    {
+      "id": "public-a",
+      "type": "subnet_public",
+      "label": "Public Subnet A",
+      "children": [
+        "web-a"
+      ]
+    },
+    {
+      "id": "private-a",
+      "type": "subnet_private",
+      "label": "Private Subnet A",
+      "children": [
+        "db-a"
+      ]
+    },
+    {
+      "id": "public-c",
+      "type": "subnet_public",
+      "label": "Public Subnet C",
+      "children": [
+        "web-c"
+      ]
+    },
+    {
+      "id": "private-c",
+      "type": "subnet_private",
+      "label": "Private Subnet C",
+      "children": [
+        "db-c"
+      ]
+    }
+  ],
+  "services": [
+    {
+      "id": "web-a",
+      "type": "ec2",
+      "label": "EC2 A",
+      "group": "public-a"
+    },
+    {
+      "id": "web-c",
+      "type": "ec2",
+      "label": "EC2 C",
+      "group": "public-c"
+    },
+    {
+      "id": "db-a",
+      "type": "rds",
+      "label": "RDS A",
+      "group": "private-a"
+    },
+    {
+      "id": "db-c",
+      "type": "rds",
+      "label": "RDS C",
+      "group": "private-c"
+    },
+    {
+      "id": "logs",
+      "type": "s3",
+      "label": "로그 S3",
+      "group": "cloud"
+    }
+  ],
+  "connections": [
+    {
+      "from": "web-a",
+      "to": "db-a",
+      "label": "Query"
+    },
+    {
+      "from": "web-c",
+      "to": "db-c",
+      "label": "Query"
+    },
+    {
+      "from": "web-a",
+      "to": "logs",
+      "label": "Logs"
+    },
+    {
+      "from": "web-c",
+      "to": "logs",
+      "label": "Logs"
+    }
+  ]
+}

@@ -2,10 +2,11 @@
 
 import { getLabelByType, getServiceDimensions, getServiceStyle, identifyServiceByStyle } from './aws-service-catalog.js';
 import { buildXml } from './json-to-xml-builder.js';
+import { ArchitectureInputError, generateArchitecture } from './architecture-generator.js';
 
 /**
  * @typedef {Object} DiagramCommand
- * @property {'add_service'|'remove_service'|'add_connection'|'remove_connection'|'replace_all'} type
+ * @property {'add_service'|'remove_service'|'add_connection'|'remove_connection'|'replace_all'|'generate_architecture'} type
  * @property {Object} params
  */
 
@@ -563,6 +564,82 @@ function insertServiceCell(xml, params, pageIndex) {
     return new XMLSerializer().serializeToString(doc);
 }
 
+/** 질문이 필요해서 그림을 만들지 않았음을 알리는 오류. executeCommands가 questions로 돌려준다. */
+class GenerationQuestionsError extends Error {
+    constructor(questions) {
+        super(`그림을 만들기 전에 확인할 내용이 있습니다:\n${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}`);
+        this.questions = questions;
+    }
+}
+
+// eslint-disable-next-line no-control-regex
+const TITLE_CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
+
+/** 새 페이지 이름은 문자열이고 60자 이하이며 제어 문자가 없어야 한다(그룹 label과 같은 XML 유효성). 쓰기 전에 검사한다. */
+function validateTitle(title) {
+    if (title === undefined || title === null) return;
+    if (typeof title !== 'string' || title.length > 60 || TITLE_CONTROL_CHARS.test(title)) {
+        throw new Error('generate_architecture: title은 60자 이하의 보이는 글자여야 합니다.');
+    }
+}
+
+/** 스타일을 참고할 페이지의 mxGraphModel XML을 돌려준다. 여러 페이지에서 참고 대상을 알 수 없으면 질문으로 중단한다. */
+function templateModelXml(xml, pageId, pageIndex) {
+    const doc = parseDocument(xml);
+    const top = doc.documentElement;
+    const hasPageId = pageId !== undefined && pageId !== null;
+    if (top.localName === 'mxGraphModel') {
+        if (hasPageId) throw new Error('generate_architecture: 단일 페이지 XML에는 pageId를 지정할 수 없습니다.');
+        return new XMLSerializer().serializeToString(top);
+    }
+    if (top.localName !== 'mxfile') throw new Error('generate_architecture: 지원하지 않는 XML 형식입니다.');
+    const diagrams = childrenNamed(top, 'diagram');
+    let diagram = null;
+    if (hasPageId) {
+        diagram = diagrams.find(d => d.getAttribute('id') === pageId);
+        if (!diagram) throw new Error('generate_architecture: 스타일을 참고할 페이지를 찾을 수 없습니다.');
+    } else if (Number.isInteger(pageIndex)) {
+        diagram = diagrams[pageIndex];
+        if (!diagram) throw new Error('generate_architecture: 현재 페이지를 찾을 수 없습니다.');
+    } else if (diagrams.length === 1) {
+        diagram = diagrams[0];
+    } else {
+        // 조용히 기본 스타일로 만들지 않고, 참고할 페이지를 정해 달라고 묻는다(아무것도 쓰지 않음).
+        throw new GenerationQuestionsError(['여러 페이지가 있는데 어느 페이지의 스타일을 참고할지 알 수 없습니다. 참고할 페이지를 선택한 뒤 같은 요청을 다시 보내주세요.']);
+    }
+    const models = childrenNamed(diagram, 'mxGraphModel');
+    if (models.length !== 1) throw new Error('generate_architecture: 선택한 페이지가 압축되어 있거나 읽을 수 없어 스타일 참고에 쓸 수 없습니다.');
+    return new XMLSerializer().serializeToString(models[0]);
+}
+
+/** 생성한 mxGraphModel을 새 페이지로 붙인 전체 XML을 만든다. 기존 페이지는 그대로 두고, 단일 모델은 mxfile 첫 페이지로 감싼다. */
+function appendGeneratedPage(currentXml, modelXml, title) {
+    const doc = parseDocument(currentXml);
+    const top = doc.documentElement;
+    let file = top;
+    if (top.localName === 'mxGraphModel') {
+        const wrapper = new DOMParser().parseFromString('<mxfile/>', 'text/xml');
+        const first = wrapper.createElement('diagram');
+        first.setAttribute('id', generateId());
+        first.setAttribute('name', '페이지-1');
+        first.appendChild(wrapper.importNode(top, true));
+        file = wrapper.documentElement;
+        file.appendChild(first);
+    } else if (top.localName !== 'mxfile') {
+        throw new Error('generate_architecture: 지원하지 않는 XML 형식입니다.');
+    }
+    const owner = file.ownerDocument;
+    const used = new Set(childrenNamed(file, 'diagram').map(d => d.getAttribute('id')));
+    let id = generateId();
+    while (used.has(id)) id = generateId();
+    const page = owner.createElement('diagram');
+    page.setAttribute('id', id);
+    page.setAttribute('name', typeof title === 'string' && title.trim() ? title.trim() : '생성된 아키텍처');
+    page.appendChild(owner.importNode(new DOMParser().parseFromString(modelXml, 'text/xml').documentElement, true));
+    file.appendChild(page);
+    return new XMLSerializer().serializeToString(owner);
+}
+
 // 선택 페이지로 범위를 좁히지 못하는 레거시 명령. 다중 페이지 문서에서는 실행하지 않는다.
 const WHOLE_DOCUMENT_COMMANDS = new Set(['remove_service', 'add_connection', 'remove_connection', 'replace_all']);
 
@@ -637,7 +714,7 @@ export class DiagramController {
         } catch (err) {
             // 오류 시 스냅샷에서 롤백
             // 변경 전에 실패했다면(검증 실패) 다시 불러오지 않는다.
-            if (!this._mutated) return { success: false, message: err.message };
+            if (!this._mutated) return { success: false, message: err.message, ...(err.questions && { questions: err.questions }) };
             const snapshot = this._snapshotManager.restore();
             if (snapshot) {
                 try {
@@ -646,7 +723,7 @@ export class DiagramController {
                     return { success: false, message: `${err.message} (롤백 실패: ${rollbackErr.message})` };
                 }
             }
-            return { success: false, message: err.message };
+            return { success: false, message: err.message, ...(err.questions && { questions: err.questions }) };
         }
     }
 
@@ -656,7 +733,7 @@ export class DiagramController {
      */
     async _dispatch(cmd) {
         // add_service는 쓰기 직전에 직접 표시한다. 나머지는 기존처럼 실패 시 롤백한다.
-        if (cmd.type !== 'add_service') this._mutated = true;
+        if (cmd.type !== 'add_service' && cmd.type !== 'generate_architecture') this._mutated = true;
         switch (cmd.type) {
             case 'add_service':
                 return this._addService(cmd.params);
@@ -668,6 +745,8 @@ export class DiagramController {
                 return this._removeConnection(cmd.params);
             case 'replace_all':
                 return this._replaceAll(cmd.params);
+            case 'generate_architecture':
+                return this._generateArchitecture(cmd.params);
             default:
                 throw new Error(`지원하지 않는 커맨드 타입: ${cmd.type}`);
         }
@@ -688,6 +767,36 @@ export class DiagramController {
             xml = await this._bridge.getCurrentXml();
         }
         const newXml = insertServiceCell(xml, params, pageIndex);
+        this._mutated = true;
+        await this._writeFullXml(newXml);
+    }
+
+    /**
+     * 명시적 구조 입력으로 새 페이지에 그림을 만든다. 기존 페이지는 바꾸지 않는다.
+     * 질문이 필요하거나 입력이 잘못되면 아무것도 쓰지 않고 실패한다.
+     * @param {Object} params - { architecture: {groups, services, connections}, pageId?, title? }
+     */
+    async _generateArchitecture(params) {
+        if (!params || typeof params.architecture !== 'object' || params.architecture === null) {
+            throw new Error('generate_architecture: architecture가 필요합니다.');
+        }
+        validateTitle(params.title);
+        let xml;
+        let pageIndex = null;
+        if (typeof this._bridge.getEditingState === 'function') {
+            ({ xml, pageIndex } = await this._bridge.getEditingState());
+        } else {
+            xml = await this._bridge.getCurrentXml();
+        }
+        let result;
+        try {
+            result = generateArchitecture(params.architecture, { templateXml: templateModelXml(xml, params.pageId, pageIndex) });
+        } catch (err) {
+            if (err instanceof ArchitectureInputError) throw new Error(`generate_architecture: ${err.problems.join(' / ')}`);
+            throw err;
+        }
+        if (result.status === 'needs_input') throw new GenerationQuestionsError(result.questions);
+        const newXml = appendGeneratedPage(xml, result.xml, params.title);
         this._mutated = true;
         await this._writeFullXml(newXml);
     }

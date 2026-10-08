@@ -1,0 +1,211 @@
+{
+  "scope": "Public fixture XML geometry only. Unspecified routes are unmeasured. Not browser-rendered routes, text bounds, or complete crossing metrics.",
+  "before": {
+    "vertices": 13,
+    "edges": 4,
+    "cloudWidth": 874,
+    "cloudHeight": 906,
+    "publicAbovePrivate": true,
+    "subnetColumnsAligned": true,
+    "azRowsAligned": true,
+    "subnetWidthsAligned": true,
+    "logsRightOfVpc": true,
+    "explicitRoutes": 4,
+    "explicitRouteIconIntersections": 0,
+    "explicitRouteTotalLength": 2082,
+    "explicitRouteStrictCrossings": 0,
+    "inventory": [
+      [
+        "az-a",
+        "Zone A",
+        "vpc"
+      ],
+      [
+        "az-c",
+        "Zone C",
+        "vpc"
+      ],
+      [
+        "cloud",
+        "Example Cloud",
+        "1"
+      ],
+      [
+        "db-a",
+        "Database A",
+        "private-a"
+      ],
+      [
+        "db-c",
+        "Database C",
+        "private-c"
+      ],
+      [
+        "logs",
+        "Log Archive",
+        "cloud"
+      ],
+      [
+        "private-a",
+        "Private A",
+        "az-a"
+      ],
+      [
+        "private-c",
+        "Private C",
+        "az-c"
+      ],
+      [
+        "public-a",
+        "Public A",
+        "az-a"
+      ],
+      [
+        "public-c",
+        "Public C",
+        "az-c"
+      ],
+      [
+        "vpc",
+        "Application VPC",
+        "cloud"
+      ],
+      [
+        "web-a",
+        "Application A",
+        "public-a"
+      ],
+      [
+        "web-c",
+        "Application C",
+        "public-c"
+      ]
+    ],
+    "connections": [
+      [
+        "web-a",
+        "db-a",
+        "Query"
+      ],
+      [
+        "web-a",
+        "logs",
+        "Logs"
+      ],
+      [
+        "web-c",
+        "db-c",
+        "Query"
+      ],
+      [
+        "web-c",
+        "logs",
+        "Logs"
+      ]
+    ]
+  },
+  "after": {
+    "vertices": 13,
+    "edges": 4,
+    "cloudWidth": 638,
+    "cloudHeight": 640,
+    "publicAbovePrivate": true,
+    "subnetColumnsAligned": true,
+    "azRowsAligned": true,
+    "subnetWidthsAligned": true,
+    "logsRightOfVpc": true,
+    "explicitRoutes": 4,
+    "explicitRouteIconIntersections": 0,
+    "explicitRouteTotalLength": 1552,
+    "explicitRouteStrictCrossings": 0,
+    "inventory": [
+      [
+        "az-a",
+        "Zone A",
+        "vpc"
+      ],
+      [
+        "az-c",
+        "Zone C",
+        "vpc"
+      ],
+      [
+        "cloud",
+        "Example Cloud",
+        "1"
+      ],
+      [
+        "db-a",
+        "Database A",
+        "private-a"
+      ],
+      [
+        "db-c",
+        "Database C",
+        "private-c"
+      ],
+      [
+        "logs",
+        "Log Archive",
+        "cloud"
+      ],
+      [
+        "private-a",
+        "Private A",
+        "az-a"
+      ],
+      [
+        "private-c",
+        "Private C",
+        "az-c"
+      ],
+      [
+        "public-a",
+        "Public A",
+        "az-a"
+      ],
+      [
+        "public-c",
+        "Public C",
+        "az-c"
+      ],
+      [
+        "vpc",
+        "Application VPC",
+        "cloud"
+      ],
+      [
+        "web-a",
+        "Application A",
+        "public-a"
+      ],
+      [
+        "web-c",
+        "Application C",
+        "public-c"
+      ]
+    ],
+    "connections": [
+      [
+        "web-a",
+        "db-a",
+        "Query"
+      ],
+      [
+        "web-a",
+        "logs",
+        "Logs"
+      ],
+      [
+        "web-c",
+        "db-c",
+        "Query"
+      ],
+      [
+        "web-c",
+        "logs",
+        "Logs"
+      ]
+    ]
+  }
+}

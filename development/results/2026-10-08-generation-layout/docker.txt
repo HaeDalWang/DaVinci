@@ -1,0 +1,100 @@
+ Image davinci:local Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 502B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.17kB done
+#2 DONE 0.0s
+
+#3 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#3 DONE 1.4s
+
+#4 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+#4 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e done
+#4 CACHED
+
+#5 [internal] load metadata for docker.io/library/node:22-alpine
+#5 DONE 1.2s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 297B done
+#6 DONE 0.0s
+
+#7 [build 1/7] FROM docker.io/library/node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
+#7 resolve docker.io/library/node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 done
+#7 DONE 0.0s
+
+#8 [internal] load build context
+#8 transferring context: 45.80kB done
+#8 DONE 0.0s
+
+#9 [build 3/7] COPY package.json package-lock.json ./
+#9 CACHED
+
+#10 [build 4/7] RUN npm ci
+#10 CACHED
+
+#11 [build 2/7] WORKDIR /app
+#11 CACHED
+
+#12 [build 5/7] COPY vite.config.js index.html ./
+#12 CACHED
+
+#13 [build 6/7] COPY src ./src
+#13 DONE 0.0s
+
+#14 [build 7/7] RUN npm run build
+#14 0.187
+#14 0.187 > davinci@0.1.0 build
+#14 0.187 > vite build
+#14 0.187
+#14 0.367 vite v6.4.1 building for production...
+#14 0.428 transforming...
+#14 0.672 ✓ 27 modules transformed.
+#14 0.742 [plugin vite:reporter]
+#14 0.742 (!) /app/src/components/toast.js is dynamically imported by /app/src/components/align-modal.js, /app/src/components/align-modal.js, /app/src/components/align-modal.js, /app/src/components/align-modal.js but also statically imported by /app/src/components/sidebar.js, /app/src/components/toolbar.js, /app/src/main.js, dynamic import will not move module into another chunk.
+#14 0.742
+#14 0.743 rendering chunks...
+#14 0.862 computing gzip size...
+#14 0.868 dist/index.html                   7.08 kB │ gzip:  2.24 kB
+#14 0.868 dist/assets/index-DXAEQO2N.css   20.53 kB │ gzip:  4.31 kB
+#14 0.868 dist/assets/index-DpF6F5j2.js   119.58 kB │ gzip: 33.36 kB │ map: 341.27 kB
+#14 0.868 ✓ built in 478ms
+#14 DONE 0.9s
+
+#15 [runtime 4/7] COPY package.json ./
+#15 CACHED
+
+#16 [runtime 5/7] COPY server ./server
+#16 CACHED
+
+#17 [deps 4/4] RUN npm ci --omit=dev && npm cache clean --force
+#17 CACHED
+
+#18 [runtime 3/7] COPY --from=deps /app/node_modules ./node_modules
+#18 CACHED
+
+#19 [runtime 6/7] COPY src/core/aws-service-catalog.js src/core/generation-flow.js ./src/core/
+#19 CACHED
+
+#20 [runtime 7/7] COPY --from=build /app/dist ./dist
+#20 DONE 0.0s
+
+#21 exporting to image
+#21 exporting layers 0.0s done
+#21 exporting manifest sha256:39a44a7d4d56dbf0a8589ee8362d9c8bbca54bd104ed896dbe116d4b5ae18cb9 done
+#21 exporting config sha256:fa5be79875a83e428a27651b9ba01ccdfe7328a95d1baeae363067e842711b5e done
+#21 exporting attestation manifest sha256:caf9d281565699b142a30fe40c627a2b1e21d4c16e7190972845d79d845972b6 done
+#21 exporting manifest list sha256:bce3f2231f23ac895c0cfd92bbe07fc3fef573257cbd99ee6323b0d9b97108c4 done
+#21 naming to docker.io/library/davinci:local done
+#21 unpacking to docker.io/library/davinci:local 0.0s done
+#21 DONE 0.1s
+
+#22 resolving provenance for metadata file
+#22 DONE 0.0s
+ Image davinci:local Built
+ Container davinci-web-1 Recreate
+ Container davinci-web-1 Recreated
+ Container davinci-web-1 Starting
+ Container davinci-web-1 Started

@@ -6,6 +6,7 @@ import { ChannelRouter } from '../core/channel-router.js';
 import { ConversationContext } from '../core/conversation-context.js';
 import { DiagramController } from '../core/diagram-controller.js';
 import { SnapshotManager } from '../core/snapshot-manager.js';
+import { applyGenerationResponse, formatPageUnreadable } from '../core/generation-flow.js';
 
 /** 모델 컨텍스트 윈도우 토큰 한도 (Claude 3.5 Sonnet 기준 근사치) */
 const MAX_MODEL_TOKENS = 200000;
@@ -14,6 +15,9 @@ const MAX_MODEL_TOKENS = 200000;
 let channelRouter = null;
 /** @type {ConversationContext|null} */
 let conversationContext = null;
+/** 새 그림 생성 전용 대화 기록. 편집 대화(기존 그림 내용 포함)가 생성 요구사항으로 섞이지 않게 분리한다. */
+/** @type {ConversationContext|null} */
+let generationContext = null;
 /** @type {DiagramController|null} */
 let diagramController = null;
 /** @type {SnapshotManager|null} */
@@ -35,7 +39,10 @@ export function initSidebar(bridge) {
     snapshotManager = new SnapshotManager();
     channelRouter = new ChannelRouter(bridge);
     conversationContext = new ConversationContext();
+    generationContext = new ConversationContext();
     diagramController = new DiagramController(bridge, snapshotManager);
+
+    initModeSelect(chatInput);
 
     // 사이드바 리사이즈 핸들 초기화
     initSidebarResize(sidebar);
@@ -83,6 +90,7 @@ export function initSidebar(bridge) {
     if (newChatBtn) {
         newChatBtn.addEventListener('click', () => {
             conversationContext.reset();
+            generationContext.reset();
             resetChatUI(chatMessages);
             showToast('새 대화를 시작합니다.', 'info');
         });
@@ -98,6 +106,7 @@ export function initSidebar(bridge) {
                 try {
                     await bridge.loadXmlAndWait(snapshot.xml);
                     conversationContext.reset();
+                    generationContext.reset();
                     resetChatUI(chatMessages);
                     try {
                         localStorage.setItem('davinci_diagram', snapshot.xml);
@@ -116,11 +125,48 @@ export function initSidebar(bridge) {
     }
 }
 
+const MODE_HINTS = {
+    edit: '',
+    generate: '새 그림 생성: 지금 보고 있는 페이지의 스타일·크기만 참고해 새 페이지에 그립니다. 원래 페이지는 바꾸지 않습니다. 스타일을 참고할 페이지를 바꾸려면 먼저 그 페이지를 선택하세요.',
+};
+const MODE_PLACEHOLDERS = {
+    edit: '아키텍처를 설명해주세요...',
+    generate: '그릴 서비스·소속·연결을 말해주세요 (예: VPC 안에 ALB와 EC2 두 대, ALB에서 EC2로 연결)',
+};
+
+/** 입력창 위에 "기존 그림 편집 / 새 그림 생성" 선택을 추가한다. 기본값은 기존 그림 편집이다. */
+function initModeSelect(chatInput) {
+    const area = chatInput.closest('.sidebar__input-area');
+    if (!area || document.getElementById('chat-mode')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'sidebar__mode';
+    wrap.innerHTML = `<label class="sidebar__mode-label" for="chat-mode">작업 방식</label>
+        <select id="chat-mode" class="sidebar__mode-select" aria-describedby="chat-mode-hint">
+            <option value="edit" selected>기존 그림 편집</option>
+            <option value="generate">새 그림 생성</option>
+        </select>
+        <p id="chat-mode-hint" class="sidebar__mode-hint" hidden></p>`;
+    area.prepend(wrap);
+    const select = wrap.querySelector('select');
+    const hint = wrap.querySelector('#chat-mode-hint');
+    select.addEventListener('change', () => {
+        hint.textContent = MODE_HINTS[select.value];
+        hint.hidden = !MODE_HINTS[select.value];
+        chatInput.placeholder = MODE_PLACEHOLDERS[select.value];
+    });
+}
+
+/** 현재 선택된 작업 방식. 선택 UI가 없으면 기존 편집이다. */
+function currentMode() {
+    return document.getElementById('chat-mode')?.value === 'generate' ? 'generate' : 'edit';
+}
+
 /**
  * 채팅 UI를 웰컴 화면으로 복원한다.
  */
 export function resetDiagramSession(previousXml) {
     conversationContext.reset();
+    generationContext.reset();
     snapshotManager.clear();
     if (previousXml) snapshotManager.save(previousXml, '그림 열기 전');
     resetChatUI(document.getElementById('chat-messages'));
@@ -199,7 +245,12 @@ async function sendMessage(inputEl, messagesEl, bridge) {
     messagesEl.insertAdjacentHTML('beforeend', loadingHtml);
     messagesEl.scrollTop = messagesEl.scrollHeight;
 
+    const mode = currentMode();
     try {
+        if (mode === 'generate') {
+            await sendGenerationRequest(text, messagesEl);
+            return;
+        }
         // 채널 라우팅으로 데이터 준비
         const payload = await channelRouter.preparePayload(text);
 
@@ -278,6 +329,43 @@ async function sendMessage(inputEl, messagesEl, bridge) {
         inputEl.disabled = false;
         document.getElementById('chat-send').disabled = !inputEl.value.trim();
     }
+}
+
+/**
+ * 새 그림 생성 요청. 현재 그림의 내용은 서버로 보내지 않고, 스타일을 참고할 페이지 id만 요청 시점에 고정한다.
+ * 질문·오류·성공은 모두 채팅에 남기고 대화 기록에도 넣어 다음 답변이 이어지게 한다.
+ */
+async function sendGenerationRequest(text, messagesEl) {
+    let pageId;
+    try {
+        pageId = (await channelRouter.preparePayload(text)).pageId;
+    } catch (err) {
+        // 참고할 페이지를 모르면 AI 요청 없이 멈추고, 같은 요청을 다시 보낼 수 있게 기록만 남긴다.
+        const notice = formatPageUnreadable(err.message);
+        appendMessage(messagesEl, notice, 'ai');
+        generationContext.addMessage('user', text);
+        generationContext.addMessage('assistant', notice);
+        return;
+    }
+    generationContext.trimToFit(Math.floor(MAX_MODEL_TOKENS * 0.8));
+    const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, mode: 'generate', conversationHistory: generationContext.getMessages() }),
+    });
+    if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        appendMessage(messagesEl, errData.error || '백엔드에서 응답을 받지 못했습니다.', 'error');
+        return;
+    }
+    const data = await response.json();
+    generationContext.addMessage('user', text);
+    const messages = await applyGenerationResponse(data, {
+        pageId,
+        executeCommands: commands => diagramController.executeCommands(commands),
+    });
+    for (const m of messages) appendMessage(messagesEl, m.text, m.type);
+    if (messages.length > 0) generationContext.addMessage('assistant', messages.map(m => m.text).join('\n\n'));
 }
 
 /**

@@ -1262,3 +1262,41 @@ textarea {
   box-shadow: none;
   filter: none;
 }
+
+/* 작업 방식 선택 (기존 그림 편집 / 새 그림 생성) */
+.sidebar__mode {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-bottom: 8px;
+}
+
+.sidebar__mode-label {
+  font-size: var(--font-size-xs, 12px);
+  color: var(--on-surface-muted);
+}
+
+.sidebar__mode-select {
+  flex: 1;
+  min-width: 120px;
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+  border: 1px solid rgba(68, 71, 76, 0.3);
+  border-radius: var(--border-radius-sm);
+  padding: 4px 8px;
+  font-size: var(--font-size-sm);
+}
+
+.sidebar__mode-select:focus-visible {
+  outline: 2px solid rgba(94, 212, 254, 0.6);
+  outline-offset: 1px;
+}
+
+.sidebar__mode-hint {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: var(--font-size-xs, 12px);
+  line-height: 1.4;
+  color: var(--on-surface-muted);
+}
